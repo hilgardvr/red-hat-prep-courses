@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-07 |
-| **Current milestone** | M0 complete — site scaffold, lab kit, and R1 |
-| **Next milestone** | M1 — Foundations F1–F8 |
+| **Current milestone** | M1 in progress — Foundations F1–F2 complete |
+| **Next milestone** | M1 continued — Foundations F3–F8 |
 | **Active branch** | `hilgard/rhcsa-prep-course` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -39,7 +39,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
 | GitHub Pages workflow | **Complete, not yet run in CI** | `.github/workflows/pages.yml` |
 | Lab kit | **Complete, validated on a KVM host** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers pass |
-| Foundations F1–F8 | **Planned** | Only `docs/foundations/index.md` exists |
+| Foundations F1–F2 | **Complete** | `f1-linux-rhel-family/`, `f2-lab-first-login/` |
+| Foundations F3–F8 | **Next** | Planned; F1–F2 are the style reference |
 | R1 — Essential tools | **Complete** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker |
 | R2–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
@@ -60,7 +61,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 ├── docs/
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
-│   ├── foundations/           # F1–F8 (index only so far)
+│   ├── foundations/           # index + F1–F2; F3–F8 next
 │   ├── rhcsa/                 # module roadmap and R1
 │   │   └── r01-essential-tools/
 │   │       ├── index.md       # theory
@@ -218,8 +219,8 @@ Every RHCSA module follows the same anatomy:
 
 | Module | Topic | Status |
 |---|---|---|
-| F1 | Linux, open source, and the RHEL family | Planned |
-| F2 | The lab: virtualization and first login | Planned |
+| F1 | Linux, open source, and the RHEL family | **Complete** |
+| F2 | The lab: virtualization and first login | **Complete** |
 | F3 | Shell, commands, and the help system | Planned |
 | F4 | Filesystem hierarchy and file operations | Planned |
 | F5 | Streams, redirection, pipes, grep, regex | Planned |

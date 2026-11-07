@@ -84,6 +84,8 @@ nav:
       - Lab setup: start-here/lab-setup.md
   - Foundations:
       - Overview: foundations/index.md
+      - "F1 — Linux and the RHEL family": foundations/f1-linux-rhel-family/index.md
+      - "F2 — The lab and first login": foundations/f2-lab-first-login/index.md
   - RHCSA:
       - Course roadmap: rhcsa/index.md
       - "R1 — Essential tools":

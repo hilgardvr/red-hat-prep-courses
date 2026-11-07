@@ -8,8 +8,8 @@ This pre-course builds that model. It is **optional for experienced Linux users*
 
 | Module | Topic | You will be able to |
 |---|---|---|
-| F1 | Linux, open source, and the RHEL family | Explain kernel vs userspace, distributions, RHEL lifecycle, and where the exam fits |
-| F2 | The lab: virtualization and first login | Create the lab VMs, log in, use snapshots, and recover from mistakes |
+| [F1](f1-linux-rhel-family/index.md) | Linux, open source, and the RHEL family | Explain kernel vs userspace, distributions, RHEL lifecycle, and where the exam fits |
+| [F2](f2-lab-first-login/index.md) | The lab: virtualization and first login | Create the lab VMs, log in, use snapshots, and recover from mistakes |
 | F3 | Shell, commands, and the help system | Read command syntax, quote arguments correctly, and find documentation offline |
 | F4 | Filesystem hierarchy and file operations | Navigate the FHS, create/copy/move/delete files, and understand paths |
 | F5 | Streams, redirection, pipes, grep, and regex | Connect commands, separate stdout/stderr, and search text precisely |
@@ -57,8 +57,13 @@ When a foundation topic goes deeper than the exam requires, the page says so. Sk
 
 ## Start
 
-The foundations modules are being written next. Until then:
+Begin with F1 and F2. F1 explains the platform; F2 gets the lab running and teaches the snapshot workflow used by every later module.
 
-- If you are new to Linux, read [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). It starts with the shell and the help system and does not assume prior administration experience.
-- If you want to set up the lab first, follow [Lab setup](../start-here/lab-setup.md).
+- [F1 — Linux, open source, and the RHEL family](f1-linux-rhel-family/index.md)
+- [F2 — The lab: virtualization and first login](f2-lab-first-login/index.md)
+
+F3–F8 are being written next. Until they are available:
+
+- If you already know your way around a shell, continue to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md).
+- If you have not set up the lab yet, follow [Lab setup](../start-here/lab-setup.md).
 - If you want to see where every exam objective is covered, open the [objective coverage matrix](../reference/objective-coverage.md).
