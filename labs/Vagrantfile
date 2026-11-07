@@ -1,0 +1,87 @@
+# frozen_string_literal: true
+
+# RHCSA Field Guide — lab environment
+#
+# Two disposable VMs:
+#   server  10.10.10.10  2 vCPU / 4 GB / 20 GB root + 10 GB /dev/vdb
+#   node2   10.10.10.11  1 vCPU / 2 GB / 20 GB root
+#
+# The default box is AlmaLinux 10, a RHEL 10-compatible rebuild that needs no
+# subscription. Override it with LAB_BOX for a RHEL 10 box.
+#
+# Optional offline repository:
+#   LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso ./bin/lab up
+
+require "pathname"
+
+LAB_DIR = Pathname.new(__dir__)
+KEY_PATH = Pathname.new(ENV.fetch("LAB_KEY_PATH", LAB_DIR.join("keys", "lab_ed25519").to_s))
+BOX = ENV.fetch("LAB_BOX", "almalinux/10")
+ISO = ENV["LAB_ISO"]
+
+unless KEY_PATH.file?
+  abort <<~MSG
+    Lab SSH key not found at #{KEY_PATH}
+
+    Run ./bin/lab up from the labs/ directory. It generates the key on first
+    use and passes it to both VMs.
+  MSG
+end
+
+unless File.file?("#{KEY_PATH}.pub")
+  abort "Public key not found: #{KEY_PATH}.pub"
+end
+
+Vagrant.configure("2") do |config|
+  config.vm.box = BOX
+  config.vm.box_check_update = false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.ssh.keep_alive = true
+
+  config.vm.provider :libvirt do |lv|
+    lv.driver = "kvm"
+    lv.video_type = "virtio"
+    lv.default_prefix = "rhcsa"
+  end
+
+  nodes = {
+    "server" => { ip: "10.10.10.10", memory: 4096, cpus: 2, data_disk: "10G" },
+    "node2"  => { ip: "10.10.10.11", memory: 2048, cpus: 1, data_disk: nil },
+  }
+
+  nodes.each do |name, opts|
+    config.vm.define name do |node|
+      node.vm.hostname = name
+      node.vm.network :private_network, ip: opts[:ip]
+
+      node.vm.provider :libvirt do |lv|
+        lv.memory = opts[:memory]
+        lv.cpus = opts[:cpus]
+        lv.machine_virtual_size = 20
+
+        if opts[:data_disk]
+          lv.storage :file, :size => opts[:data_disk], :type => "qcow2", :bus => "virtio"
+        end
+
+        if ISO
+          lv.storage :file, :device => :cdrom, :path => ISO, :bus => "sata",
+                            :type => "raw"
+        end
+      end
+
+      # Upload provisioning helpers and the shared lab key.
+      node.vm.provision "file", source: "provision/repo.sh", destination: "/tmp/repo.sh"
+      node.vm.provision "file", source: "provision/node2.sh", destination: "/tmp/node2.sh"
+      node.vm.provision "file", source: KEY_PATH.to_s, destination: "/tmp/lab_key"
+      node.vm.provision "file", source: "#{KEY_PATH}.pub", destination: "/tmp/lab_key.pub"
+
+      node.vm.provision "shell",
+        path: "provision/common.sh",
+        args: [name, opts[:ip], ISO ? "iso" : "online"]
+
+      if name == "node2"
+        node.vm.provision "shell", path: "provision/node2.sh"
+      end
+    end
+  end
+end

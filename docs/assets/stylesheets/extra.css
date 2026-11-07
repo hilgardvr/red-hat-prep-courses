@@ -1,0 +1,94 @@
+:root {
+  --rh-red: #ee0000;
+  --rh-red-dark: #b30000;
+}
+
+/* Slightly tighter hero on the landing page */
+.md-typeset .hero {
+  padding: 1.2rem 0 0.4rem;
+}
+
+.md-typeset .hero h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.md-typeset .hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--md-default-fg-color--light);
+  max-width: 46rem;
+}
+
+/* Module metadata block */
+.md-typeset .module-meta {
+  border-left: 4px solid var(--rh-red);
+  background: var(--md-code-bg-color);
+  padding: 0.7rem 1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.md-typeset .module-meta table {
+  margin: 0;
+  border: none;
+}
+
+.md-typeset .module-meta td {
+  border: none;
+  padding: 0.15rem 0.6rem 0.15rem 0;
+}
+
+/* Lab task callouts */
+.md-typeset .lab-task {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-top: 4px solid var(--rh-red);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+}
+
+.md-typeset .lab-task > :first-child {
+  margin-top: 0;
+}
+
+.md-typeset .lab-task > :last-child {
+  margin-bottom: 0;
+}
+
+/* Compact tables in reference pages */
+.md-typeset table.compact th,
+.md-typeset table.compact td {
+  padding: 0.35rem 0.6rem;
+}
+
+/* Status badges */
+.md-typeset .badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.md-typeset .badge-ready {
+  background: #e6f4ea;
+  color: #1e6b34;
+}
+
+.md-typeset .badge-planned {
+  background: #f1f3f4;
+  color: #5f6368;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .badge-ready {
+  background: #1e3a27;
+  color: #9be3af;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .badge-planned {
+  background: #2a2d31;
+  color: #b0b4b8;
+}

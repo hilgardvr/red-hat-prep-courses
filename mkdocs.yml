@@ -1,0 +1,99 @@
+site_name: RHCSA Field Guide
+site_description: A free, lab-first course for the Red Hat Certified System Administrator (EX200) exam on RHEL 10.
+site_author: RHCSA Field Guide contributors
+
+# The workflow sets SITE_URL for GitHub Pages. Change the fallback when you
+# move to a custom domain, or set the environment variable in your build.
+site_url: !ENV [SITE_URL, "https://your-username.github.io/red-hat-certs/"]
+
+# Uncomment these after you create the repository:
+# repo_url: https://github.com/your-username/red-hat-certs
+# edit_uri: edit/main/docs/
+
+copyright: >
+  Unofficial study material. Not affiliated with or endorsed by Red Hat, Inc.
+  Red Hat, RHCSA, and RHEL are trademarks of Red Hat, Inc.
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.tracking
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+extra:
+  generator: false
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.keys
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Start here:
+      - How to use this course: start-here/how-to-use.md
+      - Exam overview: start-here/exam-overview.md
+      - Study plans: start-here/study-plans.md
+      - Lab setup: start-here/lab-setup.md
+  - Foundations:
+      - Overview: foundations/index.md
+  - RHCSA:
+      - Course roadmap: rhcsa/index.md
+      - "R1 — Essential tools":
+          - Theory: rhcsa/r01-essential-tools/index.md
+          - "Lab 1 — Files and links": rhcsa/r01-essential-tools/labs/lab-1-files-and-links.md
+          - "Lab 2 — Streams and permissions": rhcsa/r01-essential-tools/labs/lab-2-streams-and-permissions.md
+          - "Challenge — Handoff bundle": rhcsa/r01-essential-tools/labs/challenge-handoff.md
+          - Knowledge check: rhcsa/r01-essential-tools/quiz.md
+          - Cheat sheet: rhcsa/r01-essential-tools/cheatsheet.md
+  - Reference:
+      - Glossary: reference/glossary.md
+      - Objective coverage: reference/objective-coverage.md
+      - RHEL 9 vs RHEL 10: reference/rhel9-vs-rhel10.md
