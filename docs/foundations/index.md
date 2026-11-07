@@ -10,12 +10,12 @@ This pre-course builds that model. It is **optional for experienced Linux users*
 |---|---|---|
 | [F1](f1-linux-rhel-family/index.md) | Linux, open source, and the RHEL family | Explain kernel vs userspace, distributions, RHEL lifecycle, and where the exam fits |
 | [F2](f2-lab-first-login/index.md) | The lab: virtualization and first login | Create the lab VMs, log in, use snapshots, and recover from mistakes |
-| F3 | Shell, commands, and the help system | Read command syntax, quote arguments correctly, and find documentation offline |
-| F4 | Filesystem hierarchy and file operations | Navigate the FHS, create/copy/move/delete files, and understand paths |
-| F5 | Streams, redirection, pipes, grep, and regex | Connect commands, separate stdout/stderr, and search text precisely |
-| F6 | Users, permissions, and ownership | Explain the ugo/rwx model, read octal modes, and predict access |
-| F7 | Processes, systemd, and logs | Inspect processes, control services, read the journal, and understand targets |
-| F8 | Networking and storage foundations; SELinux intro | Read IP addressing, explain DNS and ports, and describe disks, filesystems, and SELinux labels |
+| [F3](f3-shell-help/index.md) | Shell, commands, and the help system | Read command syntax, quote arguments correctly, and find documentation offline |
+| [F4](f4-filesystem-operations/index.md) | Filesystem hierarchy and file operations | Navigate the FHS, create/copy/move/delete files, and understand paths |
+| [F5](f5-streams-text/index.md) | Streams, redirection, pipes, grep, and regex | Connect commands, separate stdout/stderr, and search text precisely |
+| [F6](f6-users-permissions/index.md) | Users, permissions, and ownership | Explain the ugo/rwx model, read octal modes, and predict access |
+| [F7](f7-processes-systemd/index.md) | Processes, systemd, and logs | Inspect processes, control services, read the journal, and understand targets |
+| [F8](f8-networking-storage-selinux/index.md) | Networking and storage foundations; SELinux intro | Read IP addressing, explain DNS and ports, and describe disks, filesystems, and SELinux labels |
 
 ## How much time to spend
 
@@ -57,13 +57,18 @@ When a foundation topic goes deeper than the exam requires, the page says so. Sk
 
 ## Start
 
-Begin with F1 and F2. F1 explains the platform; F2 gets the lab running and teaches the snapshot workflow used by every later module.
+Work through them in order. F1 explains the platform, F2 gets the lab running and teaches the snapshot workflow used by every later module, and F3–F8 build the working knowledge R1 assumes.
 
 - [F1 — Linux, open source, and the RHEL family](f1-linux-rhel-family/index.md)
 - [F2 — The lab: virtualization and first login](f2-lab-first-login/index.md)
+- [F3 — Shell, commands, and the help system](f3-shell-help/index.md)
+- [F4 — Filesystem hierarchy and file operations](f4-filesystem-operations/index.md)
+- [F5 — Streams, pipes, and text processing](f5-streams-text/index.md)
+- [F6 — Users, permissions, and ownership](f6-users-permissions/index.md)
+- [F7 — Processes, systemd, and logs](f7-processes-systemd/index.md)
+- [F8 — Networking, storage, and SELinux foundations](f8-networking-storage-selinux/index.md)
 
-F3–F8 are being written next. Until they are available:
+When you finish F8, continue to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). If you already know your way around a shell, you can start R1 now and come back to a foundation module when a task surprises you.
 
-- If you already know your way around a shell, continue to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md).
-- If you have not set up the lab yet, follow [Lab setup](../start-here/lab-setup.md).
-- If you want to see where every exam objective is covered, open the [objective coverage matrix](../reference/objective-coverage.md).
+- [Lab setup](../start-here/lab-setup.md) — install the virtualization stack from scratch
+- [Objective coverage](../reference/objective-coverage.md) — see where every exam objective is covered

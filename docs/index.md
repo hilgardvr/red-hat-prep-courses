@@ -61,7 +61,7 @@
 
 | Stage | What it covers | Status |
 |---|---|---|
-| **Foundations** | Linux and RHEL architecture, shell, filesystem, processes, systemd, networking, storage basics | <span class="badge badge-ready">F1–F2 available</span> |
+| **Foundations** | Linux and RHEL architecture, shell, filesystem, processes, systemd, networking, storage basics | <span class="badge badge-ready">F1–F8 available</span> |
 | **R1 — Essential tools** | Shell syntax, help system, files, links, permissions, streams, grep, archives, SSH | <span class="badge badge-ready">Available</span> |
 | **R2–R11** | Users, software, scripting, services, storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
 | **R12 — Capstone** | Timed mock exams and a full review | <span class="badge badge-planned">Planned</span> |

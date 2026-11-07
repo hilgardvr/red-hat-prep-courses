@@ -60,7 +60,7 @@ cd labs
 ./bin/lab snapshot clean
 ```
 
-If you are new to Linux, start with [F1 — Linux, open source, and the RHEL family](../foundations/f1-linux-rhel-family/index.md) and [F2 — The lab: virtualization and first login](../foundations/f2-lab-first-login/index.md), then return to R1. If you are experienced, take the R1 challenge lab and see how far you get.
+If you are new to Linux, work through [Foundations F1–F8](../foundations/index.md) first, starting with [F1 — Linux, open source, and the RHEL family](../foundations/f1-linux-rhel-family/index.md), then return to R1. If you are experienced, take the R1 challenge lab and see how far you get.
 
 ## The capstone
 

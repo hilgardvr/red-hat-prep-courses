@@ -86,6 +86,12 @@ nav:
       - Overview: foundations/index.md
       - "F1 — Linux and the RHEL family": foundations/f1-linux-rhel-family/index.md
       - "F2 — The lab and first login": foundations/f2-lab-first-login/index.md
+      - "F3 — Shell, commands, and help": foundations/f3-shell-help/index.md
+      - "F4 — Filesystem and file operations": foundations/f4-filesystem-operations/index.md
+      - "F5 — Streams, pipes, and text": foundations/f5-streams-text/index.md
+      - "F6 — Users, permissions, ownership": foundations/f6-users-permissions/index.md
+      - "F7 — Processes, systemd, and logs": foundations/f7-processes-systemd/index.md
+      - "F8 — Networking, storage, SELinux": foundations/f8-networking-storage-selinux/index.md
   - RHCSA:
       - Course roadmap: rhcsa/index.md
       - "R1 — Essential tools":

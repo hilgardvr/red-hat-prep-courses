@@ -396,4 +396,4 @@ You accidentally delete an important configuration file during a lab. What is th
 
 ## Next
 
-The next foundations module is **F3 — Shell, commands, and the help system**, which is being written. In the meantime, continue to [R1 — Essential tools](../../rhcsa/r01-essential-tools/index.md), where you will use the lab workflow for real. R1 starts with the shell and the help system and does not assume prior administration experience.
+The next foundations module is [F3 — Shell, commands, and the help system](../f3-shell-help/index.md), which teaches you to read command syntax, quote correctly, and find documentation without internet access.

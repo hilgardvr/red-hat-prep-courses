@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-07 |
-| **Current milestone** | M1 in progress — Foundations F1–F2 complete |
-| **Next milestone** | M1 continued — Foundations F3–F8 |
+| **Current milestone** | M1 complete — Foundations F1–F8 |
+| **Next milestone** | M2 — R2, R3, R4 |
 | **Active branch** | `hilgard/rhcsa-prep-course` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -39,8 +39,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
 | GitHub Pages workflow | **Complete, not yet run in CI** | `.github/workflows/pages.yml` |
 | Lab kit | **Complete, validated on a KVM host** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers pass |
-| Foundations F1–F2 | **Complete** | `f1-linux-rhel-family/`, `f2-lab-first-login/` |
-| Foundations F3–F8 | **Next** | Planned; F1–F2 are the style reference |
+| Foundations F1–F8 | **Complete** | Eight modules under `docs/foundations/`; style reference for future modules |
 | R1 — Essential tools | **Complete** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker |
 | R2–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
@@ -61,7 +60,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 ├── docs/
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
-│   ├── foundations/           # index + F1–F2; F3–F8 next
+│   ├── foundations/           # index + F1–F8, complete
 │   ├── rhcsa/                 # module roadmap and R1
 │   │   └── r01-essential-tools/
 │   │       ├── index.md       # theory
@@ -215,18 +214,18 @@ Every RHCSA module follows the same anatomy:
 
 ## 7. Curriculum map
 
-### Foundations (M1 — next)
+### Foundations (M1 — complete)
 
 | Module | Topic | Status |
 |---|---|---|
 | F1 | Linux, open source, and the RHEL family | **Complete** |
 | F2 | The lab: virtualization and first login | **Complete** |
-| F3 | Shell, commands, and the help system | Planned |
-| F4 | Filesystem hierarchy and file operations | Planned |
-| F5 | Streams, redirection, pipes, grep, regex | Planned |
-| F6 | Users, permissions, ownership | Planned |
-| F7 | Processes, systemd, logs | Planned |
-| F8 | Networking and storage foundations; SELinux intro | Planned |
+| F3 | Shell, commands, and the help system | **Complete** |
+| F4 | Filesystem hierarchy and file operations | **Complete** |
+| F5 | Streams, redirection, pipes, grep, regex | **Complete** |
+| F6 | Users, permissions, ownership | **Complete** |
+| F7 | Processes, systemd, logs | **Complete** |
+| F8 | Networking and storage foundations; SELinux intro | **Complete** |
 
 Foundations modules are lighter than RHCSA modules: explanation, diagram/table, small commands, and a self-check. They do not need automated checkers.
 
@@ -273,14 +272,16 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 
 ## 9. Next steps (in order)
 
-### M1 — Foundations F1–F8
+### M1 — Foundations F1–F8 — **done**
 
-For each foundation:
+All eight modules follow the same pattern: module-meta table, theory with diagrams and tables, one hands-on lab, traps table, and a self-check with hidden answers. They have no automated checkers, by decision.
+
+When adding or revising a foundation, repeat the same five steps:
 
 1. Create `docs/foundations/fN-topic/index.md`.
 2. Add it to the `Foundations` nav section in `mkdocs.yml`.
 3. Include a small lab or command walkthrough and a self-check.
-4. Link it from `docs/foundations/index.md`.
+4. Link it from `docs/foundations/index.md`, and update the previous module's `## Next` link.
 5. Run `mkdocs build --strict`.
 
 ### M2 — R2, R3, R4
@@ -314,6 +315,7 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 
 ## 10. Known gaps and risks
 
+- **Foundations F3–F8 labs are written but not yet walked on a live lab.** F1–F2 were validated together with R1 on 2026-11-07. The newer modules use only commands and packages the provisioning installs (`man-db`, `man-pages`, `vim-enhanced`, `bash-completion`, `tar`, `openssh-clients`), plus iproute, util-linux, policycoreutils, and their dependencies, but a full read-through on `server` and `node2` is still owed before calling them validated.
 - **The lab kit has been validated on one KVM host only.** The 2026-11-07 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10`. Re-validate on other host distributions, Vagrant/plugin versions, and a real RHEL 10 box. The Vagrantfile now forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
 - **No public generic RHEL 10 Vagrant box.** AlmaLinux 10 is the default. A RHEL 10 box must be built or supplied by the user.
 - **CI has not run yet.** The Pages workflow is written but unexecuted. The first push to `main` will reveal environment-specific issues.
