@@ -77,6 +77,10 @@ Every module follows the same pattern:
 
 A module is only considered complete when its check script passes from a clean lab snapshot.
 
+## Project status and handoff
+
+See [`AGENTS.md`](AGENTS.md) for the current milestone, curriculum status, lab details, decisions, known gaps, and the next steps. It is the maintainer-facing source of truth for humans and future agents.
+
 ## Contributing
 
 Content corrections, clearer explanations, and additional verification cases are welcome. Please keep the following rules:
