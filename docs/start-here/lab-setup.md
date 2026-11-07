@@ -21,7 +21,7 @@ labs/
 | CPU | 4 cores with virtualization | 8 cores |
 | RAM | 16 GB | 24 GB or more |
 | Free disk | 40 GB | 60 GB |
-| Software | Vagrant 2.4+, vagrant-libvirt, libvirt, QEMU/KVM | Latest stable |
+| Software | Vagrant 2.3+, vagrant-libvirt, libvirt, QEMU/KVM | Latest stable (Vagrant 2.4.7+) |
 
 The two VMs request 4 GB and 2 GB of RAM, plus disk for the boxes, snapshots, and the extra storage disk. Overcommitting RAM makes the labs slow and can cause the kernel to kill processes during storage exercises.
 
@@ -140,6 +140,9 @@ Check the result:
 
 Both machines run AlmaLinux 10 (or your chosen RHEL 10 box). The extra `/dev/vdb` disk on `server` is intentionally unpartitioned for the storage module.
 
+!!! note "Private lab network"
+    Both VMs attach to the libvirt network `rhcsa-lab`, which has DHCP disabled. Provisioning configures the second NIC with a NetworkManager profile named `lab-private`, so the addresses `10.10.10.10` and `10.10.10.11` are applied inside the guest and survive a reboot. `virsh net-list --all` on the host should show `rhcsa-lab` as active.
+
 ### Lab accounts
 
 | User | Password | Access |
@@ -232,6 +235,46 @@ Before you have done the lab it should fail with a list of missing items — tha
 ### `Permission denied` talking to libvirt
 
 Your user is not in the `libvirt` group, or the group change has not taken effect. Run `id` and confirm `libvirt` is listed. Log out and back in, or reboot.
+
+### `Network 10.10.10.10 is not available`
+
+This is a vagrant-libvirt connection-mode problem. Older vagrant-libvirt releases (0.11.x) default to `qemu:///session` when no URI is set, and session mode cannot create a private libvirt network. The lab Vagrantfile forces the system connection, but a VM created before that change can keep stale state.
+
+Destroy and rebuild:
+
+```bash
+cd labs
+./bin/lab destroy
+./bin/lab up
+```
+
+If you maintain your own Vagrantfile, set this explicitly:
+
+```ruby
+config.vm.provider :libvirt do |lv|
+  lv.qemu_use_session = false
+end
+```
+
+Then confirm the lab network exists:
+
+```bash
+virsh --connect qemu:///system net-list --all
+```
+
+You should see `rhcsa-lab` in the list.
+
+### The private IP is missing or shows a DHCP address
+
+The lab does not use Vagrant's guest-side static network configuration. Provisioning creates a NetworkManager profile named `lab-private`. Check it inside the VM:
+
+```bash
+ip -4 addr show eth1
+nmcli connection show
+sudo nmcli connection up lab-private
+```
+
+If the profile is missing, the VM was provisioned before the current lab kit. Rebuild it with `./bin/lab reset`.
 
 ### Box download fails
 

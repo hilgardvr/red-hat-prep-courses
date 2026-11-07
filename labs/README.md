@@ -67,11 +67,14 @@ Provisioning mounts the ISO on both nodes, writes `file:///mnt/rhel-iso/BaseOS` 
 On first boot, `provision/common.sh`:
 
 1. Sets the hostname and writes both lab hosts to `/etc/hosts`.
-2. Configures DNF repositories (`provision/repo.sh`).
-3. Installs base packages, including `man`, `vim`, `tar`, `gzip`, and `bzip2`.
-4. Creates `labuser` with password `labpass` and membership in `wheel`.
-5. Installs the shared lab SSH key for `vagrant` and `labuser`.
-6. Writes `~/.ssh/config` entries for `server` and `node2`, so cross-VM `ssh` and `scp` work without flags.
+2. Configures the private NIC with a NetworkManager profile named `lab-private`, applying `10.10.10.10` or `10.10.10.11`.
+3. Configures DNF repositories (`provision/repo.sh`).
+4. Installs base packages, including `man`, `vim`, `tar`, `gzip`, and `bzip2`.
+5. Creates `labuser` with password `labpass` and membership in `wheel`.
+6. Installs the shared lab SSH key for `vagrant` and `labuser`.
+7. Writes `~/.ssh/config` entries for `server` and `node2`, so cross-VM `ssh` and `scp` work without flags.
+
+The Vagrantfile attaches both VMs to the libvirt network `rhcsa-lab` with DHCP disabled. It also forces `qemu_use_session = false`, because vagrant-libvirt 0.11.x otherwise defaults to the session connection, where private networks cannot be created.
 
 `provision/node2.sh` enables `sshd` and creates `/home/labuser/handoff`.
 
@@ -94,6 +97,8 @@ Checkers inspect the end state, not the commands used. They include a reboot-per
 
 - **`vagrant` missing:** install Vagrant and then `vagrant plugin install vagrant-libvirt`.
 - **KVM permission denied:** add your user to the `libvirt` and `kvm` groups, then log out and back in.
+- **`Network 10.10.10.10 is not available`:** older vagrant-libvirt releases default to the session connection, which cannot create private networks. The Vagrantfile sets `qemu_use_session = false`; destroy and rebuild with `./bin/lab destroy && ./bin/lab up`. Confirm `virsh --connect qemu:///system net-list --all` shows `rhcsa-lab`.
+- **Private IP missing or DHCP-assigned:** inside the VM, run `ip -4 addr show eth1` and `nmcli connection up lab-private`. If the profile is absent, rebuild with `./bin/lab reset`.
 - **Box download fails:** check network/proxy settings; pre-fetch with `vagrant box add almalinux/10 --provider libvirt`.
 - **`dnf` fails during provisioning:** the box has no repositories. Register a RHEL subscription or rebuild with `LAB_ISO`.
 - **Cross-VM SSH fails:** confirm both VMs are running (`./bin/lab status`) and that `~/.ssh/lab_ed25519` exists on both.

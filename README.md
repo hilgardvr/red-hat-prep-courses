@@ -4,7 +4,7 @@ A free, lab-first course for the **Red Hat Certified System Administrator (RHCSA
 
 The course teaches the underlying Linux theory first, then turns every exam objective into hands-on practice on disposable RHEL-compatible virtual machines. It is designed for learners starting with little or no Linux experience.
 
-> **Status:** M0 complete — site scaffold, lab kit, and module **R1 (Essential tools)** are available. Foundations and modules R2–R12 are next.
+> **Status:** M0 complete — site scaffold, validated lab kit, and module **R1 (Essential tools)** are available. Foundations and modules R2–R12 are next.
 
 ## What is here
 

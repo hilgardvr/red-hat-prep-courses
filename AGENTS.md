@@ -38,7 +38,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 |---|---|---|
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
 | GitHub Pages workflow | **Complete, not yet run in CI** | `.github/workflows/pages.yml` |
-| Lab kit | **Complete, not yet run on real VMs** | Vagrant + libvirt, two nodes, checker wrapper |
+| Lab kit | **Complete, validated on a KVM host** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers pass |
 | Foundations F1–F8 | **Planned** | Only `docs/foundations/index.md` exists |
 | R1 — Essential tools | **Complete** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker |
 | R2–R11 | **Planned** | See the curriculum map below |
@@ -135,7 +135,14 @@ cd labs
 ./bin/lab check r01 lab1
 ```
 
-**This has not been executed in the development sandbox.** The sandbox has no Vagrant, no RHEL 10 box, and no usable nested virtualization. The first real `./bin/lab up` on the user's host is the validation gate.
+**Validated on 2026-11-07** on a Fedora KVM host with Vagrant 2.3.4 and vagrant-libvirt 0.11.2:
+
+- `./bin/lab up` created and provisioned both VMs.
+- `10.10.10.10` / `10.10.10.11` were configured by NetworkManager and survived `vagrant reload` on both nodes.
+- Cross-VM `ssh labuser@node2` and `ssh labuser@server` worked without extra flags.
+- R1 lab 1 (18 checks), lab 2 (21 checks), and the challenge (27 checks) all passed. The full `./bin/lab check r01 all` passed 66/66 after rebooting `server`.
+
+This host is one data point. Re-run the smoke test after changing the Vagrantfile, provisioning, or the box.
 
 ---
 
@@ -160,6 +167,8 @@ cd labs
 **Offline exam-like repo:** `LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso ./bin/lab up`. Provisioning mounts the ISO on both nodes and configures `BaseOS` + `AppStream` as `file://` repositories. Existing repos are disabled in ISO mode so an unregistered box does not fail on stale online repos.
 
 **Cross-VM SSH:** `bin/lab up` generates `labs/keys/lab_ed25519`, uploads it to both nodes, installs it for `vagrant` and `labuser`, and writes `~/.ssh/config` entries for `server` and `node2`. `ssh labuser@node2` and `scp` work without extra flags.
+
+**Private network:** the Vagrantfile forces `qemu_use_session = false` because vagrant-libvirt 0.11.x otherwise defaults to the session connection, which cannot create the private lab network. Both VMs attach to the libvirt network `rhcsa-lab` with DHCP disabled. `provision/common.sh` configures the second NIC with a NetworkManager profile named `lab-private`, so `10.10.10.10` / `10.10.10.11` survive reboot.
 
 **Lab commands:** `./bin/lab doctor|up|status|ssh|snapshot|restore|check|halt|reset|destroy`.
 
@@ -257,6 +266,7 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | CC BY-NC-SA content + MIT code | Allows sharing/adaptation, prevents commercial reuse of the course text |
 | R1 checker with `LAB_ROOT` | Allows local testing without a VM and keeps checks deterministic |
 | `all` checker assumes every lab end state | Individual checks are recommended when the learner restores snapshots between labs |
+| Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
 
 ---
 
@@ -303,7 +313,7 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 
 ## 10. Known gaps and risks
 
-- **The lab kit has not been run on real VMs in the development sandbox.** Validate `./bin/lab up`, provisioning, cross-VM SSH, and all three R1 checkers on a KVM host before calling the lab stable.
+- **The lab kit has been validated on one KVM host only.** The 2026-11-07 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10`. Re-validate on other host distributions, Vagrant/plugin versions, and a real RHEL 10 box. The Vagrantfile now forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
 - **No public generic RHEL 10 Vagrant box.** AlmaLinux 10 is the default. A RHEL 10 box must be built or supplied by the user.
 - **CI has not run yet.** The Pages workflow is written but unexecuted. The first push to `main` will reveal environment-specific issues.
 - **`SITE_URL` fallback is a placeholder.** The workflow sets it from the repository owner/name. Change the fallback for a custom domain.

@@ -19,6 +19,10 @@ echo "==> Provisioning ${NODE_NAME} (${NODE_IP}), repository mode: ${REPO_MODE}"
 # ---------------------------------------------------------------------------
 hostnamectl set-hostname "$NODE_NAME"
 
+# The cloud image maps the hostname to 127.0.1.1, which shadows the lab
+# addresses for `getent hosts`. Remove it so name resolution uses 10.10.10.x.
+sed -i '/^127\.0\.1\.1[[:space:]]/d' /etc/hosts
+
 if ! grep -q '^10\.10\.10\.10[[:space:]]' /etc/hosts; then
   cat >> /etc/hosts <<'EOF'
 
@@ -27,6 +31,49 @@ if ! grep -q '^10\.10\.10\.10[[:space:]]' /etc/hosts; then
 10.10.10.11 node2
 EOF
 fi
+
+# ---------------------------------------------------------------------------
+# Private lab network
+# ---------------------------------------------------------------------------
+# The Vagrantfile attaches the private NIC with auto_config disabled because
+# Vagrant's guest-side static network configuration is unreliable on AlmaLinux
+# 10. Configure it with NetworkManager instead so the address is persistent.
+MGMT_IFACE=$(ip route show default | awk '/^default/ {print $5; exit}')
+PRIVATE_IFACE=""
+
+while IFS=: read -r dev type _state; do
+  [ "$type" = "ethernet" ] || continue
+  [ "$dev" = "$MGMT_IFACE" ] && continue
+  PRIVATE_IFACE="$dev"
+done < <(nmcli -t -f DEVICE,TYPE,STATE device status)
+
+if [ -z "$PRIVATE_IFACE" ]; then
+  echo "ERROR: could not identify the private lab interface" >&2
+  exit 1
+fi
+
+echo "==> Configuring ${PRIVATE_IFACE} as ${NODE_IP}/24"
+nmcli connection delete lab-private >/dev/null 2>&1 || true
+nmcli connection add \
+  type ethernet \
+  con-name lab-private \
+  ifname "$PRIVATE_IFACE" \
+  ipv4.method manual \
+  ipv4.addresses "${NODE_IP}/24" \
+  ipv4.never-default yes \
+  ipv6.method disabled \
+  connection.autoconnect yes \
+  connection.autoconnect-priority 100
+
+# Remove any DHCP profile the box created for the private NIC so only the
+# static profile can activate after a reboot.
+while IFS=: read -r cname cdev; do
+  [ "$cdev" = "$PRIVATE_IFACE" ] || continue
+  [ "$cname" = "lab-private" ] && continue
+  nmcli connection delete "$cname" >/dev/null 2>&1 || true
+done < <(nmcli -t -f NAME,DEVICE connection show)
+
+nmcli connection up lab-private
 
 # ---------------------------------------------------------------------------
 # Repositories
