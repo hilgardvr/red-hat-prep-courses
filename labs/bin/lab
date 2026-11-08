@@ -5,7 +5,6 @@
 # Usage:
 #   ./bin/lab doctor
 #   ./bin/lab up
-#   ./bin/lab provision
 #   ./bin/lab status
 #   ./bin/lab ssh [server|node2]
 #   ./bin/lab snapshot [name]
@@ -35,7 +34,6 @@ RHCSA lab control
 
   ./bin/lab doctor                 Check the host and dependencies
   ./bin/lab up                     Create or start both VMs
-  ./bin/lab provision              Re-run provisioning on both VMs
   ./bin/lab status                 Show VM status
   ./bin/lab ssh [server|node2]     Log in (default: server)
   ./bin/lab snapshot [name]        Snapshot both VMs (default: clean)
@@ -273,16 +271,9 @@ cmd_check() {
   vagrant_cmd ssh server -c "sudo bash /tmp/rhcsa-check.sh $lab"
 }
 
-cmd_provision() {
-  prepare
-  info "Re-running provisioning on both VMs"
-  vagrant_cmd provision
-}
-
 case "${1:-help}" in
   doctor)   cmd_doctor ;;
   up)       cmd_up ;;
-  provision) cmd_provision ;;
   status)   cmd_status ;;
   ssh)      shift; cmd_ssh "$@" ;;
   snapshot) shift; cmd_snapshot "$@" ;;

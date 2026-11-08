@@ -143,6 +143,8 @@ cd labs
 
 This host is one data point. Re-run the smoke test after changing the Vagrantfile, provisioning, or the box.
 
+**Applying a provisioning change to an existing lab** (maintainer only, not a learner command): `cd labs && vagrant provision` re-runs `common.sh` and `node2.sh` without rebuilding. It resets anything the scripts set — `labuser`'s password, the sudoers drop-in, the `lab-private` connection — so never use it mid-exercise. Learners pick up provisioning changes with `./bin/lab reset`.
+
 **Not yet re-validated:** the 2026-11-08 changes that pinned the box, removed `LAB_BOX`/`LAB_ISO`, and installed/enabled `firewalld` edited the Vagrantfile, `common.sh`, `node2.sh`, and `bin/lab`. They are syntax-checked only. Re-run the smoke test above, confirm `systemctl is-active firewalld` on both nodes, and confirm the R1 checkers (especially the node2 SSH checks) before treating it as validated.
 
 ---
@@ -171,7 +173,7 @@ This host is one data point. Re-run the smoke test after changing the Vagrantfil
 
 **Private network:** the Vagrantfile forces `qemu_use_session = false` because vagrant-libvirt 0.11.x otherwise defaults to the session connection, which cannot create the private lab network. Both VMs attach to the libvirt network `rhcsa-lab` with DHCP disabled. `provision/common.sh` configures the second NIC with a NetworkManager profile named `lab-private`, so `10.10.10.10` / `10.10.10.11` survive reboot.
 
-**Lab commands:** `./bin/lab doctor|up|provision|status|ssh|snapshot|restore|check|halt|reset|destroy`.
+**Lab commands:** `./bin/lab doctor|up|status|ssh|snapshot|restore|check|halt|reset|destroy`.
 
 **Checker wrapper:** `./bin/lab check <module> [lab1|lab2|challenge|all]` uploads `labs/checks/<module>/check.sh` to `server` and runs it as root.
 
@@ -202,6 +204,7 @@ Every RHCSA module follows the same anatomy:
 - Do not disable SELinux or firewalld in a lab unless the lesson is specifically about doing so.
 - Do not claim a lab was validated without running it.
 - The foundations are optional as a whole. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
+- `PACKAGES` in `labs/provision/common.sh` is base state only: things F1 and F2 assert, or that every module needs before it starts. A module that needs a package installs it in its own lab. Do not grow `PACKAGES` for module features — it would force every existing learner to rebuild mid-course.
 
 **Check-script conventions (R1 is the reference implementation):**
 

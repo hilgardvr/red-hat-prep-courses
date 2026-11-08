@@ -37,7 +37,6 @@ sudo su - labuser
 |---|---|
 | `./bin/lab doctor` | Check Vagrant, libvirt, KVM, RAM, disk, and the lab key |
 | `./bin/lab up` | Create or start both VMs |
-| `./bin/lab provision` | Re-run provisioning on both VMs (safe to repeat) |
 | `./bin/lab status` | Show VM status |
 | `./bin/lab ssh [server\|node2]` | Log in (default `server`) |
 | `./bin/lab snapshot [name]` | Snapshot both VMs (default `clean`) |
