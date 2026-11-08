@@ -4,15 +4,13 @@
 # Arguments:
 #   $1  node name (server|node2)
 #   $2  node IP
-#   $3  repository mode (online|iso)
 
 set -euo pipefail
 
 NODE_NAME="${1:?node name is required}"
 NODE_IP="${2:?node IP is required}"
-REPO_MODE="${3:-online}"
 
-echo "==> Provisioning ${NODE_NAME} (${NODE_IP}), repository mode: ${REPO_MODE}"
+echo "==> Provisioning ${NODE_NAME} (${NODE_IP})"
 
 # ---------------------------------------------------------------------------
 # Hostname and name resolution
@@ -76,11 +74,6 @@ done < <(nmcli -t -f NAME,DEVICE connection show)
 nmcli connection up lab-private
 
 # ---------------------------------------------------------------------------
-# Repositories
-# ---------------------------------------------------------------------------
-bash /tmp/repo.sh "$REPO_MODE"
-
-# ---------------------------------------------------------------------------
 # Base packages
 # ---------------------------------------------------------------------------
 PACKAGES=(
@@ -101,14 +94,11 @@ if ! dnf -y install "${PACKAGES[@]}"; then
 
 ERROR: package installation failed.
 
-The box has no usable DNF repositories. Choose one of:
+The VM could not reach usable DNF repositories. Check that the host and the
+VM have working internet access, then rebuild the lab:
 
-  * Use the AlmaLinux 10 default box (no action needed).
-  * For RHEL, register a subscription:
-        sudo subscription-manager register --username <account>
-        sudo subscription-manager attach --auto
-  * Or attach a RHEL 10 installation ISO and rebuild:
-        LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso ./bin/lab reset
+  ./bin/lab destroy
+  ./bin/lab up
 EOF
   exit 1
 fi
@@ -174,7 +164,6 @@ EOF
 cat > /etc/rhcsa-lab <<EOF
 LAB_NODE=${NODE_NAME}
 LAB_IP=${NODE_IP}
-LAB_REPO_MODE=${REPO_MODE}
 EOF
 
 rm -f /tmp/lab_key /tmp/lab_key.pub

@@ -107,17 +107,13 @@ cd red-hat-certs/labs
 
 `doctor` checks for Vagrant, the libvirt provider, `virsh`, KVM access, RAM, disk space, and the lab SSH key. It prints an install hint for anything missing.
 
-## 4. Choose the lab operating system
+## 4. The lab operating system
 
-The default box is **AlmaLinux 10**, a community rebuild that is binary-compatible with RHEL 10 for the skills in this course. It needs no Red Hat subscription and downloads automatically.
+The lab runs **AlmaLinux 10**, a free community rebuild built from RHEL 10 source. It needs no Red Hat subscription and downloads automatically.
 
-For exact exam fidelity, use **RHEL 10**. You need a RHEL 10 Vagrant box; the public Vagrant Cloud does not currently publish a generic RHEL 10 box. You can build one from the RHEL 10 KVM guest image or an ISO with Packer, then set:
+For the skills this course teaches, AlmaLinux 10 behaves like RHEL 10: the same `systemd`, SELinux, firewalld, DNF, NetworkManager, LVM, and filesystem layout. The course targets RHEL 10 for the exam and points out any rebuild difference that matters for an exercise. You do not need to change anything to follow along.
 
-```bash
-LAB_BOX=your-org/rhel10 ./bin/lab up
-```
-
-The course content targets RHEL 10. When AlmaLinux differs in a way that matters for an exercise, the lab page calls it out.
+The VMs install their base packages from AlmaLinux's online repositories, so your host and the VMs need internet access on first boot.
 
 ## 5. Start the lab
 
@@ -138,7 +134,7 @@ Check the result:
 | `server` | `10.10.10.10` | Main practice system | 2 vCPU, 4 GB RAM, 20 GB root + 10 GB `/dev/vdb` |
 | `node2` | `10.10.10.11` | SSH, NFS, firewall, and client/server target | 1 vCPU, 2 GB RAM, 20 GB root |
 
-Both machines run AlmaLinux 10 (or your chosen RHEL 10 box). The extra `/dev/vdb` disk on `server` is intentionally unpartitioned for the storage module.
+Both machines run AlmaLinux 10. The extra `/dev/vdb` disk on `server` is intentionally unpartitioned for the storage module.
 
 !!! note "Private lab network"
     Both VMs attach to the libvirt network `rhcsa-lab`, which has DHCP disabled. Provisioning configures the second NIC with a NetworkManager profile named `lab-private`, so the addresses `10.10.10.10` and `10.10.10.11` are applied inside the guest and survive a reboot. `virsh net-list --all` on the host should show `rhcsa-lab` as active.
@@ -189,30 +185,6 @@ Other useful commands:
 | `./bin/lab check r01 lab1` | Run the automated checker for a lab |
 
 Snapshots consume disk. If you run low on space, delete old snapshots with `cd labs && vagrant snapshot list` and `vagrant snapshot delete <machine> <name>`.
-
-## 7. Optional: offline RHEL 10 repository
-
-The exam has no internet access. To make the lab behave the same way, attach a RHEL 10 installation ISO and use it as a local package repository:
-
-```bash
-LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso ./bin/lab up
-```
-
-Provisioning mounts the ISO read-only on both VMs and writes `file:///mnt/rhel-iso/BaseOS` and `file:///mnt/rhel-iso/AppStream` repository definitions. The mount is added to `/etc/fstab` with `nofail` so it does not block a boot if the ISO is detached.
-
-This is also the easiest way to run a RHEL 10 lab without registering a subscription, provided the box itself is RHEL 10.
-
-## 8. Optional: register a RHEL 10 subscription
-
-If you use a real RHEL 10 box and want online repositories, register it:
-
-```bash
-sudo subscription-manager register --username <your-red-hat-account>
-sudo subscription-manager attach --auto
-sudo dnf repolist
-```
-
-A free Red Hat Developer subscription covers individual development use. Check the current terms on the Red Hat Developer site. For an exam-like environment, prefer the local ISO repository.
 
 ## Verifying the lab
 
@@ -286,7 +258,7 @@ vagrant box add almalinux/10 --provider libvirt
 
 ### Provisioning fails during `dnf`
 
-The box has no usable repositories. Either register a RHEL subscription or rebuild with `LAB_ISO` pointing at a RHEL 10 DVD. On AlmaLinux, confirm the box has network access.
+The VM could not reach usable repositories. Check the host's network and any proxy configuration, then rebuild the lab with `./bin/lab destroy && ./bin/lab up`.
 
 ### `ssh node2` fails from `server`
 

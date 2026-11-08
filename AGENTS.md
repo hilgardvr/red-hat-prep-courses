@@ -6,10 +6,10 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-07 |
+| **Last updated** | 2026-11-08 |
 | **Current milestone** | M1 complete — Foundations F1–F8 |
 | **Next milestone** | M2 — R2, R3, R4 |
-| **Active branch** | `hilgard/rhcsa-prep-course` |
+| **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
 ---
@@ -38,7 +38,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 |---|---|---|
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
 | GitHub Pages workflow | **Complete, not yet run in CI** | `.github/workflows/pages.yml` |
-| Lab kit | **Complete, validated on a KVM host** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers pass |
+| Lab kit | **Complete; re-validation pending** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers passed on 2026-11-07. The 2026-11-08 box pin is syntax-checked only. |
 | Foundations F1–F8 | **Complete** | Eight modules under `docs/foundations/`; style reference for future modules |
 | R1 — Essential tools | **Complete** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker |
 | R2–R11 | **Planned** | See the curriculum map below |
@@ -72,9 +72,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 ├── labs/
 │   ├── Vagrantfile            # server + node2
 │   ├── bin/lab                # lifecycle CLI
-│   ├── provision/             # common.sh, repo.sh, node2.sh
+│   ├── provision/             # common.sh, node2.sh
 │   ├── checks/r01/check.sh    # R1 automated checker
-│   ├── box/README.md          # RHEL 10 box notes
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -144,6 +143,8 @@ cd labs
 
 This host is one data point. Re-run the smoke test after changing the Vagrantfile, provisioning, or the box.
 
+**Not yet re-validated:** the 2026-11-08 change that pinned the box and removed `LAB_BOX`/`LAB_ISO` edited the Vagrantfile, `common.sh`, and `bin/lab`. It is syntax-checked only. Re-run the smoke test above and confirm the R1 checkers before treating it as validated.
+
 ---
 
 ## 5. Lab environment
@@ -160,11 +161,9 @@ This host is one data point. Re-run the smoke test after changing the Vagrantfil
 | `vagrant` | `vagrant` | Passwordless sudo; provisioning |
 | `labuser` | `labpass` | Member of `wheel`; normal sudo with password |
 
-**Default box:** `almalinux/10`. It is freely available and RHEL 10-compatible for the course objectives. There is currently no public generic RHEL 10 box on Vagrant Cloud.
+**Base box:** `almalinux/10`, pinned in the Vagrantfile. It is freely available and RHEL 10-compatible for the course objectives. There is no box override: the lab does not support swapping in a RHEL 10 box, and `LAB_BOX`/`LAB_ISO` were removed on 2026-11-08 because they were documented noise for a beginner audience and no shipped module used them.
 
-**RHEL 10 fidelity:** set `LAB_BOX=your-org/rhel10`. See `labs/box/README.md` for box requirements and the build outline.
-
-**Offline exam-like repo:** `LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso ./bin/lab up`. Provisioning mounts the ISO on both nodes and configures `BaseOS` + `AppStream` as `file://` repositories. Existing repos are disabled in ISO mode so an unregistered box does not fail on stale online repos.
+**Repositories:** the VMs use the box's own online AlmaLinux repositories. Provisioning needs internet access on first boot. The exam's no-internet condition is simulated by disconnecting the VM, not by attaching an installation DVD.
 
 **Cross-VM SSH:** `bin/lab up` generates `labs/keys/lab_ed25519`, uploads it to both nodes, installs it for `vagrant` and `labuser`, and writes `~/.ssh/config` entries for `server` and `node2`. `ssh labuser@node2` and `scp` work without extra flags.
 
@@ -257,9 +256,9 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | Target EX200 v10 / RHEL 10 | Current exam platform; adds Flatpak and systemd timers; drops Podman and set-GID |
 | MkDocs Material | Markdown-first, good search/navigation, easy GitHub Pages deploy |
 | GitHub Pages + Actions | Free hosting, no server to maintain |
-| AlmaLinux 10 as default lab box | No public generic RHEL 10 Vagrant box; AlmaLinux is RHEL-compatible and subscription-free |
+| AlmaLinux 10 as the lab OS | No public generic RHEL 10 Vagrant box; AlmaLinux is RHEL-compatible and subscription-free |
 | Two VMs (`server`, `node2`) | Needed for SSH, NFS, firewall, and client/server exercises |
-| Offline DVD repo via `LAB_ISO` | Mimics the exam's no-internet environment and avoids subscription dependency |
+| Remove `LAB_BOX` and `LAB_ISO` (2026-11-08) | Two advanced overrides documented in three beginner-facing places; no shipped module used them. Lab is pinned to AlmaLinux 10. The offline-repo teaching need moves to R3, which will use a local RPM directory as a `baseurl`. |
 | Shared lab SSH key | Makes cross-VM `ssh`/`scp` work for beginners without teaching key setup before R10 |
 | `labuser` account | Gives a non-root account for permission and sudo exercises |
 | Free core + paid extras | Keeps the course useful and marketable without paywalling exam preparation |
@@ -287,7 +286,7 @@ When adding or revising a foundation, repeat the same five steps:
 ### M2 — R2, R3, R4
 
 - **R2:** users, groups, password aging, sudoers, default permissions. Checker must verify users/groups/password aging/sudo.
-- **R3:** DNF repositories, RPM install/remove, Flatpak remotes and packages. Include the offline repo workflow.
+- **R3:** DNF repositories, RPM install/remove, Flatpak remotes and packages. Teach repository configuration with a local directory of RPMs used as a `baseurl` (not an installation DVD — `LAB_ISO` was removed). For the exam's no-internet condition, disconnect the VM's network in a lab step instead of attaching media.
 - **R4:** conditionals, loops, arguments, command substitution. Checker runs the learner's script against test inputs.
 
 ### M3 — R5–R11
@@ -316,8 +315,8 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 ## 10. Known gaps and risks
 
 - **Foundations F3–F8 labs are written but not yet walked on a live lab.** F1–F2 were validated together with R1 on 2026-11-07. The newer modules use only commands and packages the provisioning installs (`man-db`, `man-pages`, `vim-enhanced`, `bash-completion`, `tar`, `openssh-clients`), plus iproute, util-linux, policycoreutils, and their dependencies, but a full read-through on `server` and `node2` is still owed before calling them validated.
-- **The lab kit has been validated on one KVM host only.** The 2026-11-07 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10`. Re-validate on other host distributions, Vagrant/plugin versions, and a real RHEL 10 box. The Vagrantfile now forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
-- **No public generic RHEL 10 Vagrant box.** AlmaLinux 10 is the default. A RHEL 10 box must be built or supplied by the user.
+- **The lab kit has been validated on one KVM host only.** The 2026-11-07 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10`. Re-validate on other host distributions and Vagrant/plugin versions. The Vagrantfile forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
+- **First boot requires internet.** Provisioning installs base packages from AlmaLinux's online repositories, and there is no offline path since `LAB_ISO` was removed on 2026-11-08. A learner behind a restrictive proxy fails at `dnf install`.
 - **CI has not run yet.** The Pages workflow is written but unexecuted. The first push to `main` will reveal environment-specific issues.
 - **`SITE_URL` fallback is a placeholder.** The workflow sets it from the repository owner/name. Change the fallback for a custom domain.
 - **Material for MkDocs reaches end of life on 2027-05-05.** Critical fixes continue until then. Zensical is the maintained successor; migration is not urgent but should be evaluated before the EOL.
@@ -346,12 +345,6 @@ cd labs
 ./bin/lab check r01 lab1
 ./bin/lab check r01 lab2
 ./bin/lab check r01 challenge
-
-# RHEL 10 box override
-LAB_BOX=your-org/rhel10 ./bin/lab up
-
-# Offline repo
-LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso ./bin/lab up
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

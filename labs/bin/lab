@@ -40,8 +40,7 @@ RHCSA lab control
   ./bin/lab destroy                Delete both VMs
 
 Environment:
-  LAB_BOX   Vagrant box name (default: almalinux/10)
-  LAB_ISO   Path to a RHEL 10 installation ISO for an offline repo
+  LAB_KEY_PATH   Lab SSH key location (default: labs/keys/lab_ed25519)
 EOF
 }
 
@@ -140,18 +139,6 @@ cmd_doctor() {
   fi
 
   hr "Lab configuration"
-  printf '  info  box: %s\n' "${LAB_BOX:-almalinux/10}"
-  if [ -n "${LAB_ISO:-}" ]; then
-    if [ -f "$LAB_ISO" ]; then
-      printf '  ok    ISO: %s\n' "$LAB_ISO"
-    else
-      printf '  MISS  LAB_ISO does not exist: %s\n' "$LAB_ISO"
-      failures=$((failures + 1))
-    fi
-  else
-    printf '  info  LAB_ISO not set (using online repositories)\n'
-  fi
-
   if [ -f "$KEY" ]; then
     printf '  ok    lab SSH key: %s\n' "$KEY"
   else
@@ -169,12 +156,7 @@ cmd_doctor() {
 
 cmd_up() {
   prepare
-  if [ -n "${LAB_ISO:-}" ]; then
-    [ -f "$LAB_ISO" ] || die "LAB_ISO does not exist: $LAB_ISO"
-    LAB_ISO="$(realpath "$LAB_ISO")"
-    export LAB_ISO
-  fi
-  info "Starting the lab (box: ${LAB_BOX:-almalinux/10})"
+  info "Starting the lab (box: almalinux/10)"
   vagrant_cmd up
   cat <<'EOF'
 

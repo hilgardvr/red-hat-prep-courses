@@ -31,7 +31,7 @@ The current EX200 is based on **RHEL 10**. Much of the RHEL 9 material still app
 
 1. **Podman questions.** Many RHEL 9 practice exams include container tasks. They are not current EX200 objectives. Skip them unless you are studying for a different certification.
 2. **MBR partitioning.** RHEL 9 material often teaches both MBR and GPT. The current objectives list GPT only. Do not ignore GPT tools.
-3. **No Flatpak.** Older courses omit Flatpak entirely. It is a current objective; learn the offline repository workflow too.
+3. **No Flatpak.** Older courses omit Flatpak entirely. It is a current objective; learn Flatpak remotes and packages too.
 4. **No timers.** Older courses teach cron and `at` only. Learn systemd timers, including the `.timer` unit and `Persistent=` behavior.
 5. **Set-GID exercises.** Some labs teach collaborative directories with SGID. Useful knowledge, but not a current exam bullet. Do not let it crowd out current objectives.
 6. **RHEL 9 command output.** Minor output differences (package versions, unit names, default paths) can confuse memorized answers. Learn the concept, not the exact string.
@@ -55,11 +55,11 @@ If you learned RHCSA on RHEL 9, you are not starting over. You are adding Flatpa
 
 ## A note on AlmaLinux, Rocky, and CentOS Stream
 
-The lab defaults to AlmaLinux 10 because it is freely available and binary-compatible with RHEL 10 for these objectives. The course content targets RHEL 10. Differences you may encounter:
+The lab runs AlmaLinux 10 because it is freely available and binary-compatible with RHEL 10 for these objectives. The course content targets RHEL 10. Differences you may encounter:
 
 - Package versions and some default packages differ slightly.
-- Subscription-manager commands are RHEL-specific; AlmaLinux uses DNF repositories directly.
+- Subscription-manager commands are RHEL-specific; AlmaLinux uses DNF repositories directly. `subscription-manager` is not an RHCSA objective — it is how the exam machine is prepared before you start.
 - SELinux policy versions can differ, but the tools and concepts are the same.
 - The exam runs on RHEL; if a command behaves differently on a rebuild, trust the RHEL documentation for exam day.
 
-For exact fidelity, use a RHEL 10 box with a developer subscription or a local DVD repository, as described in [Lab setup](../start-here/lab-setup.md).
+The lab runs on AlmaLinux for the whole course, as described in [Lab setup](../start-here/lab-setup.md).

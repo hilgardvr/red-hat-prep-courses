@@ -24,7 +24,7 @@ This module gets that lab running and teaches the habit that makes the rest of t
 | `server` | `10.10.10.10` | 2 vCPU, 4 GB RAM, 20 GB root + 10 GB `/dev/vdb` | Main practice system |
 | `node2` | `10.10.10.11` | 1 vCPU, 2 GB RAM, 20 GB root | SSH, NFS, firewall, and client/server target |
 
-Both machines run AlmaLinux 10 by default, a RHEL 10-compatible rebuild. For exact exam fidelity, you can point `LAB_BOX` at a RHEL 10 Vagrant box. The extra `/dev/vdb` disk on `server` is deliberately left unpartitioned for the storage modules.
+Both machines run AlmaLinux 10, a RHEL 10-compatible rebuild that needs no subscription. The extra `/dev/vdb` disk on `server` is deliberately left unpartitioned for the storage modules.
 
 ## The mental model
 
@@ -75,8 +75,8 @@ cd labs
 
 If it reports a missing item, fix that item before continuing. The error message includes the command or group change you need.
 
-!!! note "Box and ISO overrides"
-    The default box is `almalinux/10`. Set `LAB_BOX=your-org/rhel10` to use a RHEL 10 box. Set `LAB_ISO=/path/to/rhel-10-x86_64-dvd.iso` to attach a RHEL 10 installation ISO and use it as an offline repository. See [Lab setup](../../start-here/lab-setup.md) for both workflows.
+!!! note "Internet access on first boot"
+    The lab runs AlmaLinux 10 and installs its base packages from AlmaLinux's online repositories. Your host and both VMs need internet access the first time you run `./bin/lab up`. See [Lab setup](../../start-here/lab-setup.md).
 
 ## Start the lab
 
@@ -169,11 +169,11 @@ getenforce
 systemctl is-active firewalld sshd
 ```
 
-The output varies with the box and host, but the shape is stable:
+The output varies with the host, but the shape is stable:
 
 | Command | What to look for |
 |---|---|
-| `hostnamectl` | Static hostname `server`, AlmaLinux 10 (or RHEL 10), kernel version |
+| `hostnamectl` | Static hostname `server`, AlmaLinux 10, kernel version |
 | `ip -brief address` | A management address and `10.10.10.10/24` on the private interface |
 | `nmcli connection show --active` | A `lab-private` connection carrying the lab address |
 | `lsblk` | `vda` for the root disk and `vdb` (10 GB, no mountpoint) on `server` |

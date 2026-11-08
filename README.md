@@ -55,13 +55,9 @@ cd labs
 ./bin/lab ssh        # log in to server
 ```
 
-The default box is **AlmaLinux 10**, a RHEL 10-compatible rebuild that requires no subscription. For exact exam fidelity, build or obtain a RHEL 10 Vagrant box and set `LAB_BOX`:
+The lab runs **AlmaLinux 10**, a free RHEL 10-compatible rebuild that requires no subscription. The course targets RHEL 10 for the exam and notes any rebuild difference that matters.
 
-```bash
-LAB_BOX=your-org/rhel10 ./bin/lab up
-```
-
-See [`docs/start-here/lab-setup.md`](docs/start-here/lab-setup.md) for the full setup guide, including the offline RHEL 10 DVD repository and subscription registration.
+See [`docs/start-here/lab-setup.md`](docs/start-here/lab-setup.md) for the full setup guide.
 
 ## Course design
 

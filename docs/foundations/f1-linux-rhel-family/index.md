@@ -188,7 +188,7 @@ RHEL-family systems install software from **repositories**, not from random down
 
 AlmaLinux uses the same split. You will configure and use repositories in R3. For now, remember that `dnf` is the package manager and that packages come from configured repositories.
 
-The lab can also run from a local RHEL 10 installation ISO. That is the closest match to the exam, which has no internet access. See [Lab setup](../../start-here/lab-setup.md) for the `LAB_ISO` option.
+Your lab installs its packages from AlmaLinux's repositories over the internet. The exam machine uses Red Hat's repositories, but the workflow you learn — `dnf repolist`, `dnf install`, `dnf remove` — is the same. See [Lab setup](../../start-here/lab-setup.md).
 
 ## Open source, support, and the exam
 
@@ -309,7 +309,7 @@ What is the difference between CentOS Stream and AlmaLinux in relation to RHEL?
 The exam runs on RHEL 10, but the lab defaults to AlmaLinux 10. Why is that acceptable?
 
 ??? question "Answer"
-    AlmaLinux is built from RHEL source and aims to be binary-compatible. It uses the same administration model: systemd, SELinux, firewalld, DNF, NetworkManager, LVM, and the same filesystem layout. The course calls out differences that matter, and you can switch to a real RHEL 10 box with `LAB_BOX` or an offline ISO.
+    AlmaLinux is built from RHEL source and aims to be binary-compatible. It uses the same administration model: systemd, SELinux, firewalld, DNF, NetworkManager, LVM, and the same filesystem layout. The RHCSA exam grades the administration tasks, not the distribution name, so everything you practise transfers directly. The course calls out any rebuild difference that matters.
 
 ### 5. Reading `os-release`
 
