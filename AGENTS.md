@@ -143,7 +143,7 @@ cd labs
 
 This host is one data point. Re-run the smoke test after changing the Vagrantfile, provisioning, or the box.
 
-**Not yet re-validated:** the 2026-11-08 change that pinned the box and removed `LAB_BOX`/`LAB_ISO` edited the Vagrantfile, `common.sh`, and `bin/lab`. It is syntax-checked only. Re-run the smoke test above and confirm the R1 checkers before treating it as validated.
+**Not yet re-validated:** the 2026-11-08 changes that pinned the box, removed `LAB_BOX`/`LAB_ISO`, and installed/enabled `firewalld` edited the Vagrantfile, `common.sh`, `node2.sh`, and `bin/lab`. They are syntax-checked only. Re-run the smoke test above, confirm `systemctl is-active firewalld` on both nodes, and confirm the R1 checkers (especially the node2 SSH checks) before treating it as validated.
 
 ---
 
@@ -165,11 +165,13 @@ This host is one data point. Re-run the smoke test after changing the Vagrantfil
 
 **Repositories:** the VMs use the box's own online AlmaLinux repositories. Provisioning needs internet access on first boot. The exam's no-internet condition is simulated by disconnecting the VM, not by attaching an installation DVD.
 
+**Base services:** the AlmaLinux cloud image does not ship `firewalld`. Provisioning installs and enables it, then asserts that SELinux is `Enforcing` and that firewalld is active *and* enabled. Those assertions exist because the docs (F1, F2) describe that base state; without them a box change would contradict the course silently.
+
 **Cross-VM SSH:** `bin/lab up` generates `labs/keys/lab_ed25519`, uploads it to both nodes, installs it for `vagrant` and `labuser`, and writes `~/.ssh/config` entries for `server` and `node2`. `ssh labuser@node2` and `scp` work without extra flags.
 
 **Private network:** the Vagrantfile forces `qemu_use_session = false` because vagrant-libvirt 0.11.x otherwise defaults to the session connection, which cannot create the private lab network. Both VMs attach to the libvirt network `rhcsa-lab` with DHCP disabled. `provision/common.sh` configures the second NIC with a NetworkManager profile named `lab-private`, so `10.10.10.10` / `10.10.10.11` survive reboot.
 
-**Lab commands:** `./bin/lab doctor|up|status|ssh|snapshot|restore|check|halt|reset|destroy`.
+**Lab commands:** `./bin/lab doctor|up|provision|status|ssh|snapshot|restore|check|halt|reset|destroy`.
 
 **Checker wrapper:** `./bin/lab check <module> [lab1|lab2|challenge|all]` uploads `labs/checks/<module>/check.sh` to `server` and runs it as root.
 

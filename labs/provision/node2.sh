@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # node2-specific provisioning.
 #
-# node2 is the remote target for SSH, NFS, and firewall exercises. For R1 it
-# only needs sshd running and a handoff directory for the challenge.
+# node2 is the remote target for SSH, NFS, and firewall exercises. sshd must be
+# running for the SSH and R1 challenge work. firewalld is installed and enabled
+# for both nodes by common.sh.
 
 set -euo pipefail
 

@@ -86,6 +86,7 @@ PACKAGES=(
   bzip2
   openssh-clients
   sudo
+  firewalld
 )
 
 echo "==> Installing base packages"
@@ -102,6 +103,14 @@ VM have working internet access, then rebuild the lab:
 EOF
   exit 1
 fi
+
+# ---------------------------------------------------------------------------
+# Firewall
+# ---------------------------------------------------------------------------
+# The AlmaLinux cloud image does not ship firewalld. Enable it so the lab
+# matches a default RHEL server and the base state F1 and F2 describe.
+systemctl unmask firewalld >/dev/null 2>&1 || true
+systemctl enable --now firewalld
 
 # ---------------------------------------------------------------------------
 # Lab user
@@ -157,6 +166,27 @@ cat > /etc/ssh/ssh_config.d/99-rhcsa-lab.conf <<'EOF'
 Host 10.10.10.*
     StrictHostKeyChecking accept-new
 EOF
+
+# ---------------------------------------------------------------------------
+# Base state
+# ---------------------------------------------------------------------------
+# The course documents a RHEL-like base: SELinux enforcing and firewalld
+# active. Assert it so a box or provisioning change fails loudly instead of
+# silently contradicting F1 and F2.
+if [ "$(getenforce)" != "Enforcing" ]; then
+  echo "ERROR: SELinux is not enforcing (got: $(getenforce))" >&2
+  exit 1
+fi
+
+if ! systemctl is-active --quiet firewalld; then
+  echo "ERROR: firewalld is not active" >&2
+  exit 1
+fi
+
+if ! systemctl is-enabled --quiet firewalld; then
+  echo "ERROR: firewalld is not enabled; it will not start after a reboot" >&2
+  exit 1
+fi
 
 # ---------------------------------------------------------------------------
 # Lab marker and cleanup
