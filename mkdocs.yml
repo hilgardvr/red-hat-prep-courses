@@ -101,6 +101,13 @@ nav:
           - "Challenge — Handoff bundle": rhcsa/r01-essential-tools/labs/challenge-handoff.md
           - Knowledge check: rhcsa/r01-essential-tools/quiz.md
           - Cheat sheet: rhcsa/r01-essential-tools/cheatsheet.md
+      - "R2 — Users and groups":
+          - Theory: rhcsa/r02-users-and-groups/index.md
+          - "Lab 1 — Accounts and groups": rhcsa/r02-users-and-groups/labs/lab-1-accounts-and-groups.md
+          - "Lab 2 — Passwords, policy, and sudo": rhcsa/r02-users-and-groups/labs/lab-2-password-policy-and-sudo.md
+          - "Challenge — Onboarding wave 2": rhcsa/r02-users-and-groups/labs/challenge-onboarding.md
+          - Knowledge check: rhcsa/r02-users-and-groups/quiz.md
+          - Cheat sheet: rhcsa/r02-users-and-groups/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

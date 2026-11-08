@@ -115,14 +115,14 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 9. Manage users and groups
 
-**Module R2** — <span class="badge badge-planned">Planned</span>
+**Module R2** — <span class="badge badge-ready">Available</span>
 
 | Objective | Where |
 |---|---|
-| Create, delete, and modify local user accounts | R2 |
-| Change passwords and adjust password aging for local user accounts | R2 |
-| Create, delete, and modify local groups and group memberships | R2 |
-| Configure privileged access | R2 |
+| Create, delete, and modify local user accounts | [R2 — Creating users](../rhcsa/r02-users-and-groups/index.md#creating-users), [Modifying users](../rhcsa/r02-users-and-groups/index.md#modifying-users), [Deleting users](../rhcsa/r02-users-and-groups/index.md#deleting-users) |
+| Change passwords and adjust password aging for local user accounts | [R2 — Passwords and aging](../rhcsa/r02-users-and-groups/index.md#passwords-and-aging) |
+| Create, delete, and modify local groups and group memberships | [R2 — Groups](../rhcsa/r02-users-and-groups/index.md#groups) |
+| Configure privileged access | [R2 — Privileged access with sudo](../rhcsa/r02-users-and-groups/index.md#privileged-access-with-sudo) |
 
 ## 10. Manage security
 
@@ -131,7 +131,7 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 | Objective | Where |
 |---|---|
 | Configure firewall settings using `firewall-cmd` / `firewalld` | R10, with R9 |
-| Manage default file permissions | R10 / R2, with [R1 — Permissions](../rhcsa/r01-essential-tools/index.md#permissions) |
+| Manage default file permissions | R10, with [R2 — umask](../rhcsa/r02-users-and-groups/index.md#default-permissions-umask) and [R1 — Permissions](../rhcsa/r01-essential-tools/index.md#permissions) |
 | Configure key-based authentication for SSH | R10, previewed in [R1 — SSH](../rhcsa/r01-essential-tools/index.md#ssh-and-secure-file-transfer) |
 | Set enforcing and permissive modes for SELinux | R10 |
 | List and identify SELinux file and process context | R10 |

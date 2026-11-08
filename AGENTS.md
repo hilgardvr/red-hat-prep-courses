@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-08 |
-| **Current milestone** | M1 complete — Foundations F1–F8 |
-| **Next milestone** | M2 — R2, R3, R4 |
+| **Current milestone** | M2 in progress — R2 complete |
+| **Next milestone** | M2 — R3, R4 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -41,7 +41,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | Lab kit | **Complete; re-validation pending** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers passed on 2026-11-07. The 2026-11-08 box pin is syntax-checked only. |
 | Foundations F1–F8 | **Complete** | Eight modules under `docs/foundations/`; style reference for future modules |
 | R1 — Essential tools | **Complete** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker |
-| R2–R11 | **Planned** | See the curriculum map below |
+| R2 — Users and groups | **Complete; lab run pending** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 checks). Written against a real lab design but not yet walked end to end. |
+| R3–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -61,8 +62,13 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
 │   ├── foundations/           # index + F1–F8, complete
-│   ├── rhcsa/                 # module roadmap and R1
-│   │   └── r01-essential-tools/
+│   ├── rhcsa/                 # module roadmap, R1, R2
+│   │   ├── r01-essential-tools/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r02-users-and-groups/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -74,6 +80,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── bin/lab                # lifecycle CLI
 │   ├── provision/             # common.sh, node2.sh
 │   ├── checks/r01/check.sh    # R1 automated checker
+│   ├── checks/r02/check.sh    # R2 automated checker
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -239,7 +246,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | Module | Focus | Objective group | Status |
 |---|---|---|---|
 | R1 | Essential tools | 1 | **Complete** |
-| R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | Planned |
+| R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | **Complete** |
 | R3 | Software: DNF, RPM repos, Flatpak | 2 | Planned |
 | R4 | Shell scripting | 3 | Planned |
 | R5 | Processes, systemd services, journald, tuned | 4 | Planned |
@@ -291,8 +298,12 @@ When adding or revising a foundation, repeat the same five steps:
 
 ### M2 — R2, R3, R4
 
-- **R2:** users, groups, password aging, sudoers, default permissions. Checker must verify users/groups/password aging/sudo.
-- **R3:** DNF repositories, RPM install/remove, Flatpak remotes and packages. Teach repository configuration with a local directory of RPMs used as a `baseurl` (not an installation DVD — `LAB_ISO` was removed). For the exam's no-internet condition, disconnect the VM's network in a lab step instead of attaching media.
+- **R2 — done.** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
+  - The module creates its own sudo drop-in (`/etc/sudoers.d/10-r2-operators`) and never touches `90-rhcsa-labuser`, so a learner editing sudoers cannot lock out the lab account by accident.
+  - The umask is set per user in `~/.bash_profile`, not system-wide in `/etc/profile.d`. A system-wide `027` would make files root creates in later modules `640`, which can break services that need to read them as another user.
+  - Password hashes are never asserted. The checker proves usability (`passwd -S` → `PS`/`LK`) rather than the password itself.
+  - A negative check (`labuser still has sudo through wheel`) catches a learner who removed `-a` from `usermod -aG`.
+- **R3:** DNF repositories, RPM install/remove, Flatpak remotes and packages. Teach repository configuration with a local directory of RPMs used as a `baseurl` (not an installation DVD — `LAB_ISO` was removed). For the exam's no-internet condition, disconnect the VM's network in a lab step instead of attaching media. `flatpak` must be installed inside the lab, not added to `PACKAGES`.
 - **R4:** conditionals, loops, arguments, command substitution. Checker runs the learner's script against test inputs.
 
 ### M3 — R5–R11
@@ -320,6 +331,7 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 
 ## 10. Known gaps and risks
 
+- **R2 has not been run on a live lab.** The checker was exercised with faked `chage`/`passwd` output and against a synthetic tree (`LAB_ROOT`), but the labs themselves have not been walked on `server`. Two things to watch when validating: whether `su -`/`bash -lc` picks up `umask 027` from `~/.bash_profile` on AlmaLinux 10, and whether the `chage -l` date strings still render as `Dec 31, 2027` / `Jun 30, 2028` under `LC_ALL=C`.
 - **Foundations F3–F8 labs are written but not yet walked on a live lab.** F1–F2 were validated together with R1 on 2026-11-07. The newer modules use only commands and packages the provisioning installs (`man-db`, `man-pages`, `vim-enhanced`, `bash-completion`, `tar`, `openssh-clients`), plus iproute, util-linux, policycoreutils, and their dependencies, but a full read-through on `server` and `node2` is still owed before calling them validated.
 - **The lab kit has been validated on one KVM host only.** The 2026-11-07 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10`. Re-validate on other host distributions and Vagrant/plugin versions. The Vagrantfile forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
 - **First boot requires internet.** Provisioning installs base packages from AlmaLinux's online repositories, and there is no offline path since `LAB_ISO` was removed on 2026-11-08. A learner behind a restrictive proxy fails at `dnf install`.
@@ -352,6 +364,9 @@ cd labs
 ./bin/lab check r01 lab1
 ./bin/lab check r01 lab2
 ./bin/lab check r01 challenge
+./bin/lab check r02 lab1
+./bin/lab check r02 lab2
+./bin/lab check r02 challenge
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

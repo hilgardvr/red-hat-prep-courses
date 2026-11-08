@@ -76,12 +76,12 @@ Checkers live in `checks/<module>/check.sh` and run inside `server` as root. The
 
 ```bash
 ./bin/lab check r01 lab1
-./bin/lab check r01 lab2
-./bin/lab check r01 challenge
-./bin/lab check r01 all
+./bin/lab check r02 lab1
+./bin/lab check r02 challenge
+./bin/lab check r02 all
 ```
 
-`all` assumes the end states of every R1 lab are present at the same time. If you restored the clean snapshot between labs, check them individually.
+`all` assumes the end states of every lab in that module are present at the same time. If you restored the clean snapshot between labs, check them individually.
 
 Checkers inspect the end state, not the commands used. They include a reboot-persistence task where the module requires it.
 

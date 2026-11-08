@@ -63,7 +63,8 @@
 |---|---|---|
 | **Foundations** | Linux and RHEL architecture, shell, filesystem, processes, systemd, networking, storage basics | <span class="badge badge-ready">F1–F8 available</span> |
 | **R1 — Essential tools** | Shell syntax, help system, files, links, permissions, streams, grep, archives, SSH | <span class="badge badge-ready">Available</span> |
-| **R2–R11** | Users, software, scripting, services, storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
+| **R2 — Users and groups** | Accounts, groups, password aging, `sudo`, default permissions | <span class="badge badge-ready">Available</span> |
+| **R3–R11** | Software, scripting, services, storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
 | **R12 — Capstone** | Timed mock exams and a full review | <span class="badge badge-planned">Planned</span> |
 
 [See the full module roadmap](rhcsa/index.md){ .md-button }

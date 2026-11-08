@@ -7,7 +7,7 @@ The course is organized around the ten objective groups Red Hat publishes for EX
 | Module | Focus | Exam objective group | Status |
 |---|---|---|---|
 | **R1** | Essential tools: shell, help, files, links, permissions, streams, grep, archives, SSH | 1 — Understand and use essential tools | <span class="badge badge-ready">Available</span> |
-| **R2** | Users, groups, password aging, sudo, default permissions | 9 — Users and groups; part of 10 | <span class="badge badge-planned">Planned</span> |
+| **R2** | Users, groups, password aging, sudo, default permissions | 9 — Users and groups; part of 10 | <span class="badge badge-ready">Available</span> |
 | **R3** | Software: DNF, RPM repositories, Flatpak | 2 — Manage software | <span class="badge badge-planned">Planned</span> |
 | **R4** | Shell scripting: conditionals, loops, arguments, substitution | 3 — Create simple shell scripts | <span class="badge badge-planned">Planned</span> |
 | **R5** | Processes, systemd services, journald, tuned | 4 — Operate running systems | <span class="badge badge-planned">Planned</span> |
@@ -48,9 +48,9 @@ The order is pedagogical, not mandatory. Storage depends on users and permission
 - **An automated checker** that verifies the end state.
 - **A knowledge check** and a **cheat sheet**.
 
-## Start with R1
+## Start with R1, then R2
 
-[R1 — Essential tools](r01-essential-tools/index.md) is complete and is the best place to begin. It covers the largest objective group and establishes the lab workflow that every later module uses.
+[R1 — Essential tools](r01-essential-tools/index.md) is the best place to begin. It covers the largest objective group and establishes the lab workflow that every later module uses. Once it passes its checker, continue with [R2 — Users and groups](r02-users-and-groups/index.md), which turns the permission model from R1 into real accounts, policy, and privileged access.
 
 Before R1, make sure the lab is running:
 
