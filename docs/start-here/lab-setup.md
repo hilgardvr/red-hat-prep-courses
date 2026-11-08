@@ -25,6 +25,29 @@ labs/
 
 The two VMs request 4 GB and 2 GB of RAM, plus disk for the boxes, snapshots, and the extra storage disk. Overcommitting RAM makes the labs slow and can cause the kernel to kill processes during storage exercises.
 
+!!! warning "Windows and macOS are not supported hosts"
+    The lab needs KVM, which is a Linux kernel feature. On Windows, WSL2 is the only route, and it works only if KVM is available *inside* WSL. That requires Windows 11 and nested virtualization:
+
+    ```ini
+    # %UserProfile%\.wslconfig  (on the Windows side, not /etc/wsl.conf)
+    [wsl2]
+    nestedVirtualization=true
+    memory=16GB
+    processors=8
+    ```
+
+    Then run `wsl --shutdown` and reopen your distro. Also enable systemd inside the distro:
+
+    ```ini
+    # /etc/wsl.conf
+    [boot]
+    systemd=true
+    ```
+
+    The gate is `ls -l /dev/kvm` inside WSL. If that file is missing, stop: qemu would fall back to software emulation and the lab would take hours. Install Linux natively, or use a spare Linux machine, instead.
+
+    WSL2 also gives the distro only half the host RAM by default; the two VMs need 6 GB between them, so set `memory=` as shown.
+
 ## 1. Install the virtualization stack
 
 ### Fedora or RHEL-family host

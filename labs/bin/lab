@@ -24,6 +24,10 @@ info() { printf '==> %s\n' "$*"; }
 warn() { printf 'WARN  %s\n' "$*" >&2; }
 die()  { printf 'ERROR %s\n' "$*" >&2; exit 1; }
 
+is_wsl() {
+  [ -n "${WSL_DISTRO_NAME:-}" ] || grep -qi microsoft /proc/version 2>/dev/null
+}
+
 usage() {
   cat <<'EOF'
 RHCSA lab control
@@ -98,6 +102,10 @@ cmd_doctor() {
   fi
 
   hr "Virtualization"
+  if is_wsl; then
+    printf '  info  WSL2 detected (nested virtualization and 16 GB+ are required)\n'
+  fi
+
   if [ -e /dev/kvm ]; then
     if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
       printf '  ok    /dev/kvm is accessible\n'
@@ -105,6 +113,18 @@ cmd_doctor() {
       printf '  MISS  /dev/kvm is not accessible (add your user to the kvm group)\n'
       failures=$((failures + 1))
     fi
+  elif is_wsl; then
+    printf '  MISS  /dev/kvm not found inside WSL2\n'
+    printf '        Enable nested virtualization on the Windows side:\n'
+    printf '\n'
+    printf '          %%UserProfile%%\\.wslconfig\n'
+    printf '          [wsl2]\n'
+    printf '          nestedVirtualization=true\n'
+    printf '          memory=16GB\n'
+    printf '\n'
+    printf '        Then run: wsl --shutdown   (and reopen your distro)\n'
+    printf '        If /dev/kvm still does not appear, this host cannot run the lab.\n'
+    failures=$((failures + 1))
   else
     printf '  MISS  /dev/kvm not found (enable virtualization in firmware)\n'
     failures=$((failures + 1))
