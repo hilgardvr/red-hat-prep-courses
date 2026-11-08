@@ -154,4 +154,4 @@ The course is considered complete for a module when every objective bullet in th
 3. an automated check that verifies the result, and
 4. a persistence test where the objective changes system state.
 
-R1 meets this rule. The remaining modules are being written to the same standard.
+R1 and R2 meet this rule. The remaining modules are being written to the same standard.

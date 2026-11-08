@@ -8,7 +8,7 @@ This course is built for people who want to **do the job**, not just pass a quiz
 - You can use a text editor and a terminal, but you do not need previous RHEL experience.
 - You want to earn RHCSA and understand what you are doing, not memorize a command list.
 
-If you already administer Linux daily, you can skip the foundations entirely and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). If you are new to Linux, work through [Foundations](../foundations/index.md) first. The [objective coverage matrix](../reference/objective-coverage.md) shows exactly where each exam bullet is taught.
+If you already administer Linux daily, you can skip the foundations entirely and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md), then continue to [R2 — Users and groups](../rhcsa/r02-users-and-groups/index.md). If you are new to Linux, work through [Foundations](../foundations/index.md) first. The [objective coverage matrix](../reference/objective-coverage.md) shows exactly where each exam bullet is taught.
 
 ## The module pattern
 
@@ -113,4 +113,4 @@ Copying a command from this page is fine while learning. On the exam you will no
 - Read the [exam overview](exam-overview.md) so you know what you are preparing for.
 - Pick a [study plan](study-plans.md).
 - Set up the [lab](lab-setup.md).
-- Start with the [Foundations overview](../foundations/index.md), or jump to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md) if you already know your way around a shell.
+- Start with the [Foundations overview](../foundations/index.md), or jump to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md) if you already know your way around a shell. [R2 — Users and groups](../rhcsa/r02-users-and-groups/index.md) follows R1.

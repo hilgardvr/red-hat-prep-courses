@@ -75,8 +75,8 @@ The Vagrantfile attaches both VMs to the libvirt network `rhcsa-lab` with DHCP d
 Checkers live in `checks/<module>/check.sh` and run inside `server` as root. The `lab check` wrapper uploads the script and executes it:
 
 ```bash
-./bin/lab check r01 lab1
 ./bin/lab check r02 lab1
+./bin/lab check r02 lab2
 ./bin/lab check r02 challenge
 ./bin/lab check r02 all
 ```
