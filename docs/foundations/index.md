@@ -4,6 +4,9 @@ The exam objectives assume a working mental model of Linux. You do not need to b
 
 This pre-course builds that model. It is **optional for experienced Linux users** and **strongly recommended for beginners**. None of it is decorative: every foundation topic reappears in the exam modules.
 
+!!! note "You can skip this section"
+    If you already administer Linux daily, skip the foundations and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). If you are not sure, answer the self-assessment below without looking anything up. No hesitation means you do not need this pre-course.
+
 ## What you will learn
 
 | Module | Topic | You will be able to |
@@ -68,7 +71,7 @@ Work through them in order. F1 explains the platform, F2 gets the lab running an
 - [F7 — Processes, systemd, and logs](f7-processes-systemd/index.md)
 - [F8 — Networking, storage, and SELinux foundations](f8-networking-storage-selinux/index.md)
 
-When you finish F8, continue to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). If you already know your way around a shell, you can start R1 now and come back to a foundation module when a task surprises you.
+When you finish F8, continue to [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md).
 
 - [Lab setup](../start-here/lab-setup.md) — install the virtualization stack from scratch
 - [Objective coverage](../reference/objective-coverage.md) — see where every exam objective is covered

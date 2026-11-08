@@ -8,7 +8,7 @@ This course is built for people who want to **do the job**, not just pass a quiz
 - You can use a text editor and a terminal, but you do not need previous RHEL experience.
 - You want to earn RHCSA and understand what you are doing, not memorize a command list.
 
-If you already administer Linux daily, you can skim the foundations and go straight to the modules. The [objective coverage matrix](../reference/objective-coverage.md) shows exactly where each exam bullet is taught.
+If you already administer Linux daily, you can skip the foundations entirely and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). If you are new to Linux, work through [Foundations](../foundations/index.md) first. The [objective coverage matrix](../reference/objective-coverage.md) shows exactly where each exam bullet is taught.
 
 ## The module pattern
 

@@ -199,6 +199,7 @@ Every RHCSA module follows the same anatomy:
 - Do not commit generated keys (`labs/keys/`) or build output (`site/`).
 - Do not disable SELinux or firewalld in a lab unless the lesson is specifically about doing so.
 - Do not claim a lab was validated without running it.
+- The foundations are optional as a whole. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
 
 **Check-script conventions (R1 is the reference implementation):**
 

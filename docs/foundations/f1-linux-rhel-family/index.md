@@ -342,5 +342,3 @@ Which distribution does the exam use: AlmaLinux or RHEL?
 ## Next
 
 Continue to [F2 — The lab: virtualization and first login](../f2-lab-first-login/index.md), where you start the two virtual machines and learn the snapshot workflow used by every later module.
-
-If you already have a running lab, you can go straight to [R1 — Essential tools](../../rhcsa/r01-essential-tools/index.md).

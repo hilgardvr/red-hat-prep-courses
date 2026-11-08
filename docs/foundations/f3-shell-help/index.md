@@ -521,5 +521,3 @@ You are in `/etc` and type `ls *.conf`. What does the shell pass to `ls` if five
 ## Next
 
 Continue to [F4 — Filesystem hierarchy and file operations](../f4-filesystem-operations/index.md), where you learn where everything lives on a RHEL system and how to create, copy, move, find, and delete files safely.
-
-If you already know the shell well, you can jump ahead to [R1 — Essential tools](../../rhcsa/r01-essential-tools/index.md).
