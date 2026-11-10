@@ -72,6 +72,111 @@ ls --human-readable --directory /etc
 
 Programs are not consistent. `ls` accepts options after arguments; `tar` traditionally wants the archive name right after `-f`; some tools use `-n` for "dry run" and others for "numeric". That inconsistency is exactly why you need the help system rather than a memory of flags.
 
+Three small examples of the same inconsistency.
+
+**Options after arguments.** GNU `ls` does not care where the options go:
+
+```bash
+ls -l /etc/hostname
+ls /etc/hostname -l
+```
+
+```text
+-rw-r--r--. 1 root root 7 Nov 10 05:43 /etc/hostname
+```
+
+The option moved; the output did not change.
+
+`find` does care. Its paths must come **before** the expression:
+
+```bash
+find /etc -maxdepth 1 -name hostname
+```
+
+```text
+/etc/hostname
+```
+
+Swap them and the words stop meaning what you intended:
+
+```bash
+find -maxdepth 1 /etc -name hostname
+```
+
+```text
+find: paths must precede expression: `/etc'
+find: possible unquoted pattern after predicate `-maxdepth'?
+```
+
+**A value belongs to one option.** `-f` takes the archive name, and the name is the next word after the whole cluster `-czf`:
+
+```bash
+tar -czf demo.tar.gz /etc/hostname
+tar -tzf demo.tar.gz
+```
+
+```text
+tar: Removing leading `/' from member names
+etc/hostname
+```
+
+The first line is a warning on stderr, not part of the archive; `etc/hostname` is the member it contains.
+
+Leave the value out and `tar` stops instead of guessing:
+
+```text
+tar: option requires an argument -- 'f'
+Try 'tar --help' or 'tar --usage' for more information.
+```
+
+**The same letter, three meanings.** `-n` is not shorthand for anything standard. In `grep` it numbers the lines:
+
+```bash
+grep -n root /etc/passwd
+```
+
+```text
+1:root:x:0:0:Super User:/root:/bin/bash
+10:operator:x:11:0:operator:/root:/usr/sbin/nologin
+```
+
+In `sort` it changes the comparison from text to arithmetic, which reorders the same input:
+
+```bash
+printf '10\n2\n1\n' | sort -n
+```
+
+```text
+1
+2
+10
+```
+
+```bash
+printf '10\n2\n1\n' | sort
+```
+
+```text
+1
+10
+2
+```
+
+In `cp` it means "do not overwrite", and it does that silently:
+
+```bash
+echo one > a
+echo two > b
+cp -n a b
+cat b
+```
+
+```text
+two
+```
+
+One letter, three unrelated instructions. The only reliable way to know what a flag does in a program you have not used is to read its help.
+
 Two syntax rules are universal enough to rely on:
 
 - **`--` ends option parsing.** Everything after it is an argument, even if it starts with a dash:
