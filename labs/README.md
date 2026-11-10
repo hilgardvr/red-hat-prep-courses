@@ -87,6 +87,10 @@ Checkers live in `checks/<module>/check.sh` and run inside `server` as root. The
 ./bin/lab check r04 lab2
 ./bin/lab check r04 challenge
 ./bin/lab check r04 all
+./bin/lab check r05 lab1
+./bin/lab check r05 lab2
+./bin/lab check r05 challenge
+./bin/lab check r05 all
 ```
 
 `all` assumes the end states of every lab in that module are present at the same time. If you restored the clean snapshot between labs, check them individually.

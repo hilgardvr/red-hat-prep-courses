@@ -49,19 +49,19 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 4. Operate running systems
 
-**Modules R5 and R11** — <span class="badge badge-planned">Planned</span>; **secure file transfer** is covered in R1
+**Module R5** — <span class="badge badge-ready">Covered</span>; **boot and recovery are R11**; **secure file transfer** is covered in R1
 
 | Objective | Where |
 |---|---|
-| Boot, reboot, and shut down a system normally | R5 / R11 |
+| Boot, reboot, and shut down a system normally | [R5 — What survives a reboot](../rhcsa/r05-processes-and-services/index.md#what-survives-a-reboot) (R11 covers the boot process itself) |
 | Boot systems into different targets manually | R11 |
 | Interrupt the boot process in order to gain access to a system | R11 |
-| Identify CPU/memory intensive processes and kill processes | R5 |
-| Adjust process scheduling | R5 |
-| Manage tuning profiles | R5 |
-| Locate and interpret system log files and journals | R5 |
-| Preserve system journals | R5 |
-| Start, stop, and check the status of network services | R5 |
+| Identify CPU/memory intensive processes and kill processes | [R5 — Processes](../rhcsa/r05-processes-and-services/index.md#processes) and [Signals](../rhcsa/r05-processes-and-services/index.md#signals) |
+| Adjust process scheduling | [R5 — Scheduling priority: nice](../rhcsa/r05-processes-and-services/index.md#scheduling-priority-nice) |
+| Manage tuning profiles | [R5 — tuned](../rhcsa/r05-processes-and-services/index.md#tuned) |
+| Locate and interpret system log files and journals | [R5 — The journal](../rhcsa/r05-processes-and-services/index.md#the-journal) |
+| Preserve system journals | [R5 — Two possible homes](../rhcsa/r05-processes-and-services/index.md#two-possible-homes) |
+| Start, stop, and check the status of network services | [R5 — systemd: units, services, and state](../rhcsa/r05-processes-and-services/index.md#systemd-units-services-and-state) |
 | Securely transfer files between systems | [R1 — SSH and secure file transfer](../rhcsa/r01-essential-tools/index.md#ssh-and-secure-file-transfer) <span class="badge badge-ready">Covered</span> |
 
 ## 5. Configure local storage

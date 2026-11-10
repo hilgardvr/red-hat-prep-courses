@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1–R4 validated; R5 next |
-| **Next milestone** | R5 |
+| **Current milestone** | M2 — R1–R5 validated; R6 next |
+| **Next milestone** | R6 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -44,7 +44,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R2 — Users and groups | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 = 88). Walked end to end on a fresh lab, 88/88 after a reboot. |
 | R3 — Software and repositories | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 6 + 17 = 33). Walked end to end on a fresh lab, 33/33 after a reboot. |
 | R4 — Shell scripting | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (14 + 13 + 13 = 40). Checker runs the learner's scripts against its own fixtures; walked end to end on a fresh lab, 40/40 after a reboot. |
-| R5–R11 | **Planned** | See the curriculum map below |
+| R5 — Processes and services | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 7 + 10 = 27). Checker reads live systemd/journald/tuned state; walked end to end on a fresh lab, 27/27 after a reboot. |
+| R6–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -64,7 +65,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
 │   ├── foundations/           # index + F1–F8, complete
-│   ├── rhcsa/                 # module roadmap, R1–R4
+│   ├── rhcsa/                 # module roadmap, R1–R5
 │   │   ├── r01-essential-tools/
 │   │   │   ├── index.md       # theory
 │   │   │   ├── labs/          # 2 guided labs + challenge
@@ -80,7 +81,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r04-shell-scripting/
+│   │   ├── r04-shell-scripting/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r05-processes-and-services/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -95,6 +101,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r02/check.sh    # R2 automated checker
 │   ├── checks/r03/check.sh    # R3 automated checker
 │   ├── checks/r04/check.sh    # R4 automated checker
+│   ├── checks/r05/check.sh    # R5 automated checker
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -148,7 +155,9 @@ Owner-specific and node2 SSH checks will fail outside the real lab; that is expe
 
 R4 is the easiest to exercise this way: every R4 check reads a script under `$LAB_ROOT/r4/bin` and runs it. Create `r4/bin/{classify,linereport,accounts}` in a temporary tree, point `LAB_ROOT` at it, and the whole 40-check run works with no VM. The reference implementations used to validate the checker live in `/tmp`, not in the repository.
 
-`LAB_ROOT` only redirects the **directory** checks under `/srv`. R2's account predicates read the live `passwd`/`shadow` databases, and R3's repository predicates read the live `dnf` configuration, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
+`LAB_ROOT` only redirects the **directory** checks under `/srv`. R2's account predicates read the live `passwd`/`shadow` databases, R3's repository predicates read the live `dnf` configuration, and every R5 check reads live systemd, journald, or `tuned` state, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
+
+R5 has no off-VM path at all: `systemctl show`, `is-enabled`, `MainPID`, `journalctl`, and `tuned-adm` are the subject of the module, and faking all of them would test the fakes. Its checker was validated only on `server`, from the `clean` snapshot, by walking the two labs and the challenge and then rebooting. It also has a side effect: the last challenge check kills `r5-batch`'s main process to prove `Restart=always` works, so `systemctl status r5-batch` shows an extra `Scheduled restart job` line afterwards. That is normal.
 
 ### Real lab validation
 
@@ -179,6 +188,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R2 lab 1 (27), lab 2 (26), and the challenge (35) passed; `./bin/lab check r02 all` passed 88/88 after rebooting `server`.
 - R3 lab 1 (10), lab 2 (6), and the challenge (17) passed; `./bin/lab check r03 all` passed 33/33 after rebooting `server`. The labs were walked in order on one machine, which is the sequence `all` assumes: Lab 1 leaves `r3-local` and `zsh`, Lab 2 leaves the Flathub remote with an empty store, and the challenge adds `r3-extra`, `tree`, and disabled distro repositories without undoing either.
 - R4 lab 1 (14), lab 2 (13), and the challenge (13) passed; `./bin/lab check r04 all` passed 40/40 after rebooting `server`. The three scripts were written and exercised in order on one machine from the clean snapshot. Unlike R1–R3, the R4 checks do not inspect the lab's own files: they create fresh fixtures in `mktemp -d`, run each script against them, and compare stdout plus exit status, so the lab's sample outputs are never the thing being tested.
+- R5 lab 1 (10), lab 2 (7), and the challenge (10) passed; `./bin/lab check r05 all` passed 27/27 after rebooting `server`. The walk started from `clean`, ran Lab 1, Lab 2, and the challenge on one machine, rebooted, and only then ran the checker, because two Lab 2 checks require a journal entry from an earlier boot. Lab 1 deliberately produces a `203/EXEC` failure first: a program under `/srv` is labelled `var_t`, and systemd (`init_t`) may not execute it. The walk confirmed that `SIGTERM` leaves the unit `inactive (dead)` with `Deactivated successfully`, while `SIGKILL` leaves it `failed` with `Result: signal`; the docs and quiz say exactly that.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -249,17 +259,18 @@ Every RHCSA module follows the same anatomy:
 - The foundations are optional except F2. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`: an experienced admin may skip F1 and F3–F8, but F2 teaches the lab and snapshot workflow, which is course logistics rather than Linux knowledge. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
 - `PACKAGES` in `labs/provision/common.sh` is base state only: things F1 and F2 assert, or that every module needs before it starts. A module that needs a package installs it in its own lab. Do not grow `PACKAGES` for module features — it would force every existing learner to rebuild mid-course.
 
-**Check-script conventions.** There are three reference implementations and they cover different kinds of state:
+**Check-script conventions.** There are four reference implementations and they cover different kinds of state:
 
 - **R1 (`labs/checks/r01/check.sh`) — filesystem state.** Use it as the model for anything under `LAB_ROOT`: files, links, modes, ownership, archives, checksums.
 - **R2 (`labs/checks/r02/check.sh`) — account state.** Use it as the model for users, groups, passwords, aging, `sudo`, and anything else that lives in a system database rather than a file under `/srv`.
 - **R4 (`labs/checks/r04/check.sh`) — program behaviour.** Use it when the deliverable is a script. It builds fixtures with `mktemp -d`, runs the learner's script against them, and compares stdout and exit status. Nothing in it greps the script's source for particular commands.
+- **R5 (`labs/checks/r05/check.sh`) — live service state.** Use it for systemd units, the journal, and `tuned`. It asks `systemctl`, `journalctl`, and `tuned-adm` what they think, and reads the process's real nice value with `ps`; one check is behavioural (kill the main PID, wait for a new one).
 
-All three follow these rules:
+All four follow these rules:
 
 - Run as root inside `server`.
 - Accept `lab1|lab2|challenge|all`.
-- Use `LAB_ROOT` (default `/srv`) so the tree checks can be tested without a VM.
+- Use `LAB_ROOT` (default `/srv`) where the module has a file tree, so the tree checks can be tested without a VM. R5 has no tree; its state is live.
 - Print `PASS`/`FAIL` per criterion and exit non-zero if any fail.
 - Inspect end state, not the commands used.
 - Include node2 checks where the lab involves the second machine.
@@ -282,6 +293,16 @@ Behaviour checks (R4) add these rules:
 - Assert exit codes with `rc_is`, output with exact-string or line-set comparisons. Keep one negative check where it teaches something (R4 asserts the subdirectory was not counted, which catches `find` without `-maxdepth`).
 - Gate every negative check on a non-empty result. "The subdirectory is absent" is true when the script printed nothing at all, so the R4 predicates require `[ -n "$OUT" ]` first; without that guard a clean snapshot passes four checks that should fail.
 - A missing or non-executable script makes every behavioural check fail with `exit 127`. That is honest and still readable, because each line names the script.
+
+Service-state checks (R5) add these rules:
+
+- Read the **effective** unit, not the file: `systemctl show -p Nice --value`, `-p DropInPaths`, `-p ExecStart`, `-p Restart`, `-p LoadState`. A learner may have used a drop-in instead of editing the unit, and both are correct.
+- Read the **process** as well as the unit: `ps -o ni= -p "$(systemctl show -p MainPID --value unit)"`. `systemctl show -p Nice` reports the configuration and will happily say 10 while the running process still has 0.
+- Assert `is-enabled`/`is-active` through `val_is`, so the failure prints the actual word (`disabled`, `inactive`, `masked`). Those two verbs already print one word and set the exit status; no parsing needed.
+- Prove persistence with time, not with a flag. The journal check compares `_BOOT_ID` with `/proc/sys/kernel/random/boot_id` and requires at least one entry from an **earlier** boot. That is why `lab2` fails until the learner reboots, and the failure message says so.
+- Read merged configuration with `systemd-analyze cat-config`, never `/etc/systemd/journald.conf`. A drop-in is the supported way to set `SystemMaxUse`, and the main file will not show it.
+- Prefer one behavioural check over another state check when the promise is a behaviour: `Restart=always` is proven by killing the main PID and waiting for a different one. Guard it with a real PID and a bounded wait (20 × 0.5 s), and fail with the old PID, the new state, and the new PID.
+- Do not assert that `systemctl --failed` is empty. This lab's `NetworkManager-wait-online.service` fails at boot on a correct machine, and a module-level failure is not the learner's fault.
 
 ---
 
@@ -310,7 +331,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | **Validated 2026-11-10** |
 | R3 | Software: DNF, RPM repos, Flatpak | 2 | **Validated 2026-11-10** |
 | R4 | Shell scripting | 3 | **Validated 2026-11-10** |
-| R5 | Processes, systemd services, journald, tuned | 4 | Planned |
+| R5 | Processes, systemd services, journald, tuned | 4 | **Validated 2026-11-10** |
 | R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | Planned |
 | R7 | ext4/XFS/VFAT, NFS, autofs, extend LVs | 6 | Planned |
 | R8 | cron, at, systemd timers, chrony | 7 | Planned |
@@ -356,6 +377,10 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R4 fixtures are built in `mktemp -d` | They must not be the lab's own files. Independent paths and line counts (3, 5, 2, and an empty file) prove the script computes rather than remembers, and the whole checker then runs off-VM with `LAB_ROOT`. |
 | R4's challenge reads a passwd **file argument**, not `/etc/passwd` | The result would otherwise depend on which accounts the machine has, and a missing home on the real system would make a correct script "fail". A captured file makes the task reproducible and teaches why scripts take input as arguments. |
 | R4 scripts live in `/srv/r4/bin` | Keeps every module's artefacts under `/srv`, so `restore clean` removes R4 completely and no module leaves files in `PATH` for the next one. `/usr/local/bin` is taught as the persistent alternative, not used. |
+| R5 programs live in `/usr/local/bin`, not `/srv` (2026-11-10) | systemd runs as `init_t`, which may execute `bin_t` (`/usr/local/bin`) but not `var_t` (`/srv`). A unit pointing at `/srv/r5/bin/worker` fails with `status=203/EXEC` and "Permission denied" even though the file is executable and the root shell can run it. Lab 1 walks into that failure on purpose, then installs the program with `install -m 0755` and explains `ls -Z`, because the same message in the exam looks like a missing file. R4's `/srv` rule does not apply: those scripts are run by a shell (`unconfined_t`), not by systemd. |
+| Journal persistence needs `journalctl --flush`, not just a restart (2026-11-10) | `mkdir -p /var/log/journal` plus `systemctl restart systemd-journald` leaves the machine-ID directory empty until journald next rotates; `--flush` moves the buffered entries to disk immediately, so `find /var/log/journal -name '*.journal'` and the persistence check work in the same session. Without it the lab appears to succeed and the checker fails for a reason the learner cannot see. |
+| R5's checker reads live state and cannot run off-VM | The module is about systemd, journald, and tuned; faking them would only test the fakes. It is validated on `server` only, like R2's account predicates. Two Lab 2 checks require a reboot by design, and the last challenge check kills `r5-batch`'s main process to prove `Restart=always`. |
+| `SIGTERM` and `SIGKILL` are taught as different end states (2026-11-10) | The first walk showed that `SIGTERM` on a unit's MainPID leaves it `inactive (dead)` with `Deactivated successfully`, while `SIGKILL` leaves it `failed` with `Result: signal`. An earlier draft said `failed` for both, which would have taught the wrong diagnostic: inactive after a kill means a clean exit, while failed means it did not shut down. Lab 1 does both, in that order, and the quiz asks which is which. |
 | Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
 
 ---
@@ -374,7 +399,7 @@ When adding or revising a foundation, repeat the same five steps:
 4. Link it from `docs/foundations/index.md`, and update the previous module's `## Next` link.
 5. Run `mkdocs build --strict`.
 
-### M2 — R2, R3, R4
+### M2 — R2, R3, R4, R5
 
 - **R2 — done and validated 2026-11-10 (88/88 from a clean snapshot).** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
   - The module creates its own sudo drop-in (`/etc/sudoers.d/10-r2-operators`) and never touches `90-rhcsa-labuser`, so a learner editing sudoers cannot lock out the lab account by accident.
@@ -396,8 +421,17 @@ When adding or revising a foundation, repeat the same five steps:
   - Lab 2 (`linereport`) uses `wc -l < "$f"` so the captured value is a number and nothing else, and confirms that an empty file counts as `0` while a subdirectory and a broken link are skipped.
   - The challenge (`accounts`) reads a passwd-format **file given as an argument** rather than `/etc/passwd`, so the result does not depend on the machine's accounts. It forces `IFS=: read` plus `done < file`; a learner who pipes into `while` loses the counters and the summary line fails.
   - Every expected-output block in the labs was captured on the VM, including `ls -l` sizes and the `[: too many arguments` message. The sample outputs in the challenge use `/srv/r4/homes/*`, so the counts are reproducible.
+- **R5 — done and validated 2026-11-10 (27/27 from a clean snapshot).** Processes, systemd units, drop-ins, `enable`/`mask`, journald persistence and size caps, `tuned`. Design decisions worth keeping:
+  - The module teaches the SELinux consequence first. Lab 1 points `ExecStart` at `/srv/r5/bin/worker`, gets `status=203/EXEC` with "Permission denied", then shows `ls -Z` (`var_t` versus `bin_t`) and installs the program into `/usr/local/bin`. This is the most useful five minutes in the module, because the error looks like a missing file.
+  - `mask` is taught as a sequence, not a verb. Lab 1 starts a unit, stops it, deletes the file, runs `daemon-reload`, and only then masks. `systemctl mask` refuses while a real unit file exists, and a learner who meets that error mid-exam loses time.
+  - Nice is checked twice. `systemctl show -p Nice` reads configuration; `ps -o ni=` reads the process. The lab makes the two disagree by adding the drop-in without restarting, which is the mistake the check exists to catch.
+  - Lab 2 makes the journal persistent with `mkdir -p /var/log/journal`, a journald restart, **and** `journalctl --flush`. The restart alone leaves the machine-ID directory empty, so the checker's `find` fails for a reason that is invisible in the UI.
+  - Two Lab 2 checks deliberately fail before the reboot: they look for a `r5-journal` entry whose `_BOOT_ID` differs from the current boot. That encodes the persistence test instead of trusting a flag.
+  - The size cap is a drop-in, read back with `systemd-analyze cat-config`. The lab also shows `journalctl --rotate` before `--vacuum-size`, because vacuuming an active file frees nothing.
+  - The challenge adds `r5-batch` (`Nice=5`, `Restart=always`) without undoing Labs 1 and 2, so `check r05 all` is a valid three-state stack. Its checker kills the main PID and waits for a different one, which is the only honest test of `Restart=always`.
+  - Expected-output blocks are VM captures. PIDs and timestamps differ on every walk; the docs say so once, in Lab 1.
 
-### M3 — R5–R11
+### M3 — R6–R11
 
 Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R6 (LVM), R7 (NFS/autofs), R10 (SELinux), R11 (boot recovery).
 
@@ -433,6 +467,9 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **`lab check` depends on `vagrant upload`.** Vagrant 2.0+ provides it. If an older Vagrant is used, replace the upload step with `cat | vagrant ssh`.
 - **The R1 `all` checker is not the normal workflow.** Restoring the clean snapshot between labs removes Lab 1's end state. Check labs individually unless the learner did them continuously.
 - **R1 node2 checks require both VMs running.** If `node2` is halted, the last two challenge checks fail even if the files on `server` are correct.
+- **R5 output blocks are version-sensitive.** The `systemctl status` wording (`Deactivated successfully`, `Result: signal`), the journal priority names, and `listen` addresses come from systemd 257 on AlmaLinux 10.2. The checker does not parse that prose — it asks for fields and exit statuses — but a learner on another systemd release may see slightly different status text than the lab shows.
+- **R5's challenge check restarts a service on purpose.** Running `check r05 challenge` (or `all`) kills `r5-batch`'s main PID. That is the test, and it leaves a `Scheduled restart job, restart counter is at 1` line in the journal, which is normal.
+- **R5's Lab 2 checks need a reboot.** `check r05 lab2` fails two lines until the learner has rebooted after writing the marker. That is deliberate and the failure message says so; it is not a broken checker.
 
 ---
 
@@ -465,6 +502,10 @@ cd labs
 ./bin/lab check r04 lab2
 ./bin/lab check r04 challenge
 ./bin/lab check r04 all
+./bin/lab check r05 lab1
+./bin/lab check r05 lab2
+./bin/lab check r05 challenge
+./bin/lab check r05 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

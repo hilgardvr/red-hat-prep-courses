@@ -66,7 +66,8 @@
 | **R2 — Users and groups** | Accounts, groups, password aging, `sudo`, default permissions | <span class="badge badge-ready">Available</span> |
 | **R3 — Software and repositories** | DNF, RPM repositories, local repos, Flatpak | <span class="badge badge-ready">Available</span> |
 | **R4 — Shell scripting** | Arguments, conditionals, loops, command substitution, exit codes | <span class="badge badge-ready">Available</span> |
-| **R5–R11** | Services, storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
+| **R5 — Processes and services** | systemd units, drop-ins, journald, process priority, tuned | <span class="badge badge-ready">Available</span> |
+| **R6–R11** | Storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
 | **R12 — Capstone** | Timed mock exams and a full review | <span class="badge badge-planned">Planned</span> |
 
 [See the full module roadmap](rhcsa/index.md){ .md-button }

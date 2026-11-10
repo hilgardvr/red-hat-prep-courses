@@ -10,7 +10,7 @@ The course is organized around the ten objective groups Red Hat publishes for EX
 | **R2** | Users, groups, password aging, sudo, default permissions | 9 — Users and groups; part of 10 | <span class="badge badge-ready">Available</span> |
 | **R3** | Software: DNF, RPM repositories, Flatpak | 2 — Manage software | <span class="badge badge-ready">Available</span> |
 | **R4** | Shell scripting: arguments, conditionals, loops, command substitution | 3 — Create simple shell scripts | <span class="badge badge-ready">Available</span> |
-| **R5** | Processes, systemd services, journald, tuned | 4 — Operate running systems | <span class="badge badge-planned">Planned</span> |
+| **R5** | Processes, systemd services, journald, tuned | 4 — Operate running systems | <span class="badge badge-ready">Available</span> |
 | **R6** | GPT partitions, LVM, swap, fstab by UUID/label | 5 — Configure local storage | <span class="badge badge-planned">Planned</span> |
 | **R7** | ext4/XFS/VFAT, NFS, autofs, extending logical volumes | 6 — Create and configure file systems | <span class="badge badge-planned">Planned</span> |
 | **R8** | cron, at, systemd timers, chrony | 7 — Deploy, configure, and maintain systems | <span class="badge badge-planned">Planned</span> |
@@ -48,11 +48,13 @@ The order is pedagogical, not mandatory. Storage depends on users and permission
 - **An automated checker** that verifies the end state.
 - **A knowledge check** and a **cheat sheet**.
 
-## Start with R1, then work through R2–R4
+## Start with R1, then work through R2–R5
 
 [R1 — Essential tools](r01-essential-tools/index.md) is the best place to begin. It covers the largest objective group and establishes the lab workflow that every later module uses. Once it passes its checker, continue with [R2 — Users and groups](r02-users-and-groups/index.md), which turns the permission model from R1 into real accounts, policy, and privileged access, then with [R3 — Software and repositories](r03-software-and-repositories/index.md), which is where the exam's no-internet condition first matters.
 
 [R4 — Shell scripting](r04-shell-scripting/index.md) comes next. It is the module that turns the commands you have been typing into programs, and every later module uses the same patterns.
+
+[R5 — Processes and services](r05-processes-and-services/index.md) is where those programs become services: systemd units, the journal, process priorities, and tuning profiles. It is also the first module whose state must survive a reboot on its own.
 
 Before R1, make sure the lab is running:
 

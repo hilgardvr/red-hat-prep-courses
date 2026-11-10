@@ -122,6 +122,13 @@ nav:
           - "Challenge — The account audit": rhcsa/r04-shell-scripting/labs/challenge-account-audit.md
           - Knowledge check: rhcsa/r04-shell-scripting/quiz.md
           - Cheat sheet: rhcsa/r04-shell-scripting/cheatsheet.md
+      - "R5 — Processes and services":
+          - Theory: rhcsa/r05-processes-and-services/index.md
+          - "Lab 1 — A service that survives": rhcsa/r05-processes-and-services/labs/lab-1-service.md
+          - "Lab 2 — Logs and tuning": rhcsa/r05-processes-and-services/labs/lab-2-journal-and-tuning.md
+          - "Challenge — The batch runner": rhcsa/r05-processes-and-services/labs/challenge-batch-runner.md
+          - Knowledge check: rhcsa/r05-processes-and-services/quiz.md
+          - Cheat sheet: rhcsa/r05-processes-and-services/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md
