@@ -36,7 +36,7 @@ ls -l /srv/r4/logs
 wc -l /srv/r4/logs/*.log
 ```
 
-```text
+```text { .no-copy }
 total 12
 -rw-r--r--. 1 root root 24 Nov 10 05:57 app.log
 drwxr-xr-x. 2 root root  6 Nov 10 05:57 build
@@ -59,7 +59,7 @@ The directory contains everything a loop can trip over: regular files, a subdire
 wc -l /srv/r4/logs/app.log
 ```
 
-```text
+```text { .no-copy }
 5 /srv/r4/logs/app.log
 ```
 
@@ -69,7 +69,7 @@ Feed the file on stdin instead and `wc` has no name to print:
 wc -l < /srv/r4/logs/app.log
 ```
 
-```text
+```text { .no-copy }
 5
 ```
 
@@ -80,7 +80,7 @@ n=$(wc -l < /srv/r4/logs/app.log)
 echo "count=[$n]"
 ```
 
-```text
+```text { .no-copy }
 count=[5]
 ```
 
@@ -117,7 +117,7 @@ bash -n /srv/r4/bin/linereport
 /srv/r4/bin/linereport /srv/r4/logs
 ```
 
-```text
+```text { .no-copy }
 app.log 5
 error.log 2
 system.log 3
@@ -150,7 +150,7 @@ for f in /srv/r4/logs/*; do
 done
 ```
 
-```text
+```text { .no-copy }
 /srv/r4/logs/app.log	-d:no	-f:yes
 /srv/r4/logs/build	-d:yes	-f:no
 /srv/r4/logs/error.log	-d:no	-f:yes
@@ -170,7 +170,7 @@ A report on a directory that does not exist should say so, not print `total 0`:
 /srv/r4/bin/linereport /srv/r4/nothing; echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 usage: /srv/r4/bin/linereport DIRECTORY
 exit=2
 usage: /srv/r4/bin/linereport DIRECTORY
@@ -186,7 +186,7 @@ mkdir /srv/r4/empty
 /srv/r4/bin/linereport /srv/r4/empty; echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 total 0
 exit=0
 ```
@@ -201,7 +201,7 @@ A file with nothing in it is different from a file that is not there:
 rm /srv/r4/logs/empty.log
 ```
 
-```text
+```text { .no-copy }
 app.log 5
 empty.log 0
 error.log 2
@@ -240,7 +240,7 @@ The checker builds its own directory with different filenames (including one emp
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R4 Lab 2 — Loops and command substitution
   PASS  script exists: /srv/r4/bin/linereport
   PASS  the script is executable

@@ -47,7 +47,7 @@ A script is a text file that the shell reads and executes. Three things make it 
 echo "hello from $0"
 ```
 
-```text
+```text { .no-copy }
 $ chmod +x hello.sh
 $ ./hello.sh
 hello from ./hello.sh
@@ -88,7 +88,7 @@ ls /etc/hostname; echo "exit=$?"
 ls /etc/nope;     echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 /etc/hostname
 exit=0
 ls: cannot access '/etc/nope': No such file or directory
@@ -277,7 +277,7 @@ printf 'at: [%s]\n' "$@"
 printf 'star: [%s]\n' "$*"
 ```
 
-```text
+```text { .no-copy }
 $ ./args.sh "two words" three
 at: [two words]
 at: [three]
@@ -406,7 +406,7 @@ name=$(basename /srv/r4/logs/app.log)
 echo "$today $lines $name"
 ```
 
-```text
+```text { .no-copy }
 2026-11-10 17873 app.log
 ```
 

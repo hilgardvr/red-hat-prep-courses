@@ -43,7 +43,7 @@ rpm -q flatpak
 flatpak --version
 ```
 
-```text
+```text { .no-copy }
 Installed:
   flatpak-1.16.0-9.el10_2.6.x86_64
   ...
@@ -70,7 +70,7 @@ flatpak remotes
 flatpak remotes --columns=name,url,options
 ```
 
-```text
+```text { .no-copy }
 flathub	system
 flathub	https://dl.flathub.org/repo/	system
 ```
@@ -86,7 +86,7 @@ flatpak remote-info flathub org.gnome.Calculator
 flatpak search calculator
 ```
 
-```text
+```text { .no-copy }
         ID: org.gnome.Calculator
        Ref: app/org.gnome.Calculator/x86_64/stable
       Arch: x86_64
@@ -98,7 +98,7 @@ Collection: org.flathub.Stable
        Sdk: org.gnome.Sdk/x86_64/51
 ```
 
-```text
+```text { .no-copy }
 Calculator	A feature rich calculator	org.kde.kalk	26.08.3	stable	flathub
 Curo Calculator	Financial calculations simplified	app.curocalc.calculator	2.6.2	stable	flathub
 BMI Calculator	Calculate your BMI	io.github.johannesboehler2.BmiCalculator	1.6.2	stable	flathub
@@ -115,7 +115,7 @@ Two things to read from that:
 flatpak install -y flathub org.gnome.Calculator
 ```
 
-```text
+```text { .no-copy }
 Installing 7/7… ██████████████████████████████ 100%
 Installation complete.
 ```
@@ -126,7 +126,7 @@ Seven objects are transferred: the application, its locale extension, and the ru
 flatpak list --app --columns=application,version,origin
 ```
 
-```text
+```text { .no-copy }
 org.gnome.Calculator	51.1	flathub
 ```
 
@@ -134,7 +134,7 @@ org.gnome.Calculator	51.1	flathub
 flatpak list --runtime --columns=application,branch,origin
 ```
 
-```text
+```text { .no-copy }
 org.freedesktop.Platform.GL.default	26.08	flathub
 org.freedesktop.Platform.GL.default	26.08-extra	flathub
 org.freedesktop.Platform.codecs-extra	26.08-extra	flathub
@@ -148,7 +148,7 @@ flatpak info org.gnome.Calculator
 du -sh /var/lib/flatpak
 ```
 
-```text
+```text { .no-copy }
           ID: org.gnome.Calculator
          Ref: app/org.gnome.Calculator/x86_64/stable
         Arch: x86_64
@@ -176,7 +176,7 @@ flatpak uninstall -y org.gnome.Calculator
 flatpak list --app --columns=application
 ```
 
-```text
+```text { .no-copy }
 Uninstalling 1/2…
 Uninstalling 2/2…
 Uninstall complete.
@@ -189,7 +189,7 @@ flatpak list --runtime --columns=application
 du -sh /var/lib/flatpak
 ```
 
-```text
+```text { .no-copy }
 org.freedesktop.Platform.GL.default
 org.freedesktop.Platform.GL.default
 org.freedesktop.Platform.codecs-extra
@@ -205,7 +205,7 @@ flatpak list --runtime --columns=application
 du -sh /var/lib/flatpak
 ```
 
-```text
+```text { .no-copy }
 Uninstalling 1/5…
 Uninstalling 2/5…
 Uninstalling 3/5…
@@ -233,7 +233,7 @@ flatpak remotes
 flatpak list
 ```
 
-```text
+```text { .no-copy }
 flathub	system
 ```
 
@@ -248,7 +248,7 @@ An empty second line is the correct answer for `flatpak list`: you removed the a
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R3 Lab 2 — Flatpak
   PASS  package flatpak is installed
   PASS  the flathub remote is configured

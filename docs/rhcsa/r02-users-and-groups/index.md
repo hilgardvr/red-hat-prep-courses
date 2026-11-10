@@ -43,7 +43,7 @@ getent passwd devon
 getent group developers
 ```
 
-```text
+```text { .no-copy }
 uid=3001(devon) gid=3001(developers) groups=3001(developers),3002(operators)
 devon developers operators
 devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
@@ -65,7 +65,7 @@ developers:x:3001:devon,labuser
 
 ### `/etc/passwd` fields
 
-```text
+```text { .no-copy }
 devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
   │   │  │    │        │           │          │
   │   │  │    │        │           │          └─ login shell
@@ -79,7 +79,7 @@ devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
 
 ### `/etc/shadow` fields
 
-```text
+```text { .no-copy }
 devon:$y$j9T$...:20430:7:90:14:::
   │      │        │   │ │  │  └─ fields 7-9: inactive days, expiry, reserved
   │      │        │   │ │  └─ warning days before the password expires
@@ -94,7 +94,7 @@ You almost never edit these files by hand. `useradd`, `usermod`, `passwd`, and `
 
 ### `/etc/group` fields
 
-```text
+```text { .no-copy }
 developers:x:3001:devon,labuser
     │      │   │        └─ supplementary members
     │      │   └─ GID
@@ -108,7 +108,7 @@ Notice what is **not** in that list: users whose **primary** group this is. Memb
 
 `/etc/login.defs` decides where new numbers come from:
 
-```text
+```text { .no-copy }
 UID_MIN          1000
 UID_MAX         60000
 GID_MIN          1000
@@ -342,7 +342,7 @@ passwd -S devon        # status: is it set, locked, or absent?
 
 `passwd -S` is the fastest way to answer "can this account log in with a password?"
 
-```text
+```text { .no-copy }
 devon P 2026-11-10 7 90 14 -1
 mira  L 2026-11-10 5 60 10 -1
 ```
@@ -387,7 +387,7 @@ chage -d 0 devon           # force a change at next login
 
 `chage -l` reports the values the way a human reads them:
 
-```text
+```text { .no-copy }
 Last password change                                    : Nov 08, 2026
 Password expires                                        : Feb 06, 2027
 Password inactive                                       : Mar 08, 2027
@@ -440,7 +440,7 @@ By default `sudo` remembers your password for five minutes **per terminal**. `su
 
 The main file is `/etc/sudoers`. It is mode `0440` and you do not edit it directly. It ends with:
 
-```text
+```text { .no-copy }
 #includedir /etc/sudoers.d
 ```
 
@@ -454,7 +454,7 @@ Everything in `/etc/sudoers.d/` is read as part of the configuration. That is wh
 
 The RHEL default also contains:
 
-```text
+```text { .no-copy }
 %wheel  ALL=(ALL)       ALL
 ```
 
@@ -462,7 +462,7 @@ That is why `labuser` is a member of `wheel`: it is the standard "full administr
 
 ### The rule format
 
-```text
+```text { .no-copy }
 who        where = (as_whom)  what
 %operators ALL   = (root)     NOPASSWD: /usr/bin/systemctl status sshd
 ```

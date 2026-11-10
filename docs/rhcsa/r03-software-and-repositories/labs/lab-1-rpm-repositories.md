@@ -44,7 +44,7 @@ ls -l /etc/yum.repos.d/
 dnf repoinfo baseos | head -14
 ```
 
-```text
+```text { .no-copy }
 repo id                        repo name
 appstream                      AlmaLinux 10 - AppStream
 baseos                         AlmaLinux 10 - BaseOS
@@ -83,7 +83,7 @@ rpm -q tree
 tree --version
 ```
 
-```text
+```text { .no-copy }
 Installed:
   tree-2.1.0-8.el10.x86_64
 Complete!
@@ -107,7 +107,7 @@ rpm -q tree; echo "exit=$?"
 dnf list installed tree
 ```
 
-```text
+```text { .no-copy }
 Removed:
   tree-2.1.0-8.el10.x86_64
 Complete!
@@ -124,7 +124,7 @@ Error: No matching Packages to list
 dnf history | head -8
 ```
 
-```text
+```text { .no-copy }
 ID     | Command line             | Date and time    | Action(s)      | Altered
 -------------------------------------------------------------------------------
      9 | -y remove tree           | 2026-11-10 06:26 | Removed        |    1
@@ -145,7 +145,7 @@ dnf download --resolve --destdir /srv/r3/repo zsh
 ls -l /srv/r3/repo
 ```
 
-```text
+```text { .no-copy }
 zsh-5.9-15.el10.x86_64.rpm                      248 kB/s | 3.3 MB     00:13
 -rw-r--r--. 1 root root 3409956 Nov 10 06:20 zsh-5.9-15.el10.x86_64.rpm
 ```
@@ -161,7 +161,7 @@ ls /srv/r3/repo
 ls /srv/r3/repo/repodata
 ```
 
-```text
+```text { .no-copy }
 Directory walk started
 Directory walk done - 1 packages
 Temporary output repo path: /srv/r3/repo/.repodata/
@@ -169,7 +169,7 @@ Pool started (with 5 workers)
 Pool finished
 ```
 
-```text
+```text { .no-copy }
 $ ls /srv/r3/repo
 repodata
 zsh-5.9-15.el10.x86_64.rpm
@@ -198,7 +198,7 @@ dnf repolist
 dnf repoinfo r3-local
 ```
 
-```text
+```text { .no-copy }
 repo id                        repo name
 appstream                      AlmaLinux 10 - AppStream
 baseos                         AlmaLinux 10 - BaseOS
@@ -207,7 +207,7 @@ extras                         AlmaLinux 10 - Extras
 r3-local                       R3 local package repository
 ```
 
-```text
+```text { .no-copy }
 Repo-id            : r3-local
 Repo-name          : R3 local package repository
 Repo-status        : enabled
@@ -241,12 +241,12 @@ dnf --disablerepo='*' --enablerepo=r3-local list --available zsh
 dnf --disablerepo='*' --enablerepo=r3-local -y install zsh
 ```
 
-```text
+```text { .no-copy }
 Available Packages
 zsh.x86_64                    5.9-15.el10                    r3-local
 ```
 
-```text
+```text { .no-copy }
 Installed:
   zsh-5.9-15.el10.x86_64
 Complete!
@@ -260,7 +260,7 @@ dnf list zsh
 dnf --disablerepo='*' --enablerepo=r3-local -q repoquery zsh
 ```
 
-```text
+```text { .no-copy }
 zsh-5.9-15.el10.x86_64
 Installed Packages
 zsh.x86_64                         5.9-15.el10                         @r3-local
@@ -280,7 +280,7 @@ dnf config-manager --set-disabled baseos appstream extras crb
 dnf repolist
 ```
 
-```text
+```text { .no-copy }
 repo id                        repo name
 r3-local                       R3 local package repository
 ```
@@ -291,7 +291,7 @@ Only the local repository is left. Try to install something that lives on the di
 dnf -y install cowsay
 ```
 
-```text
+```text { .no-copy }
 No match for argument: cowsay
 Error: Unable to find a match: cowsay
 ```
@@ -304,7 +304,7 @@ That is the exact failure mode of an offline machine with the wrong repository c
 grep -E '^enabled=' /etc/yum.repos.d/almalinux-baseos.repo
 ```
 
-```text
+```text { .no-copy }
 enabled=1
 enabled=0
 enabled=0
@@ -319,7 +319,7 @@ dnf config-manager --set-enabled baseos appstream extras crb
 dnf repolist
 ```
 
-```text
+```text { .no-copy }
 repo id                        repo name
 appstream                      AlmaLinux 10 - AppStream
 baseos                         AlmaLinux 10 - BaseOS
@@ -352,7 +352,7 @@ dnf repoinfo r3-local | sed -n '1,4p;9p'
 dnf --disablerepo='*' --enablerepo=r3-local -q repoquery zsh
 ```
 
-```text
+```text { .no-copy }
 ... r3-local ...
 zsh-5.9-15.el10.x86_64
 zsh.x86_64                         5.9-15.el10                         @r3-local
@@ -372,7 +372,7 @@ zsh-0:5.9-15.el10.x86_64
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R3 Lab 1 — RPM repositories and packages
   PASS  repository directory exists: /srv/r3/repo
   PASS  the repository contains at least one RPM

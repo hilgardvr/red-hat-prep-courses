@@ -40,7 +40,7 @@ The **kernel** manages hardware, memory, processes, and the filesystem. The **sh
 
 A command line has three parts:
 
-```text
+```text { .no-copy }
 command   [options]        [arguments]
 ls        -l               /var/log
 ```
@@ -349,7 +349,7 @@ Hard links are useful for deduplicating files and for backup schemes. Symbolic l
 
 Every file has an **owner**, a **group**, and a set of permission bits for three classes: **user** (owner), **group**, and **other**.
 
-```text
+```text { .no-copy }
 -rw-r--r--. 1 labuser labuser 1234 Mar  1 10:00 report.txt
 │└┬┘└┬┘└┬┘
 │ │  │  └── other: r--
@@ -378,7 +378,7 @@ Each permission class is a sum:
 | 2 | write |
 | 1 | execute |
 
-```text
+```text { .no-copy }
 755 = rwx r-x r-x
 644 = rw- r-- r--
 640 = rw- r-- ---
@@ -541,7 +541,7 @@ When in doubt, use `grep -E`. It matches what most people expect.
 
 Given a log line:
 
-```text
+```text { .no-copy }
 2026-01-01 10:00:03 ERROR failed to connect to 10.0.0.5
 ```
 
@@ -565,7 +565,9 @@ The last pattern is the one used in Lab 2. Note the escaped dots: an unescaped `
 
 ### Create, list, extract
 
-```bash
+These are patterns, not a session. `project/` is a placeholder for a directory you own, and each line writes or reads `project.tar.gz` in the current directory — so run one at a time and replace the names. The last line also needs `/tmp/restore` to exist. The copy button is intentionally absent for that reason.
+
+```bash { .no-copy }
 tar -czf project.tar.gz project/       # create, gzip
 tar -cjf project.tar.bz2 project/      # create, bzip2
 tar -cf project.tar project/           # create, no compression
@@ -592,7 +594,9 @@ The `f` option takes the archive name as its argument. `tar -czf archive.tar.gz 
 
 ### Standalone compressors
 
-```bash
+`file` is a placeholder, and each line consumes it: after `gzip file`, the original is gone and `gzip file` again fails. Try these on a scratch copy.
+
+```bash { .no-copy }
 gzip file              # file -> file.gz, removes the original
 gzip -k file           # keep the original
 gunzip file.gz
@@ -611,11 +615,13 @@ bzcat file.bz2
 
 `ssh` opens an encrypted session to a remote system. The lab has two machines specifically so you can practice this.
 
-```bash
+```bash { .no-copy }
 ssh labuser@10.10.10.11              # log in to node2
 ssh labuser@10.10.10.11 hostname     # run one command and exit
 ssh -p 2222 labuser@host             # non-default port
 ```
+
+The first two work against this course's lab. The third is a pattern: `host` and the port are placeholders, and no such server exists here.
 
 The first connection asks you to verify the host key fingerprint. Accepting adds the host to `~/.ssh/known_hosts`. If a host key changes unexpectedly, SSH refuses to connect — that is a security feature, not a bug. Remove the stale entry with:
 
@@ -625,7 +631,9 @@ ssh-keygen -R 10.10.10.11
 
 ### Copying files
 
-```bash
+`report.txt` and `project/` are placeholders for a file and a directory you have. Create them first, or substitute names that exist.
+
+```bash { .no-copy }
 scp report.txt labuser@10.10.10.11:/home/labuser/
 scp -r project/ labuser@10.10.10.11:/home/labuser/
 scp labuser@10.10.10.11:/home/labuser/report.txt .
@@ -652,7 +660,9 @@ The private key stays on the client (`~/.ssh/id_ed25519`, mode `600`); the publi
 
 ## Switching users and privilege
 
-```bash
+`command` below stands for a real command such as `dnf update`; `su - labuser` and `sudo -l` work as written on the lab.
+
+```bash { .no-copy }
 id                     # uid, gid, groups
 whoami                 # effective username
 su - labuser           # start a login shell as labuser (asks for labuser's password)

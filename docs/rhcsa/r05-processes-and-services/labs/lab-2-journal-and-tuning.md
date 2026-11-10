@@ -30,7 +30,7 @@ journalctl --disk-usage
 ls -d /run/log/journal/*/
 ```
 
-```text
+```text { .no-copy }
 ls: cannot access '/var/log/journal': No such file or directory
 Archived and active journals take up 8M in the file system.
 /run/log/journal/edbc4119a83247f397a80af808d2da7e/
@@ -49,7 +49,7 @@ journalctl --flush
 ls -d /var/log/journal/*
 ```
 
-```text
+```text { .no-copy }
 /var/log/journal/edbc4119a83247f397a80af808d2da7e
 ```
 
@@ -58,7 +58,7 @@ find /var/log/journal -name '*.journal'
 journalctl --disk-usage
 ```
 
-```text
+```text { .no-copy }
 /var/log/journal/edbc4119a83247f397a80af808d2da7e/system.journal
 Archived and active journals take up 8M in the file system.
 ```
@@ -74,7 +74,7 @@ logger -t r5-journal "journal persistence marker"
 journalctl -t r5-journal --no-pager
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:47:21 server r5-journal[14002]: journal persistence marker
 ```
 
@@ -99,7 +99,7 @@ Read the **merged** configuration back:
 systemd-analyze cat-config systemd/journald.conf | tail -5
 ```
 
-```text
+```text { .no-copy }
 Audit=
 
 # /etc/systemd/journald.conf.d/10-size.conf
@@ -111,7 +111,7 @@ SystemMaxUse=100M
 journalctl --disk-usage
 ```
 
-```text
+```text { .no-copy }
 Archived and active journals take up 8M in the file system.
 ```
 
@@ -134,7 +134,7 @@ The journal is only useful if you can find one line in it.
 journalctl --list-boots --no-pager
 ```
 
-```text
+```text { .no-copy }
 IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
   0 533fdfe1061f43279509180ca943fe46 Tue 2026-11-10 05:42:06 UTC Tue 2026-11-10 05:47:21 UTC
 ```
@@ -143,7 +143,7 @@ IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
 journalctl -b -u r5-worker -n 2 --no-pager
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:47:12 server systemd[1]: Started r5-worker.service - R5 worker (heartbeat).
 Nov 10 05:47:12 server r5-worker[13807]: worker heartbeat 05:47:12
 ```
@@ -152,7 +152,7 @@ Nov 10 05:47:12 server r5-worker[13807]: worker heartbeat 05:47:12
 journalctl -b -p err --no-pager | tail -3
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:43:11 localhost.localdomain systemd[1]: Failed to start NetworkManager-wait-online.service - Network Manager Wait Online.
 Nov 10 05:47:08 server (worker)[13617]: r5-worker.service: Failed at step EXEC spawning /srv/r5/bin/worker: Permission denied
 ```
@@ -163,7 +163,7 @@ Two errors this boot, and one of them is the `203/EXEC` from Lab 1 — this is h
 journalctl --since "10 min ago" -t r5-journal --no-pager
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:47:21 server r5-journal[14002]: journal persistence marker
 ```
 
@@ -171,7 +171,7 @@ Nov 10 05:47:21 server r5-journal[14002]: journal persistence marker
 journalctl -o short-iso -n 2 --no-pager
 ```
 
-```text
+```text { .no-copy }
 2026-11-10T05:47:21+00:00 server systemd-journald[14008]: System Journal (/var/log/journal/edbc4119a83247f397a80af808d2da7e) is 8M, max 100M, 92M free.
 2026-11-10T05:47:21+00:00 server systemd[1]: Started systemd-journald.service - Journal Service.
 ```
@@ -187,7 +187,7 @@ tuned-adm active
 tuned-adm recommend
 ```
 
-```text
+```text { .no-copy }
 Current active profile: virtual-guest
 virtual-guest
 ```
@@ -201,7 +201,7 @@ cat /etc/tuned/active_profile
 systemctl is-enabled tuned
 ```
 
-```text
+```text { .no-copy }
 Current active profile: throughput-performance
 throughput-performance
 enabled
@@ -231,7 +231,7 @@ systemctl is-active r5-worker
 tuned-adm active
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:47:21 server r5-journal[14002]: journal persistence marker
 IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
  -1 533fdfe1061f43279509180ca943fe46 Tue 2026-11-10 05:42:06 UTC Tue 2026-11-10 05:47:36 UTC
@@ -256,7 +256,7 @@ Two of the checks compare the marker's boot ID with the current one. If you run 
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R5 Lab 2 — Logs that survive, and a tuning profile
   PASS  /var/log/journal exists
   PASS  a journal file is stored under /var/log/journal

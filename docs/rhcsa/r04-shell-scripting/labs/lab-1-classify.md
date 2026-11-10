@@ -45,7 +45,7 @@ ln -s gone.txt /srv/r4/data/old
 ls -l /srv/r4/data
 ```
 
-```text
+```text { .no-copy }
 total 8
 lrwxrwxrwx. 1 root root  9 Nov 10 05:57 current -> notes.txt
 drwxr-xr-x. 2 root root  6 Nov 10 05:57 logs
@@ -71,7 +71,7 @@ bash -n /srv/r4/bin/classify
 /srv/r4/bin/classify /srv/r4/data/notes.txt
 ```
 
-```text
+```text { .no-copy }
 file /srv/r4/data/notes.txt
 ```
 
@@ -146,7 +146,7 @@ Read it from the top, because every line is there for a reason:
 /srv/r4/bin/classify /srv/r4/data/nothing
 ```
 
-```text
+```text { .no-copy }
 file /srv/r4/data/notes.txt
 dir /srv/r4/data/logs
 link /srv/r4/data/current
@@ -162,7 +162,7 @@ missing /srv/r4/data/nothing
 echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 missing /srv/r4/data/nothing
 exit=1
 file /srv/r4/data/notes.txt
@@ -182,7 +182,7 @@ The last two checks are the ones beginners skip:
 /srv/r4/bin/classify "/srv/r4/data/with space.txt"
 ```
 
-```text
+```text { .no-copy }
 usage: /srv/r4/bin/classify PATH...
 exit=2
 file /srv/r4/data/notes.txt
@@ -207,7 +207,7 @@ The third command printed exactly one line. It worked because both `"$@"` and `"
 bash -x /srv/r4/bin/classify /srv/r4/data/notes.txt /srv/r4/data/old
 ```
 
-```text
+```text { .no-copy }
 + '[' 2 -eq 0 ']'
 + status=0
 + for path in "$@"
@@ -241,7 +241,7 @@ ls -l /srv/r4/bin/classify
 /srv/r4/bin/classify /srv/r4/data/old /srv/r4/data/nothing; echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 -rwxr-xr-x. 1 root root 448 Nov 10 05:57 /srv/r4/bin/classify
 link /srv/r4/data/old
 missing /srv/r4/data/nothing
@@ -261,7 +261,7 @@ The checker does not read `/srv/r4/data`. It creates its own tree with different
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R4 Lab 1 — Arguments, tests, and exit codes
   PASS  script exists: /srv/r4/bin/classify
   PASS  the script is executable

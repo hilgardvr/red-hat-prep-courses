@@ -61,6 +61,18 @@
   padding: 0.35rem 0.6rem;
 }
 
+/*
+ * Output and transcript blocks.
+ *
+ * Fenced blocks marked { .no-copy } are what a command prints, or a syntax
+ * synopsis: they are there to read and compare, not to run. Material already
+ * skips the copy button for .no-copy; the muted edge makes the difference
+ * visible.
+ */
+.md-typeset .highlight.no-copy {
+  border-left: 3px solid var(--md-default-fg-color--lighter);
+}
+
 /* Status badges */
 .md-typeset .badge {
   display: inline-block;

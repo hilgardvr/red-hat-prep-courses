@@ -27,7 +27,7 @@ df -hT
 
 On the lab you will see the root filesystem on a virtio disk, mounted at `/`. The second disk, `/dev/vdb`, is present but unused; R6 partitions and mounts it. For now the point is structural: a device provides storage, a filesystem organizes it, and a mount point exposes it inside the single tree.
 
-```text
+```text { .no-copy }
 /            the root of everything
 ├── etc      configuration
 ├── var      data that changes: logs, spool, databases
@@ -67,7 +67,7 @@ Modern RHEL merges the old split directories into `/usr`. Check it:
 ls -ld /bin /sbin /lib /lib64
 ```
 
-```text
+```text { .no-copy }
 lrwxrwxrwx. 1 root root 7 ... /bin -> usr/bin
 lrwxrwxrwx. 1 root root 8 ... /sbin -> usr/sbin
 lrwxrwxrwx. 1 root root 7 ... /lib -> usr/lib
@@ -105,7 +105,7 @@ cd ..
 pwd
 ```
 
-```text
+```text { .no-copy }
 /home/labuser
 /var/log
 /
@@ -152,7 +152,7 @@ Files whose names begin with `.` are **hidden** from plain `ls`. Most are config
 
 The long format is worth reading field by field:
 
-```text
+```text { .no-copy }
 -rw-r--r--. 1 labuser labuser 1024 Nov  7 09:14 notes.txt
 ```
 
@@ -280,7 +280,7 @@ sudo install -o labuser -g labuser -m 640 /dev/null /srv/f4-example.txt
 ls -l /srv/f4-example.txt
 ```
 
-```text
+```text { .no-copy }
 -rw-r----- 1 labuser labuser 0 Nov  7 09:40 /srv/f4-example.txt
 ```
 
@@ -290,7 +290,7 @@ ls -l /srv/f4-example.txt
 
 `find` walks the tree and evaluates tests. The general form is:
 
-```text
+```text { .no-copy }
 find [where] [tests] [actions]
 ```
 
@@ -363,7 +363,7 @@ cat hard.txt    # still works: the inode has another name
 cat soft.txt    # fails: the path in the link is gone
 ```
 
-```text
+```text { .no-copy }
 alpha
 cat: soft.txt: No such file or directory
 ```

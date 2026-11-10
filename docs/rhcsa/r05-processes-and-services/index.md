@@ -41,7 +41,7 @@ A **process** is a running program: the program's code in memory, its data, its 
 ps -o pid,ppid,ni,stat,comm -p 1
 ```
 
-```text
+```text { .no-copy }
     PID    PPID  NI STAT COMMAND
       1       0   0 Ss   systemd
 ```
@@ -82,7 +82,7 @@ A trailing `s` means session leader, `l` means multi-threaded, `+` means in the 
 ps -eo pid,ni,stat,comm --sort=-pcpu | head -6
 ```
 
-```text
+```text { .no-copy }
     PID  NI STAT COMMAND
     996   0 Ss   systemd
    1023   0 Ss   sshd-session
@@ -107,7 +107,7 @@ Sorting by CPU on an idle VM shows the busiest of a quiet system. On a sick mach
 pgrep -a sshd
 ```
 
-```text
+```text { .no-copy }
 899 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
 1023 sshd-session: labuser [priv]
 1026 sshd-session: labuser@notty
@@ -123,7 +123,7 @@ A signal is a small message to a process. Most are requests, and a program can c
 kill -l | head -8
 ```
 
-```text
+```text { .no-copy }
  1) SIGHUP	 2) SIGINT	 3) SIGQUIT	 4) SIGILL	 5) SIGTRAP
  6) SIGABRT	 7) SIGBUS	 8) SIGFPE	 9) SIGKILL	10) SIGUSR1
 11) SIGSEGV	12) SIGUSR2	13) SIGPIPE	14) SIGALRM	15) SIGTERM
@@ -173,7 +173,7 @@ Only root can give a process a *lower* nice value, because that is the direction
 nice -n 5 sleep 60 &
 ```
 
-```text
+```text { .no-copy }
 [1] 1054
 ```
 
@@ -183,7 +183,7 @@ renice -n 15 -p 1054
 ps -o pid,ni,comm -p 1054
 ```
 
-```text
+```text { .no-copy }
     PID  NI COMMAND
    1054   5 sleep
 1054 (process ID) old priority 5, new priority 15
@@ -269,7 +269,7 @@ These three are the ones people mix up, because `start` *looks* like it means "t
 
 `enable` is just a symlink. Look at what it creates:
 
-```text
+```text { .no-copy }
 Created symlink '/etc/systemd/system/multi-user.target.wants/r5-worker.service' → '/etc/systemd/system/r5-worker.service'.
 ```
 
@@ -277,7 +277,7 @@ Created symlink '/etc/systemd/system/multi-user.target.wants/r5-worker.service' 
 
 `mask` is stronger than `disable`. A disabled unit can still be started by hand, or pulled in by a dependency. A masked unit is a symlink to `/dev/null`, so systemd has nothing to load and refuses:
 
-```text
+```text { .no-copy }
 Failed to start r5-scratch.service: Unit r5-scratch.service is masked.
 ```
 
@@ -297,7 +297,7 @@ You need this after **creating, editing, or deleting** a unit file or a drop-in.
 
 A drop-in is a small file in `<unit>.d/` that adds or overrides settings:
 
-```text
+```text { .no-copy }
 /etc/systemd/system/r5-worker.service.d/nice.conf
 ```
 
@@ -312,7 +312,7 @@ The effective unit is the vendor or admin unit file **plus** every drop-in, appl
 systemctl cat r5-worker
 ```
 
-```text
+```text { .no-copy }
 # /etc/systemd/system/r5-worker.service
 [Unit]
 Description=R5 worker (heartbeat)
@@ -336,7 +336,7 @@ Nice=10
 systemctl status r5-worker --no-pager --lines=2
 ```
 
-```text
+```text { .no-copy }
 ● r5-worker.service - R5 worker (heartbeat)
      Loaded: loaded (/etc/systemd/system/r5-worker.service; enabled; preset: disabled)
     Drop-In: /etc/systemd/system/r5-worker.service.d
@@ -381,14 +381,14 @@ Nov 10 18:29:13 server r5-worker[705]: worker heartbeat 18:29:13
 
 On RHEL, SELinux labels files with a **type**, and systemd runs as a type (`init_t`) that may only execute files labelled `bin_t`. A program under `/srv` is labelled `var_t`, so a unit that points there fails at start with `status=203/EXEC` — the same message as "file not found", which is why it wastes so much time:
 
-```text
+```text { .no-copy }
 Process: 14646 ExecStart=/srv/r5/bin/worker (code=exited, status=203/EXEC)
 (worker)[14646]: r5-worker.service: Failed at step EXEC spawning /srv/r5/bin/worker: Permission denied
 ```
 
 `ls -Z` shows the difference:
 
-```text
+```text { .no-copy }
 unconfined_u:object_r:var_t:s0 /srv/r5/bin/worker
 system_u:object_r:bin_t:s0 /usr/local/bin/r5-worker
 ```
@@ -447,7 +447,7 @@ Priorities, from most to least severe: `emerg` 0, `alert` 1, `crit` 2, `err` 3, 
 journalctl -t r5-journal --no-pager
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:47:21 server r5-journal[14002]: journal persistence marker
 ```
 
@@ -486,7 +486,7 @@ SystemMaxUse=100M
 tuned-adm active
 ```
 
-```text
+```text { .no-copy }
 Current active profile: virtual-guest
 ```
 
@@ -504,7 +504,7 @@ The choice is written to `/etc/tuned/active_profile`, and the daemon re-applies 
 systemctl is-enabled tuned
 ```
 
-```text
+```text { .no-copy }
 enabled
 ```
 

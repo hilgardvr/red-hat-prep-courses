@@ -51,7 +51,7 @@ passwd -S devon
 passwd -S mira
 ```
 
-```text
+```text { .no-copy }
 devon P 2026-11-10 0 99999 7 -1
 mira  P 2026-11-10 0 99999 7 -1
 ```
@@ -64,7 +64,7 @@ Look at the hash without printing it in full:
 getent shadow devon | cut -d: -f1,2 | cut -c1-20
 ```
 
-```text
+```text { .no-copy }
 devon:$y$j9T
 ```
 
@@ -93,7 +93,7 @@ chage -l mira
 
 Expected shape:
 
-```text
+```text { .no-copy }
 Last password change                                    : Nov 08, 2026
 Password expires                                        : Feb 06, 2027
 Password inactive                                       : never
@@ -103,7 +103,7 @@ Maximum number of days between password change          : 90
 Number of days of warning before password expires       : 14
 ```
 
-```text
+```text { .no-copy }
 Last password change                                    : Nov 08, 2026
 Password expires                                        : Jan 07, 2027
 Password inactive                                       : never
@@ -125,7 +125,7 @@ passwd -S mira
 chage -l mira
 ```
 
-```text
+```text { .no-copy }
 mira L 2026-11-10 5 60 10 -1
 ```
 
@@ -137,7 +137,7 @@ Look at the difference in the shadow file:
 getent shadow mira | cut -d: -f1,2 | cut -c1-12
 ```
 
-```text
+```text { .no-copy }
 mira:!$y$j9T
 ```
 
@@ -157,7 +157,7 @@ chage -l intern
 
 The `-d 0` sets the last-change date to 1970-01-01, which means "your password is older than any maximum". Read it back:
 
-```text
+```text { .no-copy }
 Last password change                                    : password must be changed
 Password expires                                        : password must be changed
 ...
@@ -175,7 +175,7 @@ grep -E '^(#includedir|@includedir|%wheel)' /etc/sudoers
 visudo -c
 ```
 
-```text
+```text { .no-copy }
 %wheel	ALL=(ALL)	ALL
 #includedir /etc/sudoers.d
 /etc/sudoers: parsed OK
@@ -194,7 +194,7 @@ EOF
 visudo -cf /tmp/10-r2-operators
 ```
 
-```text
+```text { .no-copy }
 /tmp/10-r2-operators: parsed OK
 ```
 
@@ -206,7 +206,7 @@ ls -l /etc/sudoers.d/
 visudo -c
 ```
 
-```text
+```text { .no-copy }
 -r--r-----. 1 root root 152 ... 10-r2-operators
 -r--r-----. 1 root root 135 ... 90-cloud-init-users
 -r--r-----. 1 root root  22 ... 90-rhcsa-labuser
@@ -226,7 +226,7 @@ Mode `0440` and root ownership are not style choices. `sudo` ignores drop-in fil
 sudo -l -U devon
 ```
 
-```text
+```text { .no-copy }
 Matching Defaults entries for devon on server:
     ...
 User devon may run the following commands on server:
@@ -247,7 +247,7 @@ You should see the `sshd` service status. Then try something outside the rule:
 su - devon -c 'sudo -n systemctl restart sshd'
 ```
 
-```text
+```text { .no-copy }
 sudo: a password is required
 ```
 
@@ -271,7 +271,7 @@ Check the current default for `devon` from a login shell — not from your root 
 su - devon -c 'umask'
 ```
 
-```text
+```text { .no-copy }
 0022
 ```
 
@@ -285,7 +285,7 @@ tail -3 /home/devon/.bash_profile
 su - devon -c 'umask'
 ```
 
-```text
+```text { .no-copy }
 umask 027
 0027
 ```
@@ -296,7 +296,7 @@ Now prove what that does to new objects, again from a login shell:
 su - devon -c 'd=$(mktemp -d); touch "$d/f"; mkdir "$d/d"; stat -c "%a %n" "$d/f" "$d/d"; rm -rf "$d"'
 ```
 
-```text
+```text { .no-copy }
 640 /tmp/tmp.a1b2c3/f
 750 /tmp/tmp.a1b2c3/d
 ```
@@ -347,7 +347,7 @@ Every line should match what you saw before the reboot. In particular, `su - dev
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R2 Lab 2 — Passwords, policy, and sudo
   PASS  devon has a usable password
   PASS  devon's aging: max 90 days

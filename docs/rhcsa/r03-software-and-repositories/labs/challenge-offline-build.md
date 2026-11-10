@@ -92,7 +92,7 @@ The checker reads the repository directory, both repository configurations, the 
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R3 Challenge — The offline build server
   PASS  repository directory exists: /srv/r3/extra
   PASS  the repository contains at least one RPM

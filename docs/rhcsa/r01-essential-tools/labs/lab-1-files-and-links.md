@@ -13,7 +13,7 @@
 
 ## What you are building
 
-```text
+```text { .no-copy }
 /srv/r1/project
 ├── docs
 │   ├── readme.txt
@@ -131,7 +131,7 @@ stat -c '%i %h %n' docs/readme.txt archive/readme-hardlink.txt
 
 Expected shape (your inode number will differ):
 
-```text
+```text { .no-copy }
 1234567 -rw-r--r--. 2 labuser labuser 12 ... docs/readme.txt
 1234567 -rw-r--r--. 2 labuser labuser 12 ... archive/readme-hardlink.txt
 ```
@@ -156,7 +156,7 @@ readlink -f readme-softlink
 
 Expected:
 
-```text
+```text { .no-copy }
 lrwxrwxrwx. 1 labuser labuser 15 ... readme-softlink -> docs/readme.txt
 docs/readme.txt
 /srv/r1/project/docs/readme.txt
@@ -201,7 +201,7 @@ You should see a series of `PASS` lines. If something fails, read the message, f
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R1 Lab 1 — Files and links
   PASS  /srv/r1 exists
   PASS  /srv/r1 is owned by labuser:labuser

@@ -24,6 +24,19 @@ Every module has the same parts:
 | **Knowledge check** | Questions with hidden answers |
 | **Cheat sheet** | A compact reference for review |
 
+## Reading the examples
+
+You are not expected to memorise any command in this course. The theory pages are reference material: read them once, run what your lab allows, and come back when you need the syntax. The labs, not the prose, are where the commands become yours.
+
+Two kinds of block appear in every module:
+
+| Block | How to read it |
+|---|---|
+| Command (has a copy button) | Run it. It is shell syntax, ready to paste into the lab |
+| Output or synopsis (no copy button, muted left edge) | What a command printed, or the shape of its arguments. Compare against it; do not run it |
+
+Examples state their preconditions. A command that writes a file says which directory to run it in, because `tar -czf demo.tar.gz /etc/hostname` creates the archive wherever you are, and the next line in the same block reads that archive back. If a block depends on an earlier step, the text says so.
+
 ## The lab workflow
 
 The labs run on two disposable virtual machines. You will need the lab kit from the repository; the [lab setup guide](lab-setup.md) walks through it.
@@ -50,7 +63,7 @@ After completing the lab, run the checker **from the host**:
 
 The checker runs inside `server` as root and reports each criterion:
 
-```text
+```text { .no-copy }
 R1 Lab 1 — Files and links
   PASS  directory: /srv/r1/project/docs
   PASS  hard link shares an inode with docs/readme.txt

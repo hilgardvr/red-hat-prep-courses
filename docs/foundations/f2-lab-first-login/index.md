@@ -68,7 +68,7 @@ cd labs
 
 `doctor` checks for Vagrant, the libvirt provider, `virsh`, KVM access, RAM, disk space, and the lab SSH key. A healthy run ends with:
 
-```text
+```text { .no-copy }
 ==> Result
   Ready. Run ./bin/lab up
 ```
@@ -94,7 +94,7 @@ Check the state:
 
 You want both machines running:
 
-```text
+```text { .no-copy }
 Current machine states:
 
 server                    running (libvirt)
@@ -103,7 +103,7 @@ node2                     running (libvirt)
 
 The `up` command ends with a summary:
 
-```text
+```text { .no-copy }
 Lab is ready.
 
   server  10.10.10.10  (vagrant / labuser)
@@ -124,7 +124,7 @@ Lab user password: labpass
 
 You land on `server` as the `vagrant` user:
 
-```text
+```text { .no-copy }
 [vagrant@server ~]$
 ```
 
@@ -145,7 +145,7 @@ sudo su - labuser
 
 The prompt changes:
 
-```text
+```text { .no-copy }
 [labuser@server ~]$
 ```
 
@@ -198,7 +198,7 @@ ssh node2
 
 You should land on the second machine:
 
-```text
+```text { .no-copy }
 [labuser@node2 ~]$ hostname
 node2
 [labuser@node2 ~]$ exit

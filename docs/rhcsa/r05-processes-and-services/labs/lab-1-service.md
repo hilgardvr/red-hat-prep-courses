@@ -54,7 +54,7 @@ chmod +x /srv/r5/bin/worker
 timeout 3 /srv/r5/bin/worker; echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 worker heartbeat 05:47:04
 exit=124
 ```
@@ -79,7 +79,7 @@ systemctl start r5-worker
 systemctl status r5-worker --no-pager --lines=3
 ```
 
-```text
+```text { .no-copy }
 × r5-worker.service - R5 worker (heartbeat)
      Loaded: loaded (/etc/systemd/system/r5-worker.service; disabled; preset: disabled)
      Active: failed (Result: exit-code) since Tue 2026-11-10 05:47:08 UTC; 7ms ago
@@ -102,7 +102,7 @@ ls -Z /srv/r5/bin/worker
 ls -Zd /usr/local/bin
 ```
 
-```text
+```text { .no-copy }
 unconfined_u:object_r:var_t:s0 /srv/r5/bin/worker
 system_u:object_r:bin_t:s0 /usr/local/bin
 ```
@@ -119,7 +119,7 @@ ls -Z /usr/local/bin/r5-worker
 rm -rf /srv/r5
 ```
 
-```text
+```text { .no-copy }
 system_u:object_r:bin_t:s0 /usr/local/bin/r5-worker
 ```
 
@@ -150,7 +150,7 @@ systemctl start r5-worker
 systemctl is-active r5-worker
 ```
 
-```text
+```text { .no-copy }
 active
 ```
 
@@ -177,7 +177,7 @@ The `restart` is what applies the new value to the running process: `enable --no
 systemctl status r5-worker --no-pager --lines=2
 ```
 
-```text
+```text { .no-copy }
 ● r5-worker.service - R5 worker (heartbeat)
      Loaded: loaded (/etc/systemd/system/r5-worker.service; enabled; preset: disabled)
     Drop-In: /etc/systemd/system/r5-worker.service.d
@@ -205,7 +205,7 @@ pid=$(systemctl show -p MainPID --value r5-worker)
 ps -o pid,ni,comm -p "$pid"
 ```
 
-```text
+```text { .no-copy }
 enabled
 10
     PID  NI COMMAND
@@ -222,7 +222,7 @@ Everything the service prints on stdout goes to the journal, tagged with the uni
 journalctl -u r5-worker -n 3 --no-pager
 ```
 
-```text
+```text { .no-copy }
 Nov 10 05:47:08 server systemd[1]: Stopped r5-worker.service - R5 worker (heartbeat).
 Nov 10 05:47:08 server systemd[1]: Started r5-worker.service - R5 worker (heartbeat).
 Nov 10 05:47:08 server r5-worker[13779]: worker heartbeat 05:47:08
@@ -244,7 +244,7 @@ This is the loop you will use for every service problem: `systemctl status` for 
 nice -n 5 sleep 300 &
 ```
 
-```text
+```text { .no-copy }
 [1] 13789
 ```
 
@@ -255,7 +255,7 @@ ps -o pid,ni,comm -p 13789
 kill -TERM 13789
 ```
 
-```text
+```text { .no-copy }
     PID  NI COMMAND
   13789   5 sleep
 13789 (process ID) old priority 5, new priority 15
@@ -277,7 +277,7 @@ systemctl is-active r5-worker
 systemctl status r5-worker --no-pager --lines=3
 ```
 
-```text
+```text { .no-copy }
 inactive
 ○ r5-worker.service - R5 worker (heartbeat)
      Loaded: loaded (/etc/systemd/system/r5-worker.service; enabled; preset: disabled)
@@ -306,7 +306,7 @@ sleep 2
 systemctl is-active r5-worker
 ```
 
-```text
+```text { .no-copy }
 failed
 ```
 
@@ -317,7 +317,7 @@ systemctl restart r5-worker
 systemctl is-active r5-worker
 ```
 
-```text
+```text { .no-copy }
 active
 ```
 
@@ -340,7 +340,7 @@ systemctl start r5-scratch
 systemctl is-active r5-scratch; echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 inactive
 exit=3
 ```
@@ -354,7 +354,7 @@ systemctl daemon-reload
 systemctl mask r5-scratch
 ```
 
-```text
+```text { .no-copy }
 Unit r5-scratch.service does not exist, proceeding anyway.
 Created symlink '/etc/systemd/system/r5-scratch.service' → '/dev/null'.
 ```
@@ -364,7 +364,7 @@ systemctl is-enabled r5-scratch; echo "exit=$?"
 systemctl start r5-scratch; echo "exit=$?"
 ```
 
-```text
+```text { .no-copy }
 masked
 exit=1
 Failed to start r5-scratch.service: Unit r5-scratch.service is masked.
@@ -397,7 +397,7 @@ systemctl is-enabled r5-scratch
 journalctl -u r5-worker -n 2 --no-pager
 ```
 
-```text
+```text { .no-copy }
 enabled
 active
 10
@@ -421,7 +421,7 @@ The checker asks systemd for the state, then asks the kernel for the process's r
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R5 Lab 1 — A service that survives
   PASS  unit r5-worker.service is loaded
   PASS  r5-worker is enabled at boot

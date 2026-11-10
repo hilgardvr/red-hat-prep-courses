@@ -41,7 +41,7 @@ An RPM package is a single file, `name-version-release.arch.rpm`, that contains:
 - scripts that run at install and removal time
 - a cryptographic signature, if the package is signed
 
-```text
+```text { .no-copy }
 zsh-5.9-15.el10.x86_64.rpm
 ```
 
@@ -71,7 +71,7 @@ rpm -q --whatrequires zsh  # what depends on it?
 rpm -V zsh                 # verify installed files against the package
 ```
 
-```text
+```text { .no-copy }
 $ rpm -q zsh
 zsh-5.9-15.el10.x86_64
 $ rpm -qf /etc/passwd
@@ -94,7 +94,7 @@ Direct installation (`rpm -i file.rpm`) fails with a list of missing dependencie
 
 A **repository** is a directory of RPMs plus a `repodata/` directory describing them:
 
-```text
+```text { .no-copy }
 /srv/r3/repo/
 ├── repodata/
 │   ├── repomd.xml                 # index of the index files
@@ -164,7 +164,7 @@ dnf repolist --all             # every configured repo, with its status
 dnf repoinfo r3-local          # details for one repo: baseurl, package count, metadata age
 ```
 
-```text
+```text { .no-copy }
 $ dnf repolist
 repo id                  repo name
 appstream                AlmaLinux 10 - AppStream
@@ -212,7 +212,7 @@ dnf repoquery -l zsh                  # file list, straight from the repo metada
 dnf repoquery --requires zsh          # dependencies, including ones not installed
 ```
 
-```text
+```text { .no-copy }
 $ dnf list --available zsh
 Available Packages
 zsh.x86_64                  5.9-15.el10                  r3-local
@@ -226,7 +226,7 @@ The right-hand column is where the package would come from. When you are debuggi
 
 `dnf` always shows you the plan first:
 
-```text
+```text { .no-copy }
 Dependencies resolved.
 ================================================================================
  Package        Architecture   Version            Repository        Size
@@ -288,7 +288,7 @@ sudo dnf config-manager --set-enabled baseos appstream extras crb
 
 With the distro repositories disabled and a local repository that does not contain the package, an install looks like this:
 
-```text
+```text { .no-copy }
 $ sudo dnf -y install cowsay
 No match for argument: cowsay
 Error: Unable to find a match: cowsay
@@ -311,7 +311,7 @@ sudo createrepo_c /srv/r3/repo
 
 `createrepo_c` then writes `repodata/`:
 
-```text
+```text { .no-copy }
 Directory walk done - 1 packages
 Temporary output repo path: /srv/r3/repo/.repodata/
 Pool started (with 5 workers)
@@ -348,7 +348,7 @@ flatpak remotes
 flatpak remotes --columns=name,url,options
 ```
 
-```text
+```text { .no-copy }
 $ flatpak remotes
 flathub	system
 ```
@@ -381,7 +381,7 @@ Two details that matter in practice:
 
 What an install actually brings in:
 
-```text
+```text { .no-copy }
 $ flatpak install -y flathub org.gnome.Calculator
 ...
 Installation complete.

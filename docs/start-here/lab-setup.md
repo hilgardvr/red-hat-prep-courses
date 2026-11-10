@@ -4,7 +4,7 @@ The course labs run on two disposable virtual machines on your own Linux host. T
 
 The lab kit lives in the `labs/` directory of the course repository.
 
-```text
+```text { .no-copy }
 labs/
 ├── Vagrantfile          # two VMs: server and node2
 ├── bin/lab              # up | halt | reset | snapshot | restore | check | ssh | doctor

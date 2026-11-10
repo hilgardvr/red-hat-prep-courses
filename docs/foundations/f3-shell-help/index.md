@@ -15,6 +15,11 @@ You will type thousands of commands during the exam. Almost none of them will be
 
 The exam environment is a RHEL 10 system with no internet access. You cannot search the web for a flag. Everything you need is on the machine: `--help`, `man`, `info`, the documentation under `/usr/share/doc`, and the package metadata. This module teaches you to read a command, quote it correctly, and find its options without a browser.
 
+!!! note "Read it; do not memorise it"
+    This page is a reference you will come back to, not a list to learn by heart. Run a command if your lab is up and watch what changes; if it is not, read the command and the block beneath it, which shows what it prints. The exam rewards finding and adapting commands, not recalling flags.
+
+    Command blocks have a copy button. Blocks **without** one are output, a transcript, or a syntax synopsis: they show what a command prints and are there to compare against, not to paste into a shell.
+
 ## What the shell actually does
 
 The shell is a userspace program (F1) whose job is to read a line, transform it, and ask the kernel to run something. For every command you type, it does roughly this:
@@ -38,7 +43,7 @@ ps -p $$ -o pid,comm,args
 
 Expected output on the lab:
 
-```text
+```text { .no-copy }
 /bin/bash
 2417
     PID COMMAND         COMMAND
@@ -51,7 +56,7 @@ Expected output on the lab:
 
 Every command line has the same three parts:
 
-```text
+```text { .no-copy }
 command [options] [arguments]
 ```
 
@@ -81,7 +86,7 @@ ls -l /etc/hostname
 ls /etc/hostname -l
 ```
 
-```text
+```text { .no-copy }
 -rw-r--r--. 1 root root 7 Nov 10 05:43 /etc/hostname
 ```
 
@@ -93,7 +98,7 @@ The option moved; the output did not change.
 find /etc -maxdepth 1 -name hostname
 ```
 
-```text
+```text { .no-copy }
 /etc/hostname
 ```
 
@@ -103,19 +108,20 @@ Swap them and the words stop meaning what you intended:
 find -maxdepth 1 /etc -name hostname
 ```
 
-```text
+```text { .no-copy }
 find: paths must precede expression: `/etc'
 find: possible unquoted pattern after predicate `-maxdepth'?
 ```
 
-**A value belongs to one option.** `-f` takes the archive name, and the name is the next word after the whole cluster `-czf`:
+**A value belongs to one option.** `-f` takes the archive name, and the name is the next word after the whole cluster `-czf`. Run both lines in your home directory: the first creates `demo.tar.gz` there, and the second reads that same file, so it only works after the first has succeeded.
 
 ```bash
+cd ~
 tar -czf demo.tar.gz /etc/hostname
 tar -tzf demo.tar.gz
 ```
 
-```text
+```text { .no-copy }
 tar: Removing leading `/' from member names
 etc/hostname
 ```
@@ -124,7 +130,7 @@ The first line is a warning on stderr, not part of the archive; `etc/hostname` i
 
 Leave the value out and `tar` stops instead of guessing:
 
-```text
+```text { .no-copy }
 tar: option requires an argument -- 'f'
 Try 'tar --help' or 'tar --usage' for more information.
 ```
@@ -135,7 +141,7 @@ Try 'tar --help' or 'tar --usage' for more information.
 grep -n root /etc/passwd
 ```
 
-```text
+```text { .no-copy }
 1:root:x:0:0:Super User:/root:/bin/bash
 10:operator:x:11:0:operator:/root:/usr/sbin/nologin
 ```
@@ -146,7 +152,7 @@ In `sort` it changes the comparison from text to arithmetic, which reorders the 
 printf '10\n2\n1\n' | sort -n
 ```
 
-```text
+```text { .no-copy }
 1
 2
 10
@@ -156,13 +162,13 @@ printf '10\n2\n1\n' | sort -n
 printf '10\n2\n1\n' | sort
 ```
 
-```text
+```text { .no-copy }
 1
 10
 2
 ```
 
-In `cp` it means "do not overwrite", and it does that silently:
+In `cp` it means "do not overwrite", and it does that silently. This creates two small files, `a` and `b`, in the current directory — your home directory, if you ran the `tar` example above. Remove them with `rm a b` when you are done:
 
 ```bash
 echo one > a
@@ -171,7 +177,7 @@ cp -n a b
 cat b
 ```
 
-```text
+```text { .no-copy }
 two
 ```
 
@@ -179,9 +185,10 @@ One letter, three unrelated instructions. The only reliable way to know what a f
 
 Two syntax rules are universal enough to rely on:
 
-- **`--` ends option parsing.** Everything after it is an argument, even if it starts with a dash:
+- **`--` ends option parsing.** Everything after it is an argument, even if it starts with a dash. The first line creates a file whose name begins with a dash; without the `--`, `rm` would read that name as options:
 
     ```bash
+    touch -- -weird-filename
     rm -- -weird-filename
     ```
 
@@ -194,7 +201,7 @@ Two syntax rules are universal enough to rely on:
     echo $?
     ```
 
-    ```text
+    ```text { .no-copy }
     0
     2
     ```
@@ -211,7 +218,7 @@ type ls
 type -a grep
 ```
 
-```text
+```text { .no-copy }
 cd is a shell builtin
 ls is aliased to `ls --color=auto'
 grep is /usr/bin/grep
@@ -250,7 +257,7 @@ echo "*.txt"
 echo '*.txt'
 ```
 
-```text
+```text { .no-copy }
 notes.txt report final.txt
 *.txt
 *.txt
@@ -264,7 +271,7 @@ Glob results are *not* split on whitespace, which is why `*.txt` is safer than `
 printf '<%s>\n' *.txt
 ```
 
-```text
+```text { .no-copy }
 <notes.txt>
 <report final.txt>
 ```
@@ -278,7 +285,7 @@ echo "$HOME and $(whoami)"
 echo '$HOME and $(whoami)'
 ```
 
-```text
+```text { .no-copy }
 /home/labuser and labuser
 $HOME and $(whoami)
 ```
@@ -395,7 +402,7 @@ Inside a man page:
 
 Read the `SYNOPSIS` carefully. It is a compact grammar:
 
-```text
+```text { .no-copy }
 cp [OPTION]... [-T] SOURCE DEST
 ```
 
@@ -504,7 +511,7 @@ man 5 passwd
 
 Inside `man 5 passwd`, search for the field description:
 
-```text
+```text { .no-copy }
 /^ *root
 ```
 

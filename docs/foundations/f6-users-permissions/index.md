@@ -27,7 +27,7 @@ getent passwd labuser
 getent group wheel
 ```
 
-```text
+```text { .no-copy }
 uid=1000(labuser) gid=1000(labuser) groups=1000(labuser),10(wheel)
 labuser wheel
 labuser
@@ -48,7 +48,7 @@ wheel:x:10:labuser
 
 The fields in `/etc/passwd` are positional:
 
-```text
+```text { .no-copy }
 labuser:x:1000:1000::/home/labuser:/bin/bash
    |    |  |    |   |       |          |
    |    |  |    |   |       |          +-- login shell
@@ -111,7 +111,7 @@ The directory column is where beginners lose points. `r` on a directory does not
 
 Read the long listing from F4 again:
 
-```text
+```text { .no-copy }
 -rw-r--r--. 1 labuser labuser 1024 Nov  7 09:14 notes.txt
 ```
 
@@ -145,7 +145,7 @@ chmod 640 notes.txt
 ls -l notes.txt
 ```
 
-```text
+```text { .no-copy }
 -rw-r----- 1 labuser labuser 1024 Nov  7 09:14 notes.txt
 ```
 
@@ -153,7 +153,7 @@ ls -l notes.txt
 
 Symbolic mode is easier to reason about when you change one thing:
 
-```text
+```text { .no-copy }
 chmod [who][operator][permissions] file
 ```
 
@@ -185,7 +185,7 @@ ls -ld newfile newdir
 
 With umask `022`:
 
-```text
+```text { .no-copy }
 -rw-r--r-- 1 labuser labuser 0 ... newfile
 drwxr-xr-x 2 labuser labuser 6 ... newdir
 ```
@@ -235,7 +235,7 @@ ls -l /usr/bin/passwd
 ls -ld /tmp
 ```
 
-```text
+```text { .no-copy }
 -rwsr-xr-x. 1 root root ... /usr/bin/passwd
 drwxrwxrwt. 1 root root ... /tmp
 ```
@@ -260,7 +260,7 @@ Work through this checklist in order. Usually the answer is in the first three l
 namei -l /home/labuser/f6/file.txt
 ```
 
-```text
+```text { .no-copy }
 f: /home/labuser/f6/file.txt
 drwxr-xr-x root    root    /
 drwxr-xr-x root    root    home

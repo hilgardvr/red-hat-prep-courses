@@ -252,6 +252,9 @@ Every RHCSA module follows the same anatomy:
 - Original content only. Do not copy Red Hat courseware, exam questions, or instructor materials.
 - Prefer official documentation and `man` pages as references.
 - Use relative links in Markdown. Add every page to `mkdocs.yml`.
+- Put commands in ` ```bash ` blocks. Put command output, transcripts, and syntax synopses in ` ```text { .no-copy } `: Material skips the copy button for `.no-copy`, and `extra.css` draws a muted left edge, so a reader can tell at a glance what is runnable. Never leave output in a plain `text` block — the copy button invites pasting a transcript into a shell.
+- State the preconditions of an example that writes anything or depends on an earlier step: which directory to run it in, and what it creates. `tar -czf demo.tar.gz /etc/hostname` writes to the current directory, and the `tar -tzf demo.tar.gz` on the next line reads that file. Say so, or add the `cd`.
+- Do not assume the reader will run every example while reading. Say once per page, where it matters, that the commands are reference material to return to, not a list to memorise.
 - Keep the disclaimer and licensing notices intact.
 - Do not commit generated keys (`labs/keys/`) or build output (`site/`).
 - Do not disable SELinux or firewalld in a lab unless the lesson is specifically about doing so.

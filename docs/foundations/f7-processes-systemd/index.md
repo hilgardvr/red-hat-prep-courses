@@ -38,7 +38,7 @@ ps -p 1 -o pid,comm,args
 pstree -p | head
 ```
 
-```text
+```text { .no-copy }
     PID COMMAND         COMMAND
       1 systemd         /usr/lib/systemd/systemd --switched-root --system --deserialize=42
 ```
@@ -144,7 +144,7 @@ systemctl is-active sshd
 systemctl is-enabled sshd
 ```
 
-```text
+```text { .no-copy }
 ● sshd.service - OpenSSH server daemon
      Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: enabled)
      Active: active (running) since Fri 2026-11-07 09:02:11 UTC; 41min ago

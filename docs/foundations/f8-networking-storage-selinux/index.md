@@ -47,7 +47,7 @@ getent hosts server node2
 cat /etc/resolv.conf
 ```
 
-```text
+```text { .no-copy }
 lo               UNKNOWN        127.0.0.1/8 ::1/128
 eth0             UP             192.168.121.45/24
 eth1             UP             10.10.10.10/24
@@ -124,7 +124,7 @@ The lab disables IPv6 on the private interface for simplicity, so you will mostl
 
 Storage is layered. Each layer has to exist before the next one can be used.
 
-```text
+```text { .no-copy }
 physical disk          /dev/vda, /dev/vdb
       ↓
 partition table        GPT or MBR
@@ -179,7 +179,7 @@ ls -l /mnt/demo
 
 A mount made this way exists only until reboot. Persistence requires an entry in `/etc/fstab`:
 
-```text
+```text { .no-copy }
 UUID=abcd-1234  /mnt/data  xfs  defaults  0 0
 ```
 
@@ -252,7 +252,7 @@ Standard permissions answer "which user and group may access this inode?". SELin
 
 Every process and every file has a **security context**:
 
-```text
+```text { .no-copy }
 system_u:object_r:sshd_t:s0
 ```
 
@@ -277,7 +277,7 @@ ps -ZC sshd
 
 `getenforce` prints one word. `sestatus` prints a short block that also names the policy and its mode:
 
-```text
+```text { .no-copy }
 Enforcing
 SELinux status:                 enabled
 SELinuxfs mount:                /sys/fs/selinux
@@ -287,7 +287,7 @@ Policy from config file:        targeted
 
 The remaining commands print contexts:
 
-```text
+```text { .no-copy }
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 system_u:object_r:etc_t:s0 /etc
 system_u:object_r:var_log_t:s0 /var/log

@@ -23,7 +23,7 @@ It assumes the machine from [Lab 1](lab-1-service.md) and [Lab 2](lab-2-journal-
 
 1. Write `/usr/local/bin/r5-batch`, an executable program that never exits. Every five seconds it must write one line to the journal with the tag `r5-batch` and a timestamp, for example:
 
-   ```text
+   ```text { .no-copy }
    batch tick 06:14:05
    ```
 
@@ -135,7 +135,7 @@ The checker reads the unit, the process, and the journal, and then kills the ser
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R5 Challenge — The batch runner
   PASS  unit r5-batch.service is loaded
   PASS  r5-batch is enabled at boot

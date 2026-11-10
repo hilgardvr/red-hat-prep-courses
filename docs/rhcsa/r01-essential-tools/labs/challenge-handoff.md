@@ -166,7 +166,7 @@ The checker inspects the local files, the archive contents, the checksum, and th
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R1 Challenge — Handoff bundle
   PASS  /srv/handoff exists
   PASS  /srv/handoff is owned by root:wheel

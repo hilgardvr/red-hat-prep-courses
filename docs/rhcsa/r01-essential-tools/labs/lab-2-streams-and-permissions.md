@@ -88,7 +88,7 @@ cat ips.txt
 
 Expected:
 
-```text
+```text { .no-copy }
 10.0.0.5
 172.16.0.9
 192.168.1.20
@@ -229,7 +229,7 @@ From the host:
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R1 Lab 2 — Streams and permissions
   PASS  sample.log exists
   PASS  sample.log has 10 lines

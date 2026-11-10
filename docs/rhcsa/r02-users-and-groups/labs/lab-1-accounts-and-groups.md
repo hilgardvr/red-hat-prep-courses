@@ -13,7 +13,7 @@
 
 ## What you are building
 
-```text
+```text { .no-copy }
 group developers   GID 3001
 group operators    GID 3002
 
@@ -61,7 +61,7 @@ getent group developers operators
 
 Expected:
 
-```text
+```text { .no-copy }
 developers:x:3001:
 operators:x:3002:
 ```
@@ -105,7 +105,7 @@ ls -A /home/devon
 
 Expected shape:
 
-```text
+```text { .no-copy }
 uid=3001(devon) gid=3001(developers) groups=3001(developers),3002(operators)
 devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
 drwx------. 2 devon developers 62 ... /home/devon
@@ -126,7 +126,7 @@ getent passwd mira
 
 Expected:
 
-```text
+```text { .no-copy }
 uid=3002(mira) gid=3001(developers) groups=3001(developers)
 mira:x:3002:3001:Mira Chen:/home/mira:/bin/bash
 ```
@@ -144,7 +144,7 @@ useradd -m -G developers tempuser
 id tempuser
 ```
 
-```text
+```text { .no-copy }
 uid=3003(tempuser) gid=3003(tempuser) groups=3003(tempuser),3001(developers)
 ```
 
@@ -155,7 +155,7 @@ usermod -G operators tempuser
 id tempuser
 ```
 
-```text
+```text { .no-copy }
 uid=3003(tempuser) gid=3003(tempuser) groups=3003(tempuser),3002(operators)
 ```
 
@@ -167,7 +167,7 @@ usermod -aG operators labuser
 id labuser
 ```
 
-```text
+```text { .no-copy }
 uid=1000(labuser) gid=1000(labuser) groups=1000(labuser),10(wheel),3002(operators)
 ```
 
@@ -188,7 +188,7 @@ ls -ld /var/lib/buildbot
 
 Expected shape:
 
-```text
+```text { .no-copy }
 uid=994(buildbot) gid=993(buildbot) groups=993(buildbot)
 buildbot:x:994:993:Build service:/var/lib/buildbot:/sbin/nologin
 drwx------. 2 buildbot buildbot ... /var/lib/buildbot
@@ -227,7 +227,7 @@ ls -l /home/contractor
 
 `getent` prints nothing — the account is gone from `/etc/passwd`. But the home directory is still there, and now its owner is a number:
 
-```text
+```text { .no-copy }
 drwx------. 2 3003 3003 ... /home/contractor
 -rw-r--r--. 1 3003 3003   30 ... handover.txt
 ```
@@ -281,7 +281,7 @@ ls -l /srv/r2/team
 
 Expected:
 
-```text
+```text { .no-copy }
 developers:x:3001:
 operators:x:3002:devon,labuser
 devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
@@ -305,7 +305,7 @@ From the host, in `labs/`:
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R2 Lab 1 — Accounts and groups
   PASS  group developers has GID 3001
   PASS  group operators has GID 3002

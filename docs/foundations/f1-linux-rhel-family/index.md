@@ -52,7 +52,7 @@ uname -r
 
 A RHEL 10-family system reports a kernel whose release tag contains `el10`, for example:
 
-```text
+```text { .no-copy }
 6.12.0-211.74.1.el10_2.x86_64
 ```
 
@@ -77,7 +77,7 @@ ps -p 1 -o pid=,comm=
 
 On every RHEL 10-family system, this prints:
 
-```text
+```text { .no-copy }
 1 systemd
 ```
 
@@ -166,7 +166,7 @@ cat /etc/os-release
 
 On AlmaLinux it looks like this:
 
-```text
+```text { .no-copy }
 NAME="AlmaLinux"
 VERSION="10.x"
 ID="almalinux"
@@ -237,7 +237,7 @@ systemctl is-active firewalld
 
 On the default AlmaLinux 10 lab, the output resembles:
 
-```text
+```text { .no-copy }
 $ cat /etc/os-release
 NAME="AlmaLinux"
 VERSION="10.x"

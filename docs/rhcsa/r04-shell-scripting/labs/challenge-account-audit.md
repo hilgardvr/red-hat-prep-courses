@@ -31,7 +31,7 @@ Write `/srv/r4/bin/accounts`. It takes exactly one argument, the path to a passw
 
 4. For every account whose home directory exists and is a directory, print:
 
-   ```text
+   ```text { .no-copy }
    <user> <home> ok <n>
    ```
 
@@ -39,13 +39,13 @@ Write `/srv/r4/bin/accounts`. It takes exactly one argument, the path to a passw
 
 5. For every account whose home is missing, or is not a directory, print:
 
-   ```text
+   ```text { .no-copy }
    <user> <home> missing
    ```
 
 6. The last line of output must be a summary:
 
-   ```text
+   ```text { .no-copy }
    ok=<count> missing=<count>
    ```
 
@@ -73,7 +73,7 @@ EOF
 
 The correct report for that file is exactly:
 
-```text
+```text { .no-copy }
 alpha /srv/r4/homes/alpha ok 2
 beta /srv/r4/homes/beta ok 0
 ghost /srv/r4/homes/ghost missing
@@ -159,7 +159,7 @@ The checker creates its own passwd-format fixture, with its own user names, home
 <details>
 <summary>Show the expected check output</summary>
 
-```text
+```text { .no-copy }
 R4 Challenge — The account audit
   PASS  script exists: /srv/r4/bin/accounts
   PASS  the script is executable

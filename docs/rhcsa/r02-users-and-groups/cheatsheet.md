@@ -91,7 +91,7 @@ A compact reference for review. Everything here is explained in the [theory page
 
 Rule shape:
 
-```text
+```text { .no-copy }
 who        where = (as_whom)  what
 %operators ALL   = (root)     NOPASSWD: /usr/bin/systemctl status sshd
 devon      ALL   = (ALL)      ALL

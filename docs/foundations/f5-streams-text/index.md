@@ -142,7 +142,7 @@ mv ~/f5/etc-list.sorted ~/f5/etc-list.txt
 
 A pipe connects the stdout of the left command to the stdin of the right command:
 
-```text
+```text { .no-copy }
 command1 | command2 | command3
 ```
 
