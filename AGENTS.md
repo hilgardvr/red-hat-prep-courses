@@ -37,7 +37,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | Area | Status | Notes |
 |---|---|---|
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
-| GitHub Pages workflow | **Complete, not yet run in CI** | `.github/workflows/pages.yml` |
+| GitHub Pages workflow | **Validated 2026-11-10** | `.github/workflows/pages.yml` has run and deployed successfully on `main` |
 | Lab kit | **Validated 2026-11-10** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, `visudo -c` clean on both nodes. Rebuilt from scratch and re-walked on 2026-11-10 against AlmaLinux 10.2 (box `10.2.20260914`). |
 | Foundations F1–F8 | **Complete; walked 2026-11-10** | Eight modules under `docs/foundations/`; every command in F1 and F3–F8 was run on the 2026-11-10 lab. F2 was walked with the lab kit. No automated checkers, by decision. |
 | R1 — Essential tools | **Validated** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker. 66/66 on 2026-11-07 and again on 2026-11-10 after a reboot. |
@@ -374,8 +374,7 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **A rebuilt lab changes the guest host keys.** `labs/provision/common.sh` sets `StrictHostKeyChecking accept-new` for `server` and `node2`, so a first connection succeeds, but an entry left over from a destroyed VM makes the next `ssh` fail with `REMOTE HOST IDENTIFICATION HAS CHANGED`. `docs/start-here/lab-setup.md` tells the learner to clear it with `ssh-keygen -R 10.10.10.11`; `./bin/lab ssh` is unaffected because it goes through Vagrant.
 - **First boot requires internet.** Provisioning installs base packages from AlmaLinux's online repositories, and there is no offline path since `LAB_ISO` was removed on 2026-11-08. A learner behind a restrictive proxy fails at `dnf install`.
 - **Windows and macOS hosts are unsupported.** The lab needs KVM. The only Windows route is WSL2 with nested virtualization, documented as a non-supported note in `lab-setup.md`; macOS Apple Silicon has no tested path.
-- **CI has not run yet.** The Pages workflow is written but unexecuted. The first push to `main` will reveal environment-specific issues.
-- **`SITE_URL` fallback is a placeholder.** The workflow sets it from the repository owner/name. Change the fallback for a custom domain.
+- **`SITE_URL` fallback is a placeholder.** The workflow sets it from the repository owner/name. Change the fallback if a custom domain replaces the default Pages URL.
 - **Material for MkDocs reaches end of life on 2027-05-05.** Critical fixes continue until then. Zensical is the maintained successor; migration is not urgent but should be evaluated before the EOL.
 - **Snapshots consume disk.** The lab docs explain cleanup, but a learner with a small disk can still run out.
 - **`lab check` depends on `vagrant upload`.** Vagrant 2.0+ provides it. If an older Vagrant is used, replace the upload step with `cat | vagrant ssh`.
