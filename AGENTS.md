@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1, R2 and R3 validated; R4 next |
-| **Next milestone** | R4 (then R5) |
+| **Current milestone** | M2 — R1–R4 validated; R5 next |
+| **Next milestone** | R5 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -43,7 +43,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R1 — Essential tools | **Validated** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker. 66/66 on 2026-11-07 and again on 2026-11-10 after a reboot. |
 | R2 — Users and groups | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 = 88). Walked end to end on a fresh lab, 88/88 after a reboot. |
 | R3 — Software and repositories | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 6 + 17 = 33). Walked end to end on a fresh lab, 33/33 after a reboot. |
-| R4–R11 | **Planned** | See the curriculum map below |
+| R4 — Shell scripting | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (14 + 13 + 13 = 40). Checker runs the learner's scripts against its own fixtures; walked end to end on a fresh lab, 40/40 after a reboot. |
+| R5–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -63,7 +64,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
 │   ├── foundations/           # index + F1–F8, complete
-│   ├── rhcsa/                 # module roadmap, R1, R2, R3
+│   ├── rhcsa/                 # module roadmap, R1–R4
 │   │   ├── r01-essential-tools/
 │   │   │   ├── index.md       # theory
 │   │   │   ├── labs/          # 2 guided labs + challenge
@@ -74,7 +75,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r03-software-and-repositories/
+│   │   ├── r03-software-and-repositories/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r04-shell-scripting/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -88,6 +94,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r01/check.sh    # R1 automated checker
 │   ├── checks/r02/check.sh    # R2 automated checker
 │   ├── checks/r03/check.sh    # R3 automated checker
+│   ├── checks/r04/check.sh    # R4 automated checker
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -128,15 +135,18 @@ ruby -c labs/Vagrantfile
 
 ### Checkers without a VM
 
-All three checkers accept `LAB_ROOT` for a synthetic tree of the filesystem half:
+All four checkers accept `LAB_ROOT` for a synthetic tree of the filesystem half:
 
 ```bash
 LAB_ROOT=/tmp/opencode/r1-test bash labs/checks/r01/check.sh lab1
 LAB_ROOT=/tmp/opencode/r2-test bash labs/checks/r02/check.sh lab1
 LAB_ROOT=/tmp/opencode/r3-test bash labs/checks/r03/check.sh lab1
+LAB_ROOT=/tmp/opencode/r4-test bash labs/checks/r04/check.sh all
 ```
 
 Owner-specific and node2 SSH checks will fail outside the real lab; that is expected. The important result is that the checker runs, evaluates each criterion, and exits non-zero on failure.
+
+R4 is the easiest to exercise this way: every R4 check reads a script under `$LAB_ROOT/r4/bin` and runs it. Create `r4/bin/{classify,linereport,accounts}` in a temporary tree, point `LAB_ROOT` at it, and the whole 40-check run works with no VM. The reference implementations used to validate the checker live in `/tmp`, not in the repository.
 
 `LAB_ROOT` only redirects the **directory** checks under `/srv`. R2's account predicates read the live `passwd`/`shadow` databases, and R3's repository predicates read the live `dnf` configuration, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
 
@@ -168,6 +178,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R1 lab 1 (18), lab 2 (21), and the challenge (27) passed; `./bin/lab check r01 all` passed 66/66 after rebooting `server`.
 - R2 lab 1 (27), lab 2 (26), and the challenge (35) passed; `./bin/lab check r02 all` passed 88/88 after rebooting `server`.
 - R3 lab 1 (10), lab 2 (6), and the challenge (17) passed; `./bin/lab check r03 all` passed 33/33 after rebooting `server`. The labs were walked in order on one machine, which is the sequence `all` assumes: Lab 1 leaves `r3-local` and `zsh`, Lab 2 leaves the Flathub remote with an empty store, and the challenge adds `r3-extra`, `tree`, and disabled distro repositories without undoing either.
+- R4 lab 1 (14), lab 2 (13), and the challenge (13) passed; `./bin/lab check r04 all` passed 40/40 after rebooting `server`. The three scripts were written and exercised in order on one machine from the clean snapshot. Unlike R1–R3, the R4 checks do not inspect the lab's own files: they create fresh fixtures in `mktemp -d`, run each script against them, and compare stdout plus exit status, so the lab's sample outputs are never the thing being tested.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -238,12 +249,13 @@ Every RHCSA module follows the same anatomy:
 - The foundations are optional except F2. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`: an experienced admin may skip F1 and F3–F8, but F2 teaches the lab and snapshot workflow, which is course logistics rather than Linux knowledge. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
 - `PACKAGES` in `labs/provision/common.sh` is base state only: things F1 and F2 assert, or that every module needs before it starts. A module that needs a package installs it in its own lab. Do not grow `PACKAGES` for module features — it would force every existing learner to rebuild mid-course.
 
-**Check-script conventions.** There are two reference implementations and they cover different kinds of state:
+**Check-script conventions.** There are three reference implementations and they cover different kinds of state:
 
 - **R1 (`labs/checks/r01/check.sh`) — filesystem state.** Use it as the model for anything under `LAB_ROOT`: files, links, modes, ownership, archives, checksums.
 - **R2 (`labs/checks/r02/check.sh`) — account state.** Use it as the model for users, groups, passwords, aging, `sudo`, and anything else that lives in a system database rather than a file under `/srv`.
+- **R4 (`labs/checks/r04/check.sh`) — program behaviour.** Use it when the deliverable is a script. It builds fixtures with `mktemp -d`, runs the learner's script against them, and compares stdout and exit status. Nothing in it greps the script's source for particular commands.
 
-Both follow these rules:
+All three follow these rules:
 
 - Run as root inside `server`.
 - Accept `lab1|lab2|challenge|all`.
@@ -261,6 +273,15 @@ Account-state checks add these rules:
 - Validate `sudoers` with `visudo -cf` on the file and `visudo -c` on the whole configuration. A drop-in that parses alone can still break the stack.
 - Add at least one negative check that proves the lab is not broken — R2 asserts `labuser` still has `wheel`, which catches a learner who dropped `-a` from `usermod -aG`.
 - Cheap negation checks (`user X does not exist`, `X is not in group Y`) pass vacuously on a fresh machine. That is deliberate and acceptable; do not treat a single passing line as evidence the lab was done.
+
+Behaviour checks (R4) add these rules:
+
+- Build every fixture in `mktemp -d` and delete it on exit with a `trap`. Never borrow the lab's own sample directory: a script that hardcodes the lab's answers would then pass.
+- Compare **stdout and exit status**, not stderr text. An error message is a diagnostic, not a contract; the exit code is the contract.
+- Print the expected and actual values on failure (`%q` shows spaces and newlines). For a script, "FAIL" alone is nearly useless — the learner needs to see what their script printed.
+- Assert exit codes with `rc_is`, output with exact-string or line-set comparisons. Keep one negative check where it teaches something (R4 asserts the subdirectory was not counted, which catches `find` without `-maxdepth`).
+- Gate every negative check on a non-empty result. "The subdirectory is absent" is true when the script printed nothing at all, so the R4 predicates require `[ -n "$OUT" ]` first; without that guard a clean snapshot passes four checks that should fail.
+- A missing or non-executable script makes every behavioural check fail with `exit 127`. That is honest and still readable, because each line names the script.
 
 ---
 
@@ -288,7 +309,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R1 | Essential tools | 1 | **Validated 2026-11-10** |
 | R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | **Validated 2026-11-10** |
 | R3 | Software: DNF, RPM repos, Flatpak | 2 | **Validated 2026-11-10** |
-| R4 | Shell scripting | 3 | Planned |
+| R4 | Shell scripting | 3 | **Validated 2026-11-10** |
 | R5 | Processes, systemd services, journald, tuned | 4 | Planned |
 | R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | Planned |
 | R7 | ext4/XFS/VFAT, NFS, autofs, extend LVs | 6 | Planned |
@@ -331,6 +352,10 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R3's Flatpak remote is Flathub | The objective is "configure access to Flatpak repositories". Flathub is the public reference remote and one command to add; building a local OSTree repository would add machinery without teaching anything the objective asks for. Lab 2 therefore needs internet, and the module says so. |
 | R3 Lab 2 installs an app, then removes it | Leaving `org.gnome.Calculator` installed would contradict the challenge's "no Flatpak application" requirement, so `check r03 all` could never pass. The lab ends with a configured remote and an empty store; the challenge tests that same end state from scratch. |
 | R3 checker pins every `dnf` query to one repository | `--disablerepo='*' --enablerepo=<id>` keeps the checker off the network: same answer offline, and a distro repo that happens to carry the package cannot make a pass look real. |
+| R4 checks behaviour, not source (2026-11-10) | A script is a program; the only honest test is to run it. Grepping for `if` or `for` would pass a script that prints the right words and fails on any other input. The checker supplies its own fixtures, so hardcoding the lab's sample output cannot pass. |
+| R4 fixtures are built in `mktemp -d` | They must not be the lab's own files. Independent paths and line counts (3, 5, 2, and an empty file) prove the script computes rather than remembers, and the whole checker then runs off-VM with `LAB_ROOT`. |
+| R4's challenge reads a passwd **file argument**, not `/etc/passwd` | The result would otherwise depend on which accounts the machine has, and a missing home on the real system would make a correct script "fail". A captured file makes the task reproducible and teaches why scripts take input as arguments. |
+| R4 scripts live in `/srv/r4/bin` | Keeps every module's artefacts under `/srv`, so `restore clean` removes R4 completely and no module leaves files in `PATH` for the next one. `/usr/local/bin` is taught as the persistent alternative, not used. |
 | Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
 
 ---
@@ -364,7 +389,13 @@ When adding or revising a foundation, repeat the same five steps:
   - Every `dnf` query in the checker is pinned with `--disablerepo='*'` and one explicit `--enablerepo`, so the checker never contacts a mirror and gives the same answer on an offline machine.
   - Package provenance is asserted with the `@repo` column of `dnf list`, not by trusting that the learner used a particular command.
   - The challenge requires the distro repositories to stay disabled, so the docs tell the learner to run the checker **before** re-enabling them; `all` assumes the challenge end state, the same way R1 `all` assumes every lab's files are still present.
-- **R4:** conditionals, loops, arguments, command substitution. Checker runs the learner's script against test inputs.
+- **R4 — done and validated 2026-11-10 (40/40 from a clean snapshot).** Shell scripting: shebang, exit codes, `[ ]` tests, `if`/`case`, arguments, `for`, `while read`, `$(...)`, arithmetic. Design decisions worth keeping:
+  - The checker **runs the learner's scripts** against fixtures it builds itself, and compares stdout and exit status. It never greps the script for a particular command, and it never reuses the lab's sample paths, so hardcoding the lab output fails.
+  - Scripts live in `/srv/r4/bin`, run by absolute path. `/usr/local/bin` is mentioned as the alternative that is in `PATH`, but the module does not install anything outside `/srv`, so `restore clean` removes all of R4.
+  - Lab 1 (`classify`) is deliberately built around test **order**: `-L` before `-e` is the only way a broken symlink is reported as a link. The checker includes a broken link and a filename with a space, which catch the two most common bash bugs.
+  - Lab 2 (`linereport`) uses `wc -l < "$f"` so the captured value is a number and nothing else, and confirms that an empty file counts as `0` while a subdirectory and a broken link are skipped.
+  - The challenge (`accounts`) reads a passwd-format **file given as an argument** rather than `/etc/passwd`, so the result does not depend on the machine's accounts. It forces `IFS=: read` plus `done < file`; a learner who pipes into `while` loses the counters and the summary line fails.
+  - Every expected-output block in the labs was captured on the VM, including `ls -l` sizes and the `[: too many arguments` message. The sample outputs in the challenge use `/srv/r4/homes/*`, so the counts are reproducible.
 
 ### M3 — R5–R11
 
@@ -430,6 +461,10 @@ cd labs
 ./bin/lab check r03 lab2
 ./bin/lab check r03 challenge
 ./bin/lab check r03 all
+./bin/lab check r04 lab1
+./bin/lab check r04 lab2
+./bin/lab check r04 challenge
+./bin/lab check r04 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

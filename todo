@@ -1,0 +1,1 @@
+- Programs are not consistent. ls accepts options after arguments; tar traditionally wants the archive name right after -f; some tools use -n for "dry run" and others for "numeric".

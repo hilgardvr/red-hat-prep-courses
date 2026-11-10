@@ -38,14 +38,14 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 3. Create simple shell scripts
 
-**Module R4** — <span class="badge badge-planned">Planned</span>
+**Module R4** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
-| Conditionally execute code (`if`, `test`, `[]`, etc.) | R4 |
-| Use looping constructs (`for`, etc.) to process file and command-line input | R4 |
-| Process script inputs (`$1`, `$2`, etc.) | R4 |
-| Process the output of shell commands within a script | R4 |
+| Conditionally execute code (`if`, `test`, `[]`, etc.) | [R4 — Testing conditions](../rhcsa/r04-shell-scripting/index.md#testing-conditions) and [Conditionals](../rhcsa/r04-shell-scripting/index.md#conditionals) |
+| Use looping constructs (`for`, etc.) to process file and command-line input | [R4 — Loops](../rhcsa/r04-shell-scripting/index.md#loops) |
+| Process script inputs (`$1`, `$2`, etc.) | [R4 — Arguments](../rhcsa/r04-shell-scripting/index.md#arguments) |
+| Process the output of shell commands within a script | [R4 — Command substitution](../rhcsa/r04-shell-scripting/index.md#command-substitution) |
 
 ## 4. Operate running systems
 

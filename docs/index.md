@@ -65,7 +65,8 @@
 | **R1 — Essential tools** | Shell syntax, help system, files, links, permissions, streams, grep, archives, SSH | <span class="badge badge-ready">Available</span> |
 | **R2 — Users and groups** | Accounts, groups, password aging, `sudo`, default permissions | <span class="badge badge-ready">Available</span> |
 | **R3 — Software and repositories** | DNF, RPM repositories, local repos, Flatpak | <span class="badge badge-ready">Available</span> |
-| **R4–R11** | Scripting, services, storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
+| **R4 — Shell scripting** | Arguments, conditionals, loops, command substitution, exit codes | <span class="badge badge-ready">Available</span> |
+| **R5–R11** | Services, storage, filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
 | **R12 — Capstone** | Timed mock exams and a full review | <span class="badge badge-planned">Planned</span> |
 
 [See the full module roadmap](rhcsa/index.md){ .md-button }
