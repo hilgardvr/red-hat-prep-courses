@@ -375,6 +375,8 @@ ls -d ~/f3/*
 
 Brace expansion created three directories in one command even though none existed.
 
+The `ls /etc/[abc]*` line may also print a couple of `Permission denied` lines for `/etc/credstore` and `/etc/credstore.encrypted`. Those are directories owned by `root` with no access for other users, and `ls` reports the failure on stderr while still listing everything it can read. It is normal noise on a RHEL system, not a mistake in your command.
+
 ### 4. Reuse history
 
 ```bash

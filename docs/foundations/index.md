@@ -2,10 +2,10 @@
 
 The exam objectives assume a working mental model of Linux. You do not need to be a kernel developer, but you do need to know what a process is, how the filesystem is organized, what a service manager does, and why permissions behave the way they do.
 
-This pre-course builds that model. It is **optional for experienced Linux users** and **strongly recommended for beginners**. None of it is decorative: every foundation topic reappears in the exam modules.
+This pre-course builds that model. It is **optional for experienced Linux users — except [F2](f2-lab-first-login/index.md), which sets up the course lab** — and **strongly recommended for beginners**. None of it is decorative: every foundation topic reappears in the exam modules.
 
-!!! note "You can skip this section"
-    If you already administer Linux daily, skip the foundations and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). If you are not sure, answer the self-assessment below without looking anything up. No hesitation means you do not need this pre-course.
+!!! note "You can skip most of this section"
+    If you already administer Linux daily, skip F1 and F3–F8 and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md). Read [F2](f2-lab-first-login/index.md) first even so: it covers this course's lab and snapshot workflow, which is not Linux knowledge and is not repeated in full later. If you are not sure, answer the self-assessment below without looking anything up. No hesitation means you do not need F1 or F3–F8.
 
 ## What you will learn
 
@@ -24,7 +24,7 @@ This pre-course builds that model. It is **optional for experienced Linux users*
 
 - **Beginner:** do all eight modules. They take roughly 15–20 hours including practice.
 - **Some Linux experience:** skim F1–F4, do F5–F8 properly.
-- **Working admin:** use the self-assessment below. If you can answer every question without looking it up, skip to [R1](../rhcsa/r01-essential-tools/index.md).
+- **Working admin:** use the self-assessment below. If you can answer every question without looking it up, skip F1 and F3–F8 and go to [R1](../rhcsa/r01-essential-tools/index.md) — after [F2](f2-lab-first-login/index.md), which explains the lab every module runs on.
 
 ## Self-assessment
 
@@ -61,6 +61,8 @@ When a foundation topic goes deeper than the exam requires, the page says so. Sk
 ## Start
 
 Work through them in order. F1 explains the platform, F2 gets the lab running and teaches the snapshot workflow used by every later module, and F3–F8 build the working knowledge R1 assumes.
+
+If you are skipping the foundations as an experienced admin, F2 is the one module to keep: the rest of the course assumes you can start the lab, snapshot it, and get back to a known state.
 
 - [F1 — Linux, open source, and the RHEL family](f1-linux-rhel-family/index.md)
 - [F2 — The lab: virtualization and first login](f2-lab-first-login/index.md)

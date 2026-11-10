@@ -203,18 +203,22 @@ You should see a series of `PASS` lines. If something fails, read the message, f
 
 ```text
 R1 Lab 1 — Files and links
+  PASS  /srv/r1 exists
   PASS  /srv/r1 is owned by labuser:labuser
-  PASS  directory exists: /srv/r1/project/docs
-  PASS  directory exists: /srv/r1/project/src/nested/deep
-  PASS  file exists: /srv/r1/project/docs/readme.txt
-  PASS  file exists: /srv/r1/project/docs/notes.txt
-  PASS  file exists: /srv/r1/project/archive/old.txt
+  PASS  directory: /srv/r1/project/docs
+  PASS  directory: /srv/r1/project/src/nested/deep
+  PASS  directory: /srv/r1/project/archive
+  PASS  file: /srv/r1/project/docs/readme.txt
+  PASS  file: /srv/r1/project/docs/notes.txt
+  PASS  file: /srv/r1/project/archive/old.txt
   PASS  removed: /srv/r1/project/docs/delete-me.txt
+  PASS  hard link exists: /srv/r1/project/archive/readme-hardlink.txt
   PASS  hard link shares an inode with docs/readme.txt
   PASS  hard link count is 2 for docs/readme.txt
   PASS  symlink readme-softlink -> docs/readme.txt
   PASS  readme.txt contains the lab marker
   PASS  notes.txt contains the copied content
+  PASS  notes.txt contains the appended line
   PASS  notes.txt was edited in an editor
   PASS  old.txt was moved, not copied
 ```

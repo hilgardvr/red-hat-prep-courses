@@ -52,11 +52,11 @@ passwd -S mira
 ```
 
 ```text
-devon PS 2026-11-08 0 99999 7 -1 (Password set, SHA512 crypt.)
-mira  PS 2026-11-08 0 99999 7 -1 (Password set, SHA512 crypt.)
+devon P 2026-11-10 0 99999 7 -1
+mira  P 2026-11-10 0 99999 7 -1
 ```
 
-`PS` means a usable password is set. `LK` would mean locked, `NP` would mean no password at all. The four numbers are the minimum, maximum, warning, and inactivity values from `/etc/shadow`; they still hold the defaults from `/etc/login.defs` until you set the policy in the next step.
+`P` means a usable password is set. `L` would mean locked, `NP` would mean no password at all. (Some releases print the two-letter `PS` and `LK`; the meaning is the same.) The four numbers are the minimum, maximum, warning, and inactivity values from `/etc/shadow`; they still hold the defaults from `/etc/login.defs` until you set the policy in the next step.
 
 Look at the hash without printing it in full:
 
@@ -65,10 +65,10 @@ getent shadow devon | cut -d: -f1,2 | cut -c1-20
 ```
 
 ```text
-devon:$6$Q2
+devon:$y$j9T
 ```
 
-`$6$` is the SHA-512 crypt scheme. You never need to produce one by hand — `passwd` does it.
+`$y$` is yescrypt, the default on RHEL 10 and AlmaLinux 10. Older systems show `$6$` for SHA-512. Either way you never need to produce a hash by hand — `passwd` does it.
 
 ## Step 2 — Set password aging with `chage`
 
@@ -126,7 +126,7 @@ chage -l mira
 ```
 
 ```text
-mira LK 2026-11-08 5 60 10 -1 (Password locked.)
+mira L 2026-11-10 5 60 10 -1
 ```
 
 The aging values are still there. Locking is not deletion and it does not clear the policy — it prefixes the hash with `!`, so the password cannot be verified.
@@ -138,7 +138,7 @@ getent shadow mira | cut -d: -f1,2 | cut -c1-12
 ```
 
 ```text
-mira:!$6$Q2
+mira:!$y$j9T
 ```
 
 Do not unlock her; the locked state is what the checker expects. When you want it back, `passwd -u mira` (or `usermod -U mira`) removes the `!`.
@@ -171,17 +171,17 @@ That is what every real onboarding process does: an administrator sets a tempora
 Look at the baseline first. Read the main file, but do not edit it:
 
 ```bash
-grep -E '^(@includedir|%wheel)' /etc/sudoers
+grep -E '^(#includedir|@includedir|%wheel)' /etc/sudoers
 visudo -c
 ```
 
 ```text
-@includedir /etc/sudoers.d
 %wheel	ALL=(ALL)	ALL
+#includedir /etc/sudoers.d
 /etc/sudoers: parsed OK
 ```
 
-`%wheel ALL=(ALL) ALL` is the standard "full administrator" grant, and it is why `labuser` can use `sudo`. Your own rules go in `/etc/sudoers.d`, never in the main file.
+`%wheel ALL=(ALL) ALL` is the standard "full administrator" grant, and it is why `labuser` can use `sudo`. `#includedir` is **not** a comment — in the sudoers grammar a leading `#` on that directive means "include". AlmaLinux 10 uses the legacy spelling; newer releases write `@includedir`. Either way `/etc/sudoers.d` is read, and that is where your own rules go, never in the main file.
 
 Write the candidate in `/tmp` and validate it **before** it is reachable by `sudo`:
 
@@ -207,10 +207,16 @@ visudo -c
 ```
 
 ```text
--r--r-----. 1 root root 118 ... 10-r2-operators
+-r--r-----. 1 root root 152 ... 10-r2-operators
+-r--r-----. 1 root root 135 ... 90-cloud-init-users
+-r--r-----. 1 root root  22 ... 90-rhcsa-labuser
+-r--r-----. 1 root root  40 ... vagrant
 /etc/sudoers: parsed OK
 /etc/sudoers.d/10-r2-operators: parsed OK
+...
 ```
+
+The lab image ships its own drop-ins (`90-cloud-init-users` gives `vagrant` passwordless sudo; `90-rhcsa-labuser` gives `labuser` normal sudo). Your new file is the only one you created; the rest are expected.
 
 Mode `0440` and root ownership are not style choices. `sudo` ignores drop-in files that an unprivileged user could have modified, and it ignores filenames containing a dot — that is how it skips `10-r2-operators~` after an editor crash.
 
@@ -221,6 +227,8 @@ sudo -l -U devon
 ```
 
 ```text
+Matching Defaults entries for devon on server:
+    ...
 User devon may run the following commands on server:
     (root) NOPASSWD: /usr/bin/systemctl status sshd, /usr/bin/journalctl -u sshd
 ```
@@ -240,8 +248,10 @@ su - devon -c 'sudo -n systemctl restart sshd'
 ```
 
 ```text
-Sorry, user devon is not allowed to execute '/usr/bin/systemctl restart sshd' as root on server.
+sudo: a password is required
 ```
+
+`-n` means "never prompt". A command that is not covered by a `NOPASSWD` rule would need a password, so with `-n` it fails immediately instead of hanging your script. Drop the `-n` and you would be asked for devon's password, then refused.
 
 That refusal is the point. The rule names one command line, so a different verb is not covered.
 
@@ -251,7 +261,7 @@ For contrast, `mira` is not in `operators`:
 sudo -l -U mira
 ```
 
-Her list is empty. Locking her does not affect this — `sudo -l -U` reports policy, not current login ability.
+Her list is empty — `sudo` reports `User mira is not allowed to run sudo on server.` Locking her does not affect this; `sudo -l -U` reports policy, not current login ability.
 
 ## Step 6 — Set a umask for one user
 
@@ -373,7 +383,7 @@ The last check exists for a reason: it is the one that catches a learner who rem
 
 ## What to remember
 
-- `passwd -S` answers "is this account usable with a password?" — `PS`, `LK`, or `NP`.
+- `passwd -S` answers "is this account usable with a password?" — `P`, `L`, or `NP` (`PS`/`LK` on older releases).
 - `chage -M` expires the password; `chage -E` expires the account; `chage -d 0` forces a change.
 - `passwd -l` blocks password login only, not SSH keys or running services.
 - Rules belong in `/etc/sudoers.d`, mode `0440`, root-owned, no dot in the name.

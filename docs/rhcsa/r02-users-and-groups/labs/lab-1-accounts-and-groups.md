@@ -127,11 +127,11 @@ getent passwd mira
 Expected:
 
 ```text
-uid=1002(mira) gid=3001(developers) groups=3001(developers)
-mira:x:1002:3001:Mira Chen:/home/mira:/bin/bash
+uid=3002(mira) gid=3001(developers) groups=3001(developers)
+mira:x:3002:3001:Mira Chen:/home/mira:/bin/bash
 ```
 
-Your UID will be whatever came next in the `1000–60000` range — the lab's existing accounts take `1000` and `1001`. Leave it unpinned: an exam task only asks for a specific UID when it gives you one.
+`useradd` continues above the highest UID already in use, so on this lab mira gets `3002` rather than `1002`. Leave it unpinned: an exam task names a UID only when it wants one.
 
 Note that mira's GID is `3001`, the same number as devon's. They share the group; they do not share the UID.
 
@@ -145,7 +145,7 @@ id tempuser
 ```
 
 ```text
-uid=1003(tempuser) gid=1003(tempuser) groups=1003(tempuser),3001(developers)
+uid=3003(tempuser) gid=3003(tempuser) groups=3003(tempuser),3001(developers)
 ```
 
 Now replace the list instead of adding to it:
@@ -156,7 +156,7 @@ id tempuser
 ```
 
 ```text
-uid=1003(tempuser) gid=1003(tempuser) groups=1003(tempuser),3002(operators)
+uid=3003(tempuser) gid=3003(tempuser) groups=3003(tempuser),3002(operators)
 ```
 
 `developers` is gone. `-G` means "this is the complete list now". Remove the test account and do it properly:
@@ -189,10 +189,12 @@ ls -ld /var/lib/buildbot
 Expected shape:
 
 ```text
-uid=997(buildbot) gid=995(buildbot) groups=995(buildbot)
-buildbot:x:997:995:Build service:/var/lib/buildbot:/sbin/nologin
-drwx------. 2 buildbot buildbot 6 ... /var/lib/buildbot
+uid=994(buildbot) gid=993(buildbot) groups=993(buildbot)
+buildbot:x:994:993:Build service:/var/lib/buildbot:/sbin/nologin
+drwx------. 2 buildbot buildbot ... /var/lib/buildbot
 ```
+
+The exact number depends on which system accounts the box already has; on a fresh lab it lands in the `990s`.
 
 Three things to notice:
 
@@ -226,8 +228,8 @@ ls -l /home/contractor
 `getent` prints nothing — the account is gone from `/etc/passwd`. But the home directory is still there, and now its owner is a number:
 
 ```text
-drwx------. 2 1003 1002 4096 ... /home/contractor
--rw-r--r--. 1 1003 1002   32 ... handover.txt
+drwx------. 2 3003 3003 ... /home/contractor
+-rw-r--r--. 1 3003 3003   30 ... handover.txt
 ```
 
 Those numbers are the deleted UID and GID. The files are intact; there is simply no name left to show. This is what "delete the user, keep the files" looks like, and it is why you check for orphaned files before recreating an account with a recycled UID.
@@ -280,17 +282,17 @@ ls -l /srv/r2/team
 Expected:
 
 ```text
-developers:x:3001:labuser
+developers:x:3001:
 operators:x:3002:devon,labuser
 devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
-mira:x:1002:3001:Mira Chen:/home/mira:/bin/bash
-buildbot:x:997:995:Build service:/var/lib/buildbot:/sbin/nologin
+mira:x:3002:3001:Mira Chen:/home/mira:/bin/bash
+buildbot:x:994:993:Build service:/var/lib/buildbot:/sbin/nologin
 uid=3001(devon) gid=3001(developers) groups=3001(developers),3002(operators)
--rw-r-----. 1 devon developers 32 ... handover.txt
--rw-r-----. 1 mira  developers 21 ... notes.txt
+-rw-r-----. 1 devon developers 30 ... handover.txt
+-rw-r-----. 1 mira  developers 23 ... notes.txt
 ```
 
-Notice `developers` lists `labuser` but not `devon` or `mira`: they are in it as their primary group, so they do not appear in the member list.
+`operators` lists `devon` and `labuser` because it is a supplementary group for both. `developers` has no members listed: devon and mira use it as their **primary** group, and primary groups never appear in the member list. Add `labuser` to `developers` and only then would that line change.
 
 ## Step 10 — Run the checker
 

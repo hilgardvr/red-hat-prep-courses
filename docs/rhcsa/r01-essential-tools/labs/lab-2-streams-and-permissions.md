@@ -231,17 +231,24 @@ From the host:
 
 ```text
 R1 Lab 2 — Streams and permissions
+  PASS  sample.log exists
   PASS  sample.log has 10 lines
-  PASS  errors.txt contains only ERROR lines (4)
+  PASS  errors.txt contains only ERROR lines
+  PASS  errors.txt has 4 lines
   PASS  error-count.txt is 4
   PASS  ips.txt contains the three unique addresses
   PASS  stdout.txt contains /etc/hosts
   PASS  stderr.txt contains the missing-file error
-  PASS  combined.txt contains both streams
-  PASS  /srv/r1/secure is mode 755
-  PASS  report.txt is mode 640 and owned by labuser:labuser
-  PASS  run.sh is executable and mode 750
-  PASS  /srv/r1/shared is mode 770
+  PASS  combined.txt contains stdout
+  PASS  combined.txt contains stderr
+  PASS  secure directory is mode 755
+  PASS  report.txt is mode 640
+  PASS  report.txt is owned by labuser:labuser
+  PASS  report.txt contains the report text
+  PASS  run.sh is executable
+  PASS  run.sh is mode 750
+  PASS  run.sh is owned by labuser:labuser
+  PASS  shared directory is mode 770
   PASS  notice.txt is mode 644
   PASS  private.txt is mode 640
   PASS  umask.txt records 0027

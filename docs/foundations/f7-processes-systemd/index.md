@@ -326,9 +326,14 @@ journalctl -x -u sshd -n 3 --no-pager
 Now generate an event by opening a second SSH session from the host, or by making a failed login attempt from `server`:
 
 ```bash
-ssh -o BatchMode=yes -o ConnectTimeout=2 labuser@localhost true
+ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+    -o ConnectTimeout=2 labuser@localhost true
 journalctl -u sshd -n 5 --no-pager
 ```
+
+The client prints `Permission denied (publickey,...)`: the lab key is configured for `server` and `node2`, not for `localhost`, so the attempt is refused. `journalctl` still records it, as a `Connection closed by authenticating user` line. A refused login is the event you wanted to see.
+
+`StrictHostKeyChecking=accept-new` is there only so the first `localhost` connection does not stop at `Host key verification failed` before the login is ever attempted.
 
 ### 4. Find errors from this boot
 

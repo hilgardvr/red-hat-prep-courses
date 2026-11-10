@@ -223,6 +223,8 @@ du -sh /var/log
 sudo du -h --max-depth=1 /var | sort -h | tail
 ```
 
+The unprivileged `du` prints a few `Permission denied` lines for subdirectories like `/var/log/audit`, so its total understates the tree; the `sudo` line sees everything.
+
 If `df` says a filesystem is full while `du` does not, look for **deleted files that are still open**:
 
 ```bash
@@ -270,7 +272,7 @@ getenforce
 sestatus
 id -Z
 ls -Zd /etc /var/log /home /tmp
-ps -Z | grep sshd
+ps -ZC sshd
 ```
 
 `getenforce` prints one word. `sestatus` prints a short block that also names the policy and its mode:
@@ -291,10 +293,13 @@ system_u:object_r:etc_t:s0 /etc
 system_u:object_r:var_log_t:s0 /var/log
 system_u:object_r:home_root_t:s0 /home
 system_u:object_r:tmp_t:s0 /tmp
-system_u:system_r:sshd_t:s0-s0:c0.c1023 812 ? 00:00:00 sshd
+LABEL                                     PID TTY          TIME CMD
+system_u:system_r:sshd_t:s0-s0:c0.c1023  1094 ?   00:00:00 sshd
 ```
 
 The type is what matters in practice. A file in `/var/log` is `var_log_t`, and a service allowed to write `var_log_t` can write it; a service not allowed to cannot, regardless of the `rwx` bits.
+
+Use `ps -ZC sshd` rather than `ps -Z | grep sshd`. The plain form also matches `sshd-session`, the per-login child process that runs with *your* user context, so the first line it prints is `unconfined_t` and looks wrong. The listener — the process that owns the service — is the one with `sshd_t`.
 
 ### Modes
 
@@ -424,6 +429,8 @@ free -h
 swapon --show
 ```
 
+The unprivileged `du` reports `Permission denied` for subdirectories such as `/var/log/audit` and understates the tree; the `sudo` line does not.
+
 If `swapon --show` prints nothing, the lab has no swap. That is worth knowing before R6 adds some.
 
 ### 6. SELinux state and labels
@@ -433,10 +440,10 @@ getenforce
 sestatus | head
 id -Z
 ls -Zd /etc /var/log /home /tmp
-ps -Z | grep sshd
+ps -ZC sshd
 ```
 
-Confirm that the system is enforcing and that every file has a type. Note that your shell is `unconfined_t` while `sshd` is `sshd_t`.
+Confirm that the system is enforcing and that every file has a type. Note that your shell is `unconfined_t` while the `sshd` listener is `sshd_t`.
 
 ### 7. Reproduce the label problem
 

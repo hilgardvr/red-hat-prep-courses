@@ -80,7 +80,7 @@ devon:x:3001:3001:Devon Rivera:/home/devon:/bin/bash
 ### `/etc/shadow` fields
 
 ```text
-devon:$6$Q2...:20430:7:90:14:::
+devon:$y$j9T$...:20430:7:90:14:::
   │      │        │   │ │  │  └─ fields 7-9: inactive days, expiry, reserved
   │      │        │   │ │  └─ warning days before the password expires
   │      │        │   │ └─ maximum days between password changes
@@ -260,10 +260,10 @@ Renaming does not rename the home directory or the group. Do those separately, o
 ### Changing the password hash directly
 
 ```bash
-usermod -p '$6$...' devon
+usermod -p '$y$...' devon
 ```
 
-`-p` writes the encrypted hash, not a plain password. Use `passwd` unless you are generating hashes in an automated build.
+`-p` writes the encrypted hash, not a plain password. `$y$` is yescrypt, the RHEL 10 default; older systems use `$6$` for SHA-512. Use `passwd` unless you are generating hashes in an automated build.
 
 ---
 
@@ -284,10 +284,10 @@ The default is deliberately conservative. It keeps data that might be needed. Th
 ```bash
 userdel contractor
 ls -ld /home/contractor
-# drwx------. 2 1003 1003 4096 ... /home/contractor
+# drwx------. 2 3003 3003 ... /home/contractor
 ```
 
-That `1003` is the orphaned UID. To hand the data to someone else:
+Those numbers are the orphaned UID and GID — whatever `useradd` happened to assign. To hand the data to someone else:
 
 ```bash
 chown -R devon:developers /home/contractor
@@ -343,11 +343,11 @@ passwd -S devon        # status: is it set, locked, or absent?
 `passwd -S` is the fastest way to answer "can this account log in with a password?"
 
 ```text
-devon PS 2026-11-08 7 90 14 -1 (Password set, SHA512 crypt.)
-mira  LK 2026-11-08 5 60 10 -1 (Password locked.)
+devon P 2026-11-10 7 90 14 -1
+mira  L 2026-11-10 5 60 10 -1
 ```
 
-The second field is `PS` (set), `LK` (locked), or `NP` (no password). The four numbers are the minimum, maximum, warning, and inactivity values from `/etc/shadow`, in that order.
+The second field is `P` (set), `L` (locked), or `NP` (no password); some releases print the two-letter `PS` and `LK`, with the same meaning. The four numbers are the minimum, maximum, warning, and inactivity values from `/etc/shadow`, in that order. RHEL 10 no longer appends a parenthetical such as `(Password set, SHA512 crypt.)`.
 
 ### Locking and unlocking
 
@@ -441,8 +441,10 @@ By default `sudo` remembers your password for five minutes **per terminal**. `su
 The main file is `/etc/sudoers`. It is mode `0440` and you do not edit it directly. It ends with:
 
 ```text
-@includedir /etc/sudoers.d
+#includedir /etc/sudoers.d
 ```
+
+The `#` here is part of the directive, not a comment: in the sudoers grammar that spelling means "include". AlmaLinux 10 uses it; newer sudo releases also accept `@includedir`.
 
 Everything in `/etc/sudoers.d/` is read as part of the configuration. That is where your rules go. Files there must:
 

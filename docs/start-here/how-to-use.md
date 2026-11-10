@@ -8,7 +8,7 @@ This course is built for people who want to **do the job**, not just pass a quiz
 - You can use a text editor and a terminal, but you do not need previous RHEL experience.
 - You want to earn RHCSA and understand what you are doing, not memorize a command list.
 
-If you already administer Linux daily, you can skip the foundations entirely and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md), then continue to [R2 — Users and groups](../rhcsa/r02-users-and-groups/index.md). If you are new to Linux, work through [Foundations](../foundations/index.md) first. The [objective coverage matrix](../reference/objective-coverage.md) shows exactly where each exam bullet is taught.
+If you already administer Linux daily, you can skip most of the foundations and start with [R1 — Essential tools](../rhcsa/r01-essential-tools/index.md), then continue to [R2 — Users and groups](../rhcsa/r02-users-and-groups/index.md). Read [F2 — The lab](../foundations/f2-lab-first-login/index.md) first anyway: it covers this course's lab — the two virtual machines, snapshots, and the `./bin/lab` workflow — which is course logistics rather than Linux knowledge, and no later module repeats it in full. If you are new to Linux, work through [Foundations](../foundations/index.md) in order. The [objective coverage matrix](../reference/objective-coverage.md) shows exactly where each exam bullet is taught.
 
 ## The module pattern
 
@@ -36,7 +36,7 @@ cd labs
 ./bin/lab ssh             # log in to server
 ```
 
-Before each lab, restore the clean snapshot so you start from a known state:
+Before each lab, restore the clean snapshot so you start from a known state — unless the module says the next lab builds on the previous one:
 
 ```bash
 ./bin/lab restore clean
@@ -51,16 +51,18 @@ After completing the lab, run the checker **from the host**:
 The checker runs inside `server` as root and reports each criterion:
 
 ```text
-Lab 1 — Files and links
-  PASS  directory exists: /srv/r1/project/docs
+R1 Lab 1 — Files and links
+  PASS  directory: /srv/r1/project/docs
   PASS  hard link shares an inode with docs/readme.txt
   FAIL  symlink readme-softlink -> docs/readme.txt
 ```
 
 Fix the failing items and run it again. A lab is complete when every line passes.
 
-!!! tip "Check after reboot"
-    For any task that changes system configuration, reboot `server` and run the checker again. This is the single most common way candidates lose points on EX200.
+!!! tip "Reboot inside the VM, then check again"
+    For any task that changes system configuration, reboot `server` **from inside your SSH session** with `sudo systemctl reboot`, then reconnect from the host and run the checker. This is the single most common way candidates lose points on EX200.
+
+    When the VM reboots your session drops. Wait 30–60 seconds, then from the host run `./bin/lab status` followed by `./bin/lab ssh`. Run the checker **before** you restore the snapshot, or you will throw away the work you are trying to verify. The full sequence is in [F2 — The lab workflow](../foundations/f2-lab-first-login/index.md#the-lab-workflow).
 
 ## The persistence rule
 

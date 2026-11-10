@@ -127,6 +127,14 @@ labuser ALL=(ALL) ALL
 EOF
 chmod 440 /etc/sudoers.d/90-rhcsa-labuser
 
+# The AlmaLinux box ships /etc/sudoers.d/vagrant at mode 0644. sudo ignores a
+# world-readable drop-in, and `visudo -c` reports it as "bad permissions" with
+# a non-zero exit — which fails the R2 checkers on a perfect lab. The same
+# grant lives in 90-cloud-init-users, so repairing the mode is enough.
+if [ -f /etc/sudoers.d/vagrant ]; then
+  chmod 0440 /etc/sudoers.d/vagrant
+fi
+
 # ---------------------------------------------------------------------------
 # Shared lab SSH key and client configuration
 # ---------------------------------------------------------------------------

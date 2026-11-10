@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Time** | 1–2 hours |
-| **Prerequisites** | [F1 — Linux, open source, and the RHEL family](../f1-linux-rhel-family/index.md) |
+| **Prerequisites** | None; [F1 — Linux, open source, and the RHEL family](../f1-linux-rhel-family/index.md) is recommended background |
 | **Lab** | Start both VMs, log in, inspect the system, test cross-VM SSH, and use snapshots |
 | **Self-check** | At the end of the page |
 
@@ -279,13 +279,15 @@ Use the same rhythm for every module:
 
 4. **Do the lab.** Read the expected output, run the commands, and inspect the result.
 
-5. **Reboot when the lab asks for it.** This is the persistence test:
+5. **Reboot the VM when the lab asks for it.** This is the persistence test. Run it inside your SSH session on `server`, as `labuser` — not on your host:
 
     ```bash
     sudo systemctl reboot
     ```
 
-    Your SSH session disconnects. Wait 30–60 seconds, then reconnect:
+    A reboot is a guest action. Running it on your host restarts your workstation and takes the lab down with it.
+
+    Your SSH session disconnects. Wait 30–60 seconds, then reconnect from **the host**:
 
     ```bash
     ./bin/lab status
@@ -300,7 +302,7 @@ Use the same rhythm for every module:
     ./bin/lab check r01 lab1
     ```
 
-7. **Restore the clean snapshot** when you are finished, or before starting a different lab:
+7. **Restore the clean snapshot** when you are finished, or before starting a different lab — unless that lab says it builds on the previous one. R1's two labs and its challenge are cumulative, so do not restore between them:
 
     ```bash
     ./bin/lab restore clean

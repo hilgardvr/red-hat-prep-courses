@@ -6,8 +6,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-08 |
-| **Current milestone** | M2 in progress — R2 content complete, validation pending |
+| **Last updated** | 2026-11-10 |
+| **Current milestone** | M2 — R1 and R2 validated; R3 next |
 | **Next milestone** | R3 (then R4) |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
@@ -38,10 +38,10 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 |---|---|---|
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
 | GitHub Pages workflow | **Complete, not yet run in CI** | `.github/workflows/pages.yml` |
-| Lab kit | **Complete; re-validation pending** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, all R1 checkers passed on 2026-11-07. The 2026-11-08 box pin is syntax-checked only. |
-| Foundations F1–F8 | **Complete** | Eight modules under `docs/foundations/`; style reference for future modules |
-| R1 — Essential tools | **Validated** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker. 66/66 on 2026-11-07. |
-| R2 — Users and groups | **Content complete; validation pending** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 checks). Written against a real lab design but not yet walked end to end. |
+| Lab kit | **Validated 2026-11-10** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, `visudo -c` clean on both nodes. Rebuilt from scratch and re-walked on 2026-11-10 against AlmaLinux 10.2 (box `10.2.20260914`). |
+| Foundations F1–F8 | **Complete; walked 2026-11-10** | Eight modules under `docs/foundations/`; every command in F1 and F3–F8 was run on the 2026-11-10 lab. F2 was walked with the lab kit. No automated checkers, by decision. |
+| R1 — Essential tools | **Validated** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker. 66/66 on 2026-11-07 and again on 2026-11-10 after a reboot. |
+| R2 — Users and groups | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 = 88). Walked end to end on a fresh lab, 88/88 after a reboot. |
 | R3–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
@@ -94,7 +94,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 ### Site
 
 ```bash
-cd /home/hilgard/orca/workspaces/red-hat-certs/zoanthid
+cd ~/workspace/red-hat-certs/zoanthid
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -130,7 +130,7 @@ LAB_ROOT=/tmp/opencode/r2-test bash labs/checks/r02/check.sh lab1
 
 Owner-specific and node2 SSH checks will fail outside the real lab; that is expected. The important result is that the checker runs, evaluates each criterion, and exits non-zero on failure.
 
-`LAB_ROOT` only redirects the **directory** checks. R2's account predicates read the live `passwd`/`shadow` databases, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`PS`/`LK`), and the `must be changed` string were verified before R2 shipped. Any script that does this belongs in `/tmp`, not in the repository.
+`LAB_ROOT` only redirects the **directory** checks. R2's account predicates read the live `passwd`/`shadow` databases, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
 
 ### Real lab validation
 
@@ -149,22 +149,26 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 ./bin/lab check r02 all
 ```
 
-**Validated on 2026-11-07** on a Fedora KVM host with Vagrant 2.3.4 and vagrant-libvirt 0.11.2:
+**Validated on 2026-11-10** on a Fedora KVM host with Vagrant 2.3.4 and vagrant-libvirt 0.11.2, against AlmaLinux 10.2 (box `10.2.20260914`):
 
-- `./bin/lab up` created and provisioned both VMs.
+- `./bin/lab reset` destroyed both VMs and rebuilt them from the current Vagrantfile and provisioning.
 - `10.10.10.10` / `10.10.10.11` were configured by NetworkManager and survived `vagrant reload` on both nodes.
-- Cross-VM `ssh labuser@node2` and `ssh labuser@server` worked without extra flags.
-- R1 lab 1 (18 checks), lab 2 (21 checks), and the challenge (27 checks) all passed. The full `./bin/lab check r01 all` passed 66/66 after rebooting `server`.
+- Cross-VM `ssh labuser@node2` and `ssh labuser@server`, plus `scp` in both directions, worked without extra flags.
+- `firewalld` active and enabled, SELinux `Enforcing`, `vdb` (10 GB) present and unmounted on `server`.
+- `visudo -c` exited 0 on both nodes, and `/etc/sudoers.d` was mode-clean (see the `vagrant` drop-in fix below).
+- Snapshot save, restore, and delete round-tripped on both machines; an in-guest `systemctl reboot` plus host reconnect worked.
+- R1 lab 1 (18), lab 2 (21), and the challenge (27) passed; `./bin/lab check r01 all` passed 66/66 after rebooting `server`.
+- R2 lab 1 (27), lab 2 (26), and the challenge (35) passed; `./bin/lab check r02 all` passed 88/88 after rebooting `server`.
 
-That run predates R2, so `./bin/lab check r02 all` is unverified.
+The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
+
+**Base-image bug found and fixed on 2026-11-10:** the AlmaLinux box ships `/etc/sudoers.d/vagrant` at mode `0644`. `sudo` still works because `90-cloud-init-users` repeats the grant, but `visudo -c` reports `bad permissions` and exits 1, which failed the R2 `the whole sudoers configuration parses` check on an otherwise perfect lab. `labs/provision/common.sh` now chmods it to `0440`. Do not weaken that checker: a bad mode is exactly the kind of real misconfiguration it exists to catch.
 
 This host is one data point. Re-run the smoke test after changing the Vagrantfile, provisioning, or the box.
 
 **Applying a provisioning change to an existing lab** (maintainer only, not a learner command): `cd labs && vagrant provision` re-runs `common.sh` and `node2.sh` without rebuilding. It resets anything the scripts set — `labuser`'s password, the sudoers drop-in, the `lab-private` connection — so never use it mid-exercise. Learners pick up provisioning changes with `./bin/lab reset`.
 
-**Not yet re-validated:** the 2026-11-08 changes that pinned the box, removed `LAB_BOX`/`LAB_ISO`, and installed/enabled `firewalld` edited the Vagrantfile, `common.sh`, `node2.sh`, and `bin/lab`. They are syntax-checked only. Re-run the smoke test above, confirm `systemctl is-active firewalld` on both nodes, and confirm the R1 checkers (especially the node2 SSH checks) before treating it as validated.
-
-The R2 module is in the same batch. When the lab is rebuilt, walk [Lab 1](docs/rhcsa/r02-users-and-groups/labs/lab-1-accounts-and-groups.md), [Lab 2](docs/rhcsa/r02-users-and-groups/labs/lab-2-password-policy-and-sudo.md), and the [challenge](docs/rhcsa/r02-users-and-groups/labs/challenge-onboarding.md), rebooting at the end of Lab 2 and again after the challenge. Watch two things: whether a login shell picks up `umask 027` from `~/.bash_profile` on AlmaLinux 10, and whether `chage -l` still renders `Dec 31, 2027` and `Jun 30, 2028` under `LC_ALL=C`.
+**Two behaviours confirmed on the 2026-11-10 run:** a login shell picks up `umask 027` from `~/.bash_profile` (`su - devon -c umask` → `0027`), and `LC_ALL=C chage -l` renders `Dec 31, 2027` / `Jun 30, 2028` exactly as the docs show.
 
 ---
 
@@ -222,7 +226,7 @@ Every RHCSA module follows the same anatomy:
 - Do not commit generated keys (`labs/keys/`) or build output (`site/`).
 - Do not disable SELinux or firewalld in a lab unless the lesson is specifically about doing so.
 - Do not claim a lab was validated without running it.
-- The foundations are optional as a whole. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
+- The foundations are optional except F2. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`: an experienced admin may skip F1 and F3–F8, but F2 teaches the lab and snapshot workflow, which is course logistics rather than Linux knowledge. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
 - `PACKAGES` in `labs/provision/common.sh` is base state only: things F1 and F2 assert, or that every module needs before it starts. A module that needs a package installs it in its own lab. Do not grow `PACKAGES` for module features — it would force every existing learner to rebuild mid-course.
 
 **Check-script conventions.** There are two reference implementations and they cover different kinds of state:
@@ -257,14 +261,14 @@ Account-state checks add these rules:
 
 | Module | Topic | Status |
 |---|---|---|
-| F1 | Linux, open source, and the RHEL family | **Complete** |
-| F2 | The lab: virtualization and first login | **Complete** |
-| F3 | Shell, commands, and the help system | **Complete** |
-| F4 | Filesystem hierarchy and file operations | **Complete** |
-| F5 | Streams, redirection, pipes, grep, regex | **Complete** |
-| F6 | Users, permissions, ownership | **Complete** |
-| F7 | Processes, systemd, logs | **Complete** |
-| F8 | Networking and storage foundations; SELinux intro | **Complete** |
+| F1 | Linux, open source, and the RHEL family | **Complete; walked 2026-11-10** |
+| F2 | The lab: virtualization and first login | **Complete; walked 2026-11-10** |
+| F3 | Shell, commands, and the help system | **Complete; walked 2026-11-10** |
+| F4 | Filesystem hierarchy and file operations | **Complete; walked 2026-11-10** |
+| F5 | Streams, redirection, pipes, grep, regex | **Complete; walked 2026-11-10** |
+| F6 | Users, permissions, ownership | **Complete; walked 2026-11-10** |
+| F7 | Processes, systemd, logs | **Complete; walked 2026-11-10** |
+| F8 | Networking and storage foundations; SELinux intro | **Complete; walked 2026-11-10** |
 
 Foundations modules are lighter than RHCSA modules: explanation, diagram/table, small commands, and a self-check. They do not need automated checkers.
 
@@ -272,8 +276,8 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 
 | Module | Focus | Objective group | Status |
 |---|---|---|---|
-| R1 | Essential tools | 1 | **Validated** |
-| R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | **Content complete; validation pending** |
+| R1 | Essential tools | 1 | **Validated 2026-11-10** |
+| R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | **Validated 2026-11-10** |
 | R3 | Software: DNF, RPM repos, Flatpak | 2 | Planned |
 | R4 | Shell scripting | 3 | Planned |
 | R5 | Processes, systemd services, journald, tuned | 4 | Planned |
@@ -285,7 +289,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | Planned |
 | R12 | Capstone: timed mock exams and full review | All | Planned |
 
-Status values: **Validated** means the checker has passed from a clean snapshot on a real lab. **Content complete; validation pending** means the full anatomy is written and syntax-checked but has not been walked end to end on a VM. **Planned** means not started. A module moves to **Validated** only after its checkers are re-run on `server`, not because the files exist.
+Status values: **Validated** means the checker has passed from a clean snapshot on a real lab. **Complete; walked** (foundations) means every command in the page was run on the 2026-11-10 lab; foundations have no automated checkers. **Content complete; validation pending** means the full anatomy is written and syntax-checked but has not been walked end to end on a VM. **Planned** means not started. A module moves to **Validated** only after its checkers are re-run on `server`, not because the files exist.
 
 The objective-to-module mapping lives in `docs/reference/objective-coverage.md`. Keep it in sync when a module lands.
 
@@ -309,7 +313,9 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R2 checks account state, not files | `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U` are the only reliable way to prove users, groups, aging, and sudo policy; parsing `/etc/shadow` by hand would test the file, not the system |
 | R2 owns `/etc/sudoers.d/10-r2-operators` | The lab already has `90-rhcsa-labuser` for `labuser`. Giving the module its own drop-in means a learner who breaks theirs cannot lock out the account they need to fix it |
 | R2 sets the umask per user, not system-wide | A system-wide `umask 027` in `/etc/profile.d` would make every file root creates by redirection in R5–R11 `640`. A service running as another user would then fail to read its own config, which is a confusing failure that has nothing to do with the lesson |
-| R2 never asserts a password or hash | The checker proves usability (`passwd -S` → `PS`) and lock state (`LK`). Storing an expected password in the repository would be both a secret and a brittleness trap |
+| R2 never asserts a password or hash | The checker proves usability (`passwd -S` → `P`, printed as `PS` on older releases) and lock state (`L`/`LK`). Storing an expected password in the repository would be both a secret and a brittleness trap |
+| Provisioning repairs the mode of the box's `/etc/sudoers.d/vagrant` | The AlmaLinux box ships that drop-in at `0644`. `sudo` still works because `90-cloud-init-users` repeats the grant, but `visudo -c` exits non-zero on the bad mode, which made the R2 checkers fail on a correct lab. `chmod 0440` in `common.sh` fixes the root cause; loosening the checker would have hidden a real misconfiguration in the learner's own configuration |
+| Foundations optional except F2 (2026-11-09) | The skip offer is skill-based, but F2 is course logistics: the VMs, `./bin/lab`, snapshots, and reboot-and-recheck. `how-to-use` and `lab-setup` summarise the commands, but F2 is the only page that explains the loop and the guest/host boundary. An experienced admin can skip the Linux theory, not the operating procedure |
 | `all` checker assumes every lab end state | Individual checks are recommended when the learner restores snapshots between labs |
 | Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
 
@@ -331,10 +337,10 @@ When adding or revising a foundation, repeat the same five steps:
 
 ### M2 — R2, R3, R4
 
-- **R2 — done.** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
+- **R2 — done and validated 2026-11-10 (88/88 from a clean snapshot).** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
   - The module creates its own sudo drop-in (`/etc/sudoers.d/10-r2-operators`) and never touches `90-rhcsa-labuser`, so a learner editing sudoers cannot lock out the lab account by accident.
   - The umask is set per user in `~/.bash_profile`, not system-wide in `/etc/profile.d`. A system-wide `027` would make files root creates in later modules `640`, which can break services that need to read them as another user.
-  - Password hashes are never asserted. The checker proves usability (`passwd -S` → `PS`/`LK`) rather than the password itself.
+  - Password hashes are never asserted. The checker proves usability (`passwd -S` → `P`/`L`, printed `PS`/`LK` on older releases) rather than the password itself.
   - A negative check (`labuser still has sudo through wheel`) catches a learner who removed `-a` from `usermod -aG`.
 - **R3:** DNF repositories, RPM install/remove, Flatpak remotes and packages. Teach repository configuration with a local directory of RPMs used as a `baseurl` (not an installation DVD — `LAB_ISO` was removed). For the exam's no-internet condition, disconnect the VM's network in a lab step instead of attaching media. `flatpak` must be installed inside the lab, not added to `PACKAGES`.
 - **R4:** conditionals, loops, arguments, command substitution. Checker runs the learner's script against test inputs.
@@ -364,9 +370,8 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 
 ## 10. Known gaps and risks
 
-- **R2 has not been run on a live lab.** The checker was exercised with faked `chage`/`passwd` output and against a synthetic tree (`LAB_ROOT`), but the labs themselves have not been walked on `server`. Two things to watch when validating: whether `su -`/`bash -lc` picks up `umask 027` from `~/.bash_profile` on AlmaLinux 10, and whether the `chage -l` date strings still render as `Dec 31, 2027` / `Jun 30, 2028` under `LC_ALL=C`.
-- **Foundations F3–F8 labs are written but not yet walked on a live lab.** F1–F2 were validated together with R1 on 2026-11-07. The newer modules use only commands and packages the provisioning installs (`man-db`, `man-pages`, `vim-enhanced`, `bash-completion`, `tar`, `openssh-clients`), plus iproute, util-linux, policycoreutils, and their dependencies, but a full read-through on `server` and `node2` is still owed before calling them validated.
-- **The lab kit has been validated on one KVM host only.** The 2026-11-07 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10`. Re-validate on other host distributions and Vagrant/plugin versions. The Vagrantfile forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
+- **The lab kit has been validated on one KVM host only.** The 2026-11-10 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10` 10.2. Re-validate on other host distributions and Vagrant/plugin versions. The Vagrantfile forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
+- **A rebuilt lab changes the guest host keys.** `labs/provision/common.sh` sets `StrictHostKeyChecking accept-new` for `server` and `node2`, so a first connection succeeds, but an entry left over from a destroyed VM makes the next `ssh` fail with `REMOTE HOST IDENTIFICATION HAS CHANGED`. `docs/start-here/lab-setup.md` tells the learner to clear it with `ssh-keygen -R 10.10.10.11`; `./bin/lab ssh` is unaffected because it goes through Vagrant.
 - **First boot requires internet.** Provisioning installs base packages from AlmaLinux's online repositories, and there is no offline path since `LAB_ISO` was removed on 2026-11-08. A learner behind a restrictive proxy fails at `dnf install`.
 - **Windows and macOS hosts are unsupported.** The lab needs KVM. The only Windows route is WSL2 with nested virtualization, documented as a non-supported note in `lab-setup.md`; macOS Apple Silicon has no tested path.
 - **CI has not run yet.** The Pages workflow is written but unexecuted. The first push to `main` will reveal environment-specific issues.

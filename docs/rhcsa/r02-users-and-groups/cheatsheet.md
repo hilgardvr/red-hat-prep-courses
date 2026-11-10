@@ -63,7 +63,7 @@ A compact reference for review. Everything here is explained in the [theory page
 |---|---|
 | Change your password | `passwd` |
 | Set someone else's | `passwd user` (root) |
-| Status | `passwd -S user` — `PS`, `LK`, `NP` |
+| Status | `passwd -S user` — `P`, `L`, `NP` (older releases: `PS`, `LK`) |
 | Lock / unlock | `passwd -l user` / `passwd -u user` |
 | Expire immediately | `passwd -e user` |
 | Show aging | `chage -l user` |
@@ -104,7 +104,7 @@ Drop-in rules:
 - Mode: `0440`
 - No `.` in the filename
 - Validate with `visudo -cf` **before** installing
-- The main file includes it with `@includedir /etc/sudoers.d`
+- The main file includes it with `#includedir /etc/sudoers.d` (AlmaLinux 10 spelling; newer sudo also accepts `@includedir`)
 
 ## umask
 
@@ -119,7 +119,7 @@ Drop-in rules:
 | Read it | `umask` |
 | Set it for this shell | `umask 027` |
 | Persist for one user | append to `~/.bash_profile` |
-| Persist for all login shells | `/etc/profile.d/99-umask.sh` |
+| Persist for all login shells | `/etc/profile.d/99-umask.sh` — affects root too; prefer the per-user setting |
 | Persist for a service | `UMask=` in the unit |
 | Test from a login shell | `su - user -c 'umask'` |
 

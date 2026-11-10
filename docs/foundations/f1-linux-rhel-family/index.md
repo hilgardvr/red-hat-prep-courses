@@ -50,13 +50,13 @@ You can see the running kernel version with:
 uname -r
 ```
 
-A RHEL 10-family system reports a kernel ending in `el10`, for example:
+A RHEL 10-family system reports a kernel whose release tag contains `el10`, for example:
 
 ```text
-6.12.0-55.el10.x86_64
+6.12.0-211.74.1.el10_2.x86_64
 ```
 
-The exact version changes with updates. The important part is that the kernel is separate from the rest of the system and can be updated independently.
+The exact version, and the `el10_2` minor suffix, change with updates. The important part is that the kernel is separate from the rest of the system and can be updated independently.
 
 ### Userspace
 
@@ -245,13 +245,13 @@ ID="almalinux"
 ID_LIKE="rhel centos fedora"
 ...
 $ uname -r
-6.12.0-...el10.x86_64
+6.12.0-211.74.1.el10_2.x86_64
 $ uname -m
 x86_64
 $ ps -p 1 -o pid=,comm=
 1 systemd
 $ rpm -q kernel
-kernel-6.12.0-...el10.x86_64
+kernel-6.12.0-211.74.1.el10_2.x86_64
 $ getenforce
 Enforcing
 $ systemctl is-active firewalld
@@ -263,7 +263,7 @@ Read the evidence:
 | Command | What it tells you |
 |---|---|
 | `cat /etc/os-release` | Which distribution and version you are running |
-| `uname -r` | The running kernel version; `el10` confirms the RHEL 10 family |
+| `uname -r` | The running kernel version; `el10_2` places it in the RHEL 10 family, minor stream 2 |
 | `uname -m` | The CPU architecture; `x86_64` is the exam architecture |
 | `ps -p 1` | The init system; `systemd` means units and `systemctl` |
 | `rpm -q kernel` | The installed kernel package, managed by RPM/DNF |

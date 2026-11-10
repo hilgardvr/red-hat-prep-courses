@@ -441,6 +441,8 @@ ls /var/log
 
 `du` reports disk usage by walking the tree. If `/var/log` is unexpectedly large, that is a finding worth investigating, not a command to memorize.
 
+As an ordinary user, `du -sh /var/log` also prints `du: cannot read directory ...: Permission denied` for a few subdirectories such as `/var/log/audit` and `/var/log/private`. The total it reports is smaller than the real one for that reason. `sudo du -sh /var/log` walks the whole tree.
+
 ### 5. Link and unlink
 
 ```bash

@@ -87,36 +87,44 @@ You are preparing a release handoff for another administrator. The bundle must b
 
 ```bash
 sudo install -d -o root -g wheel -m 0770 /srv/handoff
+sudo install -d -o root -g wheel -m 0750 /srv/handoff/release
 ```
+
+The group matters as much as the mode. With `0750 root:root` you would lock yourself out of your own handoff directory.
 
 </details>
 
 <details>
 <summary>Hint 2 — Writing the report script</summary>
 
-Use a heredoc and then make it executable:
+`/srv/handoff/release` is `0750 root:wheel`. You are in `wheel`, so you can read and traverse it, but the group does **not** have write permission. Build the file where you can write, then install it with root ownership and the final mode:
 
 ```bash
-cat <<'EOF' > /srv/handoff/release/report.sh
+cat > /tmp/report.sh <<'EOF'
 #!/usr/bin/env bash
 echo "hostname: $(hostname)"
 echo "date: $(date)"
 echo "kernel: $(uname -r)"
 EOF
-chmod 750 /srv/handoff/release/report.sh
+sudo install -m 0750 /tmp/report.sh /srv/handoff/release/report.sh
 ```
+
+`install -m` copies the file and sets the mode in one step. The same pattern works for `readme.txt` and `ips.txt`, with `0640` and `0644`.
 
 </details>
 
 <details>
 <summary>Hint 3 — Creating the archives</summary>
 
-`-C` changes directory before archiving, so the archive contains `release/...` rather than the full path:
+`-C` changes directory before archiving, so the archive contains `release/...` rather than the full path. Run `tar` with `sudo`: you cannot read every file in `release/` — `readme.txt` is `0640 root:root`, so group and world have no read access:
 
 ```bash
-tar -czf /srv/handoff/handoff.tar.gz -C /srv/handoff release
-tar -cjf /srv/handoff/handoff.tar.bz2 -C /srv/handoff release
+sudo tar -czf /srv/handoff/handoff.tar.gz -C /srv/handoff release
+sudo tar -cjf /srv/handoff/handoff.tar.bz2 -C /srv/handoff release
+sudo chown labuser /srv/handoff/handoff.tar.gz /srv/handoff/handoff.tar.bz2
 ```
+
+Without `sudo`, `tar` stops with `release/readme.txt: Cannot open: Permission denied` and leaves a partial archive. The `chown` only matters for the next step, where `labuser` hashes and copies the file.
 
 </details>
 
@@ -160,20 +168,32 @@ The checker inspects the local files, the archive contents, the checksum, and th
 
 ```text
 R1 Challenge — Handoff bundle
+  PASS  /srv/handoff exists
   PASS  /srv/handoff is owned by root:wheel
   PASS  /srv/handoff is mode 770
   PASS  release directory is mode 750
-  PASS  report.sh is executable and mode 750
-  PASS  report.sh prints hostname, date, and kernel
-  PASS  readme.txt is mode 640 and contains the marker
+  PASS  report.sh exists
+  PASS  report.sh is executable
+  PASS  report.sh is mode 750
+  PASS  report.sh has a bash shebang
+  PASS  report.sh prints the hostname
+  PASS  report.sh prints the date
+  PASS  report.sh prints the kernel
+  PASS  readme.txt is mode 640
+  PASS  readme.txt contains the marker
+  PASS  ips.txt has three lines
   PASS  ips.txt contains the three unique addresses
-  PASS  tar-help.txt is non-empty and mentions tar
+  PASS  tar-help.txt is non-empty
+  PASS  tar-help.txt mentions tar
+  PASS  handoff.tar.gz exists
   PASS  handoff.tar.gz contains release/report.sh
+  PASS  handoff.tar.gz contains release/readme.txt
+  PASS  handoff.tar.bz2 exists
   PASS  handoff.tar.bz2 contains release/report.sh
   PASS  checksum file matches handoff.tar.gz
   PASS  whoami.txt contains labuser
   PASS  root-id.txt contains 0
-  PASS  node2 has the archive at /home/labuser/handoff/handoff.tar.gz
+  PASS  node2 has the archive
   PASS  node2 copy matches the checksum
 ```
 
