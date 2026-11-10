@@ -12,7 +12,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **DNF** | The package manager on RHEL 10 (`dnf`). It resolves dependencies and installs RPM packages from repositories. Covered in R3. |
 | **exit status** | The number a command returns to the shell: `0` for success, non-zero for failure. Read with `$?`. |
 | **fstab** | `/etc/fstab`, the file that defines filesystems to mount at boot. Covered in R6. |
-| **filesystem** | The structure that organizes data on a device: ext4, XFS, VFAT, and others. Covered in R7. |
+| **filesystem** | The structure that organizes data on a device: ext4, XFS, VFAT, and others. Covered in R6 and R7. |
 | **Firewalld** | The dynamic firewall manager on RHEL, controlled with `firewall-cmd`. Covered in R9/R10. |
 | **Flatpak** | A cross-distribution application packaging and sandboxing system. A current RHCSA objective. Covered in R3. |
 | **GPT** | GUID Partition Table. The current partition table format for the exam; MBR is no longer listed. Covered in R6. |
@@ -47,6 +47,6 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **umask** | A shell setting that removes permission bits from newly created files and directories. See [R1 — Permissions](../rhcsa/r01-essential-tools/index.md#permissions). |
 | **unit file** | A systemd configuration file describing a service, timer, mount, target, or other object. |
 | **UUID** | Universally Unique Identifier. A stable identifier for a filesystem, preferred over device names in `/etc/fstab`. |
-| **VG / LV** | Volume group and logical volume, the LVM pooling and allocation layers. |
+| **VG / LV** | Volume group and logical volume, the LVM pooling and allocation layers. Covered in R6. |
 | **XFS** | The default filesystem on RHEL. It can be grown online but not shrunk. |
 | **yum** | A compatibility alias for `dnf` on modern RHEL; both commands work. |

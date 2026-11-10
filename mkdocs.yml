@@ -129,6 +129,13 @@ nav:
           - "Challenge — The batch runner": rhcsa/r05-processes-and-services/labs/challenge-batch-runner.md
           - Knowledge check: rhcsa/r05-processes-and-services/quiz.md
           - Cheat sheet: rhcsa/r05-processes-and-services/cheatsheet.md
+      - "R6 — Local storage":
+          - Theory: rhcsa/r06-local-storage/index.md
+          - "Lab 1 — Partitions and LVM": rhcsa/r06-local-storage/labs/lab-1-partitions-and-lvm.md
+          - "Lab 2 — Swap and labels": rhcsa/r06-local-storage/labs/lab-2-swap-and-labels.md
+          - "Challenge — Extend storage": rhcsa/r06-local-storage/labs/challenge-extend-storage.md
+          - Knowledge check: rhcsa/r06-local-storage/quiz.md
+          - Cheat sheet: rhcsa/r06-local-storage/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

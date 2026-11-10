@@ -66,16 +66,16 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 5. Configure local storage
 
-**Module R6** — <span class="badge badge-planned">Planned</span>
+**Module R6** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
-| List, create, and delete partitions on GPT disks | R6 |
-| Create and remove physical volumes | R6 |
-| Assign physical volumes to volume groups | R6 |
-| Create and delete logical volumes | R6 |
-| Configure systems to mount file systems at boot by UUID or label | R6 |
-| Add new partitions and logical volumes, and swap to a system non-destructively | R6 |
+| List, create, and delete partitions on GPT disks | [R6 — Disks and partitions](../rhcsa/r06-local-storage/index.md#disks-and-partitions) |
+| Create and remove physical volumes | [R6 — LVM](../rhcsa/r06-local-storage/index.md#lvm-physical-volumes-volume-groups-logical-volumes) |
+| Assign physical volumes to volume groups | [R6 — LVM](../rhcsa/r06-local-storage/index.md#lvm-physical-volumes-volume-groups-logical-volumes) |
+| Create and delete logical volumes | [R6 — LVM](../rhcsa/r06-local-storage/index.md#lvm-physical-volumes-volume-groups-logical-volumes) |
+| Configure systems to mount file systems at boot by UUID or label | [R6 — Mounting at boot](../rhcsa/r06-local-storage/index.md#mounting-at-boot-etcfstab) |
+| Add new partitions and logical volumes, and swap to a system non-destructively | [R6 — Growing storage](../rhcsa/r06-local-storage/index.md#growing-storage-without-losing-data) and [R6 — Swap](../rhcsa/r06-local-storage/index.md#swap) |
 
 ## 6. Create and configure file systems
 

@@ -136,7 +136,7 @@ filesystem             XFS, ext4, VFAT, swap
 mount point            /, /home, /var, /mnt/data
 ```
 
-R6 creates partitions, LVM volumes, and swap. R7 creates filesystems, mounts NFS, and extends volumes. This module teaches you to *see* the stack.
+R6 creates partitions, LVM volumes, filesystems, and swap. R7 adds VFAT, NFS, autofs, and filesystem repair. This module teaches you to *see* the stack.
 
 ### Seeing disks, partitions, and filesystems
 
@@ -242,7 +242,7 @@ free -h
 swapon --show
 ```
 
-The cloud image may have no swap configured. R6 creates a swap file or partition and adds it to `/etc/fstab`.
+The cloud image may have no swap configured. R6 creates a swap logical volume and adds it to `/etc/fstab`.
 
 ## SELinux
 

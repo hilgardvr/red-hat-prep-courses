@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1–R5 validated; R6 next |
-| **Next milestone** | R6 |
+| **Current milestone** | M2 — R1–R6 validated; R7 next |
+| **Next milestone** | R7 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -45,7 +45,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R3 — Software and repositories | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 6 + 17 = 33). Walked end to end on a fresh lab, 33/33 after a reboot. |
 | R4 — Shell scripting | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (14 + 13 + 13 = 40). Checker runs the learner's scripts against its own fixtures; walked end to end on a fresh lab, 40/40 after a reboot. |
 | R5 — Processes and services | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 7 + 10 = 27). Checker reads live systemd/journald/tuned state; walked end to end on a fresh lab, 27/27 after a reboot. |
-| R6–R11 | **Planned** | See the curriculum map below |
+| R6 — Local storage | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 12 + 12 = 36). Checker reads the live partition table, LVM metadata, mounts, and fstab; walked end to end on a fresh lab, 36/36 after a reboot. |
+| R7–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -65,7 +66,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
 │   ├── foundations/           # index + F1–F8, complete
-│   ├── rhcsa/                 # module roadmap, R1–R5
+│   ├── rhcsa/                 # module roadmap, R1–R6
 │   │   ├── r01-essential-tools/
 │   │   │   ├── index.md       # theory
 │   │   │   ├── labs/          # 2 guided labs + challenge
@@ -86,7 +87,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r05-processes-and-services/
+│   │   ├── r05-processes-and-services/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r06-local-storage/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -102,6 +108,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r03/check.sh    # R3 automated checker
 │   ├── checks/r04/check.sh    # R4 automated checker
 │   ├── checks/r05/check.sh    # R5 automated checker
+│   ├── checks/r06/check.sh    # R6 automated checker
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -142,7 +149,7 @@ ruby -c labs/Vagrantfile
 
 ### Checkers without a VM
 
-All four checkers accept `LAB_ROOT` for a synthetic tree of the filesystem half:
+All four of the tree-based checkers (R1–R4) accept `LAB_ROOT` for a synthetic tree of the filesystem half:
 
 ```bash
 LAB_ROOT=/tmp/opencode/r1-test bash labs/checks/r01/check.sh lab1
@@ -155,9 +162,11 @@ Owner-specific and node2 SSH checks will fail outside the real lab; that is expe
 
 R4 is the easiest to exercise this way: every R4 check reads a script under `$LAB_ROOT/r4/bin` and runs it. Create `r4/bin/{classify,linereport,accounts}` in a temporary tree, point `LAB_ROOT` at it, and the whole 40-check run works with no VM. The reference implementations used to validate the checker live in `/tmp`, not in the repository.
 
-`LAB_ROOT` only redirects the **directory** checks under `/srv`. R2's account predicates read the live `passwd`/`shadow` databases, R3's repository predicates read the live `dnf` configuration, and every R5 check reads live systemd, journald, or `tuned` state, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
+`LAB_ROOT` only redirects the **directory** checks under `/srv`. R2's account predicates read the live `passwd`/`shadow` databases, R3's repository predicates read the live `dnf` configuration, and every R5 and R6 check reads live systemd, journald, `tuned`, block-device, or mount state, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
 
 R5 has no off-VM path at all: `systemctl show`, `is-enabled`, `MainPID`, `journalctl`, and `tuned-adm` are the subject of the module, and faking all of them would test the fakes. Its checker was validated only on `server`, from the `clean` snapshot, by walking the two labs and the challenge and then rebooting. It also has a side effect: the last challenge check kills `r5-batch`'s main process to prove `Restart=always` works, so `systemctl status r5-batch` shows an extra `Scheduled restart job` line afterwards. That is normal.
+
+R6 has the same limitation for the same reason: `parted`, `sfdisk`, `pvs`, `vgs`, `lvs`, `blkid`, `findmnt`, and `swapon` are the subject. It was validated only on `server`, from the `clean` snapshot, by walking both labs and the challenge, rebooting, and running `./bin/lab check r06 all`.
 
 ### Real lab validation
 
@@ -189,6 +198,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R3 lab 1 (10), lab 2 (6), and the challenge (17) passed; `./bin/lab check r03 all` passed 33/33 after rebooting `server`. The labs were walked in order on one machine, which is the sequence `all` assumes: Lab 1 leaves `r3-local` and `zsh`, Lab 2 leaves the Flathub remote with an empty store, and the challenge adds `r3-extra`, `tree`, and disabled distro repositories without undoing either.
 - R4 lab 1 (14), lab 2 (13), and the challenge (13) passed; `./bin/lab check r04 all` passed 40/40 after rebooting `server`. The three scripts were written and exercised in order on one machine from the clean snapshot. Unlike R1–R3, the R4 checks do not inspect the lab's own files: they create fresh fixtures in `mktemp -d`, run each script against them, and compare stdout plus exit status, so the lab's sample outputs are never the thing being tested.
 - R5 lab 1 (10), lab 2 (7), and the challenge (10) passed; `./bin/lab check r05 all` passed 27/27 after rebooting `server`. The walk started from `clean`, ran Lab 1, Lab 2, and the challenge on one machine, rebooted, and only then ran the checker, because two Lab 2 checks require a journal entry from an earlier boot. Lab 1 deliberately produces a `203/EXEC` failure first: a program under `/srv` is labelled `var_t`, and systemd (`init_t`) may not execute it. The walk confirmed that `SIGTERM` leaves the unit `inactive (dead)` with `Deactivated successfully`, while `SIGKILL` leaves it `failed` with `Result: signal`; the docs and quiz say exactly that.
+- R6 lab 1 (12), lab 2 (12), and the challenge (12) passed; `./bin/lab check r06 all` passed 36/36 after rebooting `server`. The walk started from `clean`, installed `lvm2`, created the 5 GiB GPT partition on `/dev/vdb`, built `r6vg` with a 2 GiB XFS `r6data` mounted by UUID, added a 512 MiB swap LV and a 512 MiB ext4 `r6label` mounted by `LABEL=r6label`, then added `/dev/vdb2`, extended the VG, grew `r6data` to 4 GiB, and ran `xfs_growfs`. A marker file written before the resize was readable after the reboot. `findmnt --verify` reported no errors at the end of each phase.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -262,18 +272,19 @@ Every RHCSA module follows the same anatomy:
 - The foundations are optional except F2. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`: an experienced admin may skip F1 and F3–F8, but F2 teaches the lab and snapshot workflow, which is course logistics rather than Linux knowledge. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
 - `PACKAGES` in `labs/provision/common.sh` is base state only: things F1 and F2 assert, or that every module needs before it starts. A module that needs a package installs it in its own lab. Do not grow `PACKAGES` for module features — it would force every existing learner to rebuild mid-course.
 
-**Check-script conventions.** There are four reference implementations and they cover different kinds of state:
+**Check-script conventions.** There are five reference implementations and they cover different kinds of state:
 
 - **R1 (`labs/checks/r01/check.sh`) — filesystem state.** Use it as the model for anything under `LAB_ROOT`: files, links, modes, ownership, archives, checksums.
 - **R2 (`labs/checks/r02/check.sh`) — account state.** Use it as the model for users, groups, passwords, aging, `sudo`, and anything else that lives in a system database rather than a file under `/srv`.
 - **R4 (`labs/checks/r04/check.sh`) — program behaviour.** Use it when the deliverable is a script. It builds fixtures with `mktemp -d`, runs the learner's script against them, and compares stdout and exit status. Nothing in it greps the script's source for particular commands.
 - **R5 (`labs/checks/r05/check.sh`) — live service state.** Use it for systemd units, the journal, and `tuned`. It asks `systemctl`, `journalctl`, and `tuned-adm` what they think, and reads the process's real nice value with `ps`; one check is behavioural (kill the main PID, wait for a new one).
+- **R6 (`labs/checks/r06/check.sh`) — live block-device and mount state.** Use it for partitions, LVM, filesystems, swap, and fstab. It reads the partition table with `parted` and `sfdisk`, the LVM metadata with `pvs`/`vgs`/`lvs`, the superblocks with `blkid`, and the live mount table with `findmnt`. Size checks are ranges, not exact equality, because a correct disk loses a little room to alignment.
 
-All four follow these rules:
+All five follow these rules:
 
 - Run as root inside `server`.
 - Accept `lab1|lab2|challenge|all`.
-- Use `LAB_ROOT` (default `/srv`) where the module has a file tree, so the tree checks can be tested without a VM. R5 has no tree; its state is live.
+- Use `LAB_ROOT` (default `/srv`) where the module has a file tree, so the tree checks can be tested without a VM. R5 and R6 have no tree; their state is live.
 - Print `PASS`/`FAIL` per criterion and exit non-zero if any fail.
 - Inspect end state, not the commands used.
 - Include node2 checks where the lab involves the second machine.
@@ -307,6 +318,16 @@ Service-state checks (R5) add these rules:
 - Prefer one behavioural check over another state check when the promise is a behaviour: `Restart=always` is proven by killing the main PID and waiting for a different one. Guard it with a real PID and a bounded wait (20 × 0.5 s), and fail with the old PID, the new state, and the new PID.
 - Do not assert that `systemctl --failed` is empty. This lab's `NetworkManager-wait-online.service` fails at boot on a correct machine, and a module-level failure is not the learner's fault.
 
+Block-state checks (R6) add these rules:
+
+- Verify a partition's type by its **GPT type GUID** with `sfdisk -d`, not with `lsblk -o PARTFLAGS` or `PARTTYPE`. On the AlmaLinux 10.2 image those two columns are empty even when `parted` prints the `lvm` flag, and parsing `parted`'s prose is version-sensitive.
+- Read sizes in **bytes** (`blockdev --getsize64`, `lvs --units b`, `findmnt -b -o SIZE`) and assert a range. `lsblk` and `parted` round, and `parted` reports a 5 GiB partition as `5369MB` in decimal units.
+- Build the expected fstab source from the filesystem's own identifier (`blkid -s UUID -o value`, `blkid -s LABEL -o value`). That way a stale UUID left in fstab from an earlier attempt fails instead of matching itself.
+- Check both views of a mount: `findmnt <target>` for what is mounted now and `findmnt --fstab <target>` for what boot will do.
+- Run `findmnt --verify` as one check. It validates the whole fstab and only passes after `systemctl daemon-reload`; it is the closest thing to a boot test without rebooting.
+- Prove non-destructive growth in two parts: `lvs` for the logical volume and `findmnt -b -o SIZE` for the filesystem. `lvextend` alone leaves `df` at the old size, which is the mistake the challenge exists to catch.
+- Include regression checks. R6 Lab 2 asserts Lab 1's mount still works, and the challenge asserts both earlier labs are intact, because `all` runs the three phases as one state stack.
+
 ---
 
 ## 7. Curriculum map
@@ -335,8 +356,8 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R3 | Software: DNF, RPM repos, Flatpak | 2 | **Validated 2026-11-10** |
 | R4 | Shell scripting | 3 | **Validated 2026-11-10** |
 | R5 | Processes, systemd services, journald, tuned | 4 | **Validated 2026-11-10** |
-| R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | Planned |
-| R7 | ext4/XFS/VFAT, NFS, autofs, extend LVs | 6 | Planned |
+| R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | **Validated 2026-11-10** |
+| R7 | VFAT, NFS, autofs, filesystem repair and resize | 6 | Planned |
 | R8 | cron, at, systemd timers, chrony | 7 | Planned |
 | R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | Planned |
 | R10 | SELinux, SSH keys, firewall hardening | 10 | Planned |
@@ -384,6 +405,13 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | Journal persistence needs `journalctl --flush`, not just a restart (2026-11-10) | `mkdir -p /var/log/journal` plus `systemctl restart systemd-journald` leaves the machine-ID directory empty until journald next rotates; `--flush` moves the buffered entries to disk immediately, so `find /var/log/journal -name '*.journal'` and the persistence check work in the same session. Without it the lab appears to succeed and the checker fails for a reason the learner cannot see. |
 | R5's checker reads live state and cannot run off-VM | The module is about systemd, journald, and tuned; faking them would only test the fakes. It is validated on `server` only, like R2's account predicates. Two Lab 2 checks require a reboot by design, and the last challenge check kills `r5-batch`'s main process to prove `Restart=always`. |
 | `SIGTERM` and `SIGKILL` are taught as different end states (2026-11-10) | The first walk showed that `SIGTERM` on a unit's MainPID leaves it `inactive (dead)` with `Deactivated successfully`, while `SIGKILL` leaves it `failed` with `Result: signal`. An earlier draft said `failed` for both, which would have taught the wrong diagnostic: inactive after a kill means a clean exit, while failed means it did not shut down. Lab 1 does both, in that order, and the quiz asks which is which. |
+| R6 installs `lvm2` in the lab, not in `PACKAGES` (2026-11-10) | Only R6 needs the LVM userland. Adding it to `PACKAGES` would force every existing learner to rebuild mid-course for one module, which the `PACKAGES` rule exists to prevent. The lab says the install needs a working repository; a learner who left R3's distro repositories disabled must re-enable them first. |
+| R6 uses a 5 GiB first partition and a second partition for the challenge (2026-11-10) | The lab disk is 10 GB. A 5 GiB partition leaves room for a second one, and the first partition's ~5 GiB holds the 2 GiB `r6data`, the 512 MiB swap, the 512 MiB label volume, and 2 GiB free for the challenge's `lvextend -L +2G`. The second partition takes the rest with `100%`. |
+| R6 verifies partition type by GPT type GUID, not `lsblk` flags (2026-11-10) | On the AlmaLinux 10.2 image `lsblk -o PARTFLAGS` and `PARTTYPE` print empty for these partitions even though `parted` prints the `lvm` flag, and `partx` reports `0x0`. The flag is really the GPT type GUID, which `sfdisk -d` prints as `type=E6D6D379-...`. The checker parses that GUID, which is machine-readable and stable. |
+| R6 teaches one UUID mount and one LABEL mount (2026-11-10) | The objective names both. Lab 1 mounts XFS by `UUID=`; Lab 2 mounts ext4 by `LABEL=` and swap by `UUID=`. Seeing both in one fstab makes the trade-off concrete: a UUID is generated and safe, a label is chosen and must be unique. |
+| R6 makes `findmnt --verify` the fstab check (2026-11-10) | It validates the whole file, not just the new line, and it catches the skipped `systemctl daemon-reload` with an explicit warning. It is the closest thing to a boot test without rebooting, so both labs and the challenge end with it. |
+| R6 teaches `lvextend` and `xfs_growfs` as separate steps (2026-11-10) | `lvextend -r` does both, and the theory mentions it. The labs split them because the exam may ask which layer changed: `lvs` proves the volume grew, and `df` proves the filesystem followed. A single command hides that distinction. |
+| R6's checker reads live block state and cannot run off-VM (2026-11-10) | The module is about partitions, LVM, filesystems, and mounts; faking `parted`, `pvs`, `blkid`, and `findmnt` would only test the fakes. Like R5, it was validated on `server` only, and it asserts sizes as ranges because alignment and filesystem overhead make exact byte counts wrong. |
 | Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
 
 ---
@@ -402,7 +430,7 @@ When adding or revising a foundation, repeat the same five steps:
 4. Link it from `docs/foundations/index.md`, and update the previous module's `## Next` link.
 5. Run `mkdocs build --strict`.
 
-### M2 — R2, R3, R4, R5
+### M2 — R2, R3, R4, R5, R6
 
 - **R2 — done and validated 2026-11-10 (88/88 from a clean snapshot).** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
   - The module creates its own sudo drop-in (`/etc/sudoers.d/10-r2-operators`) and never touches `90-rhcsa-labuser`, so a learner editing sudoers cannot lock out the lab account by accident.
@@ -433,10 +461,19 @@ When adding or revising a foundation, repeat the same five steps:
   - The size cap is a drop-in, read back with `systemd-analyze cat-config`. The lab also shows `journalctl --rotate` before `--vacuum-size`, because vacuuming an active file frees nothing.
   - The challenge adds `r5-batch` (`Nice=5`, `Restart=always`) without undoing Labs 1 and 2, so `check r05 all` is a valid three-state stack. Its checker kills the main PID and waits for a different one, which is the only honest test of `Restart=always`.
   - Expected-output blocks are VM captures. PIDs and timestamps differ on every walk; the docs say so once, in Lab 1.
+- **R6 — done and validated 2026-11-10 (36/36 from a clean snapshot).** GPT partitions, LVM physical volumes/volume groups/logical volumes, XFS and ext4, swap, and UUID/LABEL mounts. Design decisions worth keeping:
+  - The module installs `lvm2` first. The base image has `parted` and `blkid` but not the LVM userland, so a learner who skips the install meets `pvcreate: command not found` at the first LVM step.
+  - Lab 1 builds a 5 GiB GPT partition marked Linux LVM, a PV, `r6vg`, a 2 GiB XFS LV, and an fstab entry by UUID. Lab 2 adds a 512 MiB swap LV (UUID) and a 512 MiB ext4 LV mounted by `LABEL=r6label`. The challenge adds a second ~5 GiB partition, extends the VG, grows `r6data` by 2 GiB, and runs `xfs_growfs` while it is mounted.
+  - The three states stack, so `check r06 all` is valid: Lab 2 leaves Lab 1's mount alone, and the challenge leaves both alone. The checker asserts those regressions explicitly.
+  - The partition type is verified by the GPT type GUID from `sfdisk -d`, because `lsblk -o PARTFLAGS` and `PARTTYPE` are empty on this image even when `parted` shows the `lvm` flag.
+  - Sizes are ranges: `blockdev --getsize64` for partitions, `lvs --units b` for LVs, `findmnt -b -o SIZE` for filesystems. A 5 GiB partition is 5368709120 bytes in the table but `parted` prints `5369MB`, and XFS reports slightly less than 4 GiB after `xfs_growfs`.
+  - Every fstab edit is followed by `systemctl daemon-reload`, `mount -a` (or `swapon -a`), and `findmnt --verify`. The lab calls out the daemon-reload warning by name, because skipping it produces a configuration that works now and fails later.
+  - `lvextend` and `xfs_growfs` are separate steps in the labs; `lvextend -r` is mentioned in the theory as the one-command alternative. The challenge checks both `lvs` and the mounted filesystem size, because growing only the LV is the common mistake.
+  - The walk started from `clean`, ran Lab 1, Lab 2, and the challenge on one machine, rebooted, and then ran `./bin/lab check r06 all`: 36/36. The marker file written before the resize was still readable after the reboot, which is the non-destructive part of the objective.
 
-### M3 — R6–R11
+### M3 — R7–R11
 
-Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R6 (LVM), R7 (NFS/autofs), R10 (SELinux), R11 (boot recovery).
+Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R7 (NFS/autofs), R10 (SELinux), R11 (boot recovery).
 
 ### M4 — R12 and polish
 
@@ -473,6 +510,10 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **R5 output blocks are version-sensitive.** The `systemctl status` wording (`Deactivated successfully`, `Result: signal`), the journal priority names, and `listen` addresses come from systemd 257 on AlmaLinux 10.2. The checker does not parse that prose — it asks for fields and exit statuses — but a learner on another systemd release may see slightly different status text than the lab shows.
 - **R5's challenge check restarts a service on purpose.** Running `check r05 challenge` (or `all`) kills `r5-batch`'s main PID. That is the test, and it leaves a `Scheduled restart job, restart counter is at 1` line in the journal, which is normal.
 - **R5's Lab 2 checks need a reboot.** `check r05 lab2` fails two lines until the learner has rebooted after writing the marker. That is deliberate and the failure message says so; it is not a broken checker.
+- **R6 needs a working repository to install `lvm2`.** The base image has `parted` but not the LVM userland. If the learner left R3's distro repositories disabled, `dnf install -y lvm2` fails before the first LVM step. The module says to re-enable them, but a learner who jumps straight from R3 to R6 can still be surprised.
+- **R6's fstab lines are appended, not merged.** The labs use `printf ... >> /etc/fstab` so the command is reproducible, which means walking a lab twice leaves duplicate lines. The documented recovery is `./bin/lab restore clean` before repeating a lab; a real edit would use an editor and replace the line.
+- **R6 output is size- and UUID-sensitive.** `parted` prints decimal sizes, `lsblk` prints binary, XFS reports slightly less than the LV size, and every UUID is generated. The docs say this once in Lab 1. The checker uses ranges and reads the identifiers from the machine, so a different disk or filesystem build does not produce false failures.
+- **R6's challenge assumes `/dev/vdb1` ends at `5121MiB`.** That is what Lab 1 creates. A learner who chose a different end sector must start `/dev/vdb2` at the matching offset or leave a gap; the checker only requires that `vdb2` exists, is about 5 GiB, is LVM-typed, and is in the VG, so a sensible variation still passes.
 
 ---
 
@@ -509,6 +550,10 @@ cd labs
 ./bin/lab check r05 lab2
 ./bin/lab check r05 challenge
 ./bin/lab check r05 all
+./bin/lab check r06 lab1
+./bin/lab check r06 lab2
+./bin/lab check r06 challenge
+./bin/lab check r06 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done
