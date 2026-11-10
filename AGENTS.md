@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1 and R2 validated; R3 next |
-| **Next milestone** | R3 (then R4) |
+| **Current milestone** | M2 — R1, R2 and R3 validated; R4 next |
+| **Next milestone** | R4 (then R5) |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -42,7 +42,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | Foundations F1–F8 | **Complete; walked 2026-11-10** | Eight modules under `docs/foundations/`; every command in F1 and F3–F8 was run on the 2026-11-10 lab. F2 was walked with the lab kit. No automated checkers, by decision. |
 | R1 — Essential tools | **Validated** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker. 66/66 on 2026-11-07 and again on 2026-11-10 after a reboot. |
 | R2 — Users and groups | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 = 88). Walked end to end on a fresh lab, 88/88 after a reboot. |
-| R3–R11 | **Planned** | See the curriculum map below |
+| R3 — Software and repositories | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 6 + 17 = 33). Walked end to end on a fresh lab, 33/33 after a reboot. |
+| R4–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -62,13 +63,18 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
 │   ├── foundations/           # index + F1–F8, complete
-│   ├── rhcsa/                 # module roadmap, R1, R2
+│   ├── rhcsa/                 # module roadmap, R1, R2, R3
 │   │   ├── r01-essential-tools/
 │   │   │   ├── index.md       # theory
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r02-users-and-groups/
+│   │   ├── r02-users-and-groups/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r03-software-and-repositories/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -81,6 +87,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── provision/             # common.sh, node2.sh
 │   ├── checks/r01/check.sh    # R1 automated checker
 │   ├── checks/r02/check.sh    # R2 automated checker
+│   ├── checks/r03/check.sh    # R3 automated checker
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -121,16 +128,17 @@ ruby -c labs/Vagrantfile
 
 ### Checkers without a VM
 
-Both checkers accept `LAB_ROOT` for a synthetic tree of the filesystem half:
+All three checkers accept `LAB_ROOT` for a synthetic tree of the filesystem half:
 
 ```bash
 LAB_ROOT=/tmp/opencode/r1-test bash labs/checks/r01/check.sh lab1
 LAB_ROOT=/tmp/opencode/r2-test bash labs/checks/r02/check.sh lab1
+LAB_ROOT=/tmp/opencode/r3-test bash labs/checks/r03/check.sh lab1
 ```
 
 Owner-specific and node2 SSH checks will fail outside the real lab; that is expected. The important result is that the checker runs, evaluates each criterion, and exits non-zero on failure.
 
-`LAB_ROOT` only redirects the **directory** checks. R2's account predicates read the live `passwd`/`shadow` databases, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
+`LAB_ROOT` only redirects the **directory** checks under `/srv`. R2's account predicates read the live `passwd`/`shadow` databases, and R3's repository predicates read the live `dnf` configuration, so they cannot be simulated that way. Test them by feeding the parsers faked command output — define shell functions named `chage` and `passwd` that print a known real-world block, then call the predicate helpers against it. That is how the `chage -l` labels, the `passwd -S` status prefixes (`P`/`L` on RHEL 10, `PS`/`LK` on older releases), and the `must be changed` string were verified. Any script that does this belongs in `/tmp`, not in the repository.
 
 ### Real lab validation
 
@@ -159,6 +167,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - Snapshot save, restore, and delete round-tripped on both machines; an in-guest `systemctl reboot` plus host reconnect worked.
 - R1 lab 1 (18), lab 2 (21), and the challenge (27) passed; `./bin/lab check r01 all` passed 66/66 after rebooting `server`.
 - R2 lab 1 (27), lab 2 (26), and the challenge (35) passed; `./bin/lab check r02 all` passed 88/88 after rebooting `server`.
+- R3 lab 1 (10), lab 2 (6), and the challenge (17) passed; `./bin/lab check r03 all` passed 33/33 after rebooting `server`. The labs were walked in order on one machine, which is the sequence `all` assumes: Lab 1 leaves `r3-local` and `zsh`, Lab 2 leaves the Flathub remote with an empty store, and the challenge adds `r3-extra`, `tree`, and disabled distro repositories without undoing either.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -278,7 +287,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 |---|---|---|---|
 | R1 | Essential tools | 1 | **Validated 2026-11-10** |
 | R2 | Users, groups, password aging, sudo, default permissions | 9 + part of 10 | **Validated 2026-11-10** |
-| R3 | Software: DNF, RPM repos, Flatpak | 2 | Planned |
+| R3 | Software: DNF, RPM repos, Flatpak | 2 | **Validated 2026-11-10** |
 | R4 | Shell scripting | 3 | Planned |
 | R5 | Processes, systemd services, journald, tuned | 4 | Planned |
 | R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | Planned |
@@ -304,7 +313,7 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | GitHub Pages + Actions | Free hosting, no server to maintain |
 | AlmaLinux 10 as the lab OS | No public generic RHEL 10 Vagrant box; AlmaLinux is RHEL-compatible and subscription-free |
 | Two VMs (`server`, `node2`) | Needed for SSH, NFS, firewall, and client/server exercises |
-| Remove `LAB_BOX` and `LAB_ISO` (2026-11-08) | Two advanced overrides documented in three beginner-facing places; no shipped module used them. Lab is pinned to AlmaLinux 10. The offline-repo teaching need moves to R3, which will use a local RPM directory as a `baseurl`. |
+| Remove `LAB_BOX` and `LAB_ISO` (2026-11-08) | Two advanced overrides documented in three beginner-facing places; no shipped module used them. Lab is pinned to AlmaLinux 10. The offline-repo teaching need moved to R3, which uses a local RPM directory as a `baseurl`. |
 | Shared lab SSH key | Makes cross-VM `ssh`/`scp` work for beginners without teaching key setup before R10 |
 | `labuser` account | Gives a non-root account for permission and sudo exercises |
 | Free core + paid extras | Keeps the course useful and marketable without paywalling exam preparation |
@@ -317,6 +326,11 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | Provisioning repairs the mode of the box's `/etc/sudoers.d/vagrant` | The AlmaLinux box ships that drop-in at `0644`. `sudo` still works because `90-cloud-init-users` repeats the grant, but `visudo -c` exits non-zero on the bad mode, which made the R2 checkers fail on a correct lab. `chmod 0440` in `common.sh` fixes the root cause; loosening the checker would have hidden a real misconfiguration in the learner's own configuration |
 | Foundations optional except F2 (2026-11-09) | The skip offer is skill-based, but F2 is course logistics: the VMs, `./bin/lab`, snapshots, and reboot-and-recheck. `how-to-use` and `lab-setup` summarise the commands, but F2 is the only page that explains the loop and the guest/host boundary. An experienced admin can skip the Linux theory, not the operating procedure |
 | `all` checker assumes every lab end state | Individual checks are recommended when the learner restores snapshots between labs |
+| R3 uses a directory of RPMs as a `baseurl` (2026-11-10) | The objective is "configure access to repositories, including the local filesystem". A `createrepo_c` directory served over `file://` teaches the whole mechanism with no media to mount, and it is where the removed `LAB_ISO` path was headed. |
+| R3 simulates "no internet" by disabling the distro repositories (2026-11-10) | Cutting the VM's network also drops the learner's SSH session, so a repository lesson becomes a connectivity lesson. `dnf config-manager --set-disabled` produces the exam's exact failure (`Unable to find a match`) while the session stays alive. This supersedes the older "disconnect the VM" plan. |
+| R3's Flatpak remote is Flathub | The objective is "configure access to Flatpak repositories". Flathub is the public reference remote and one command to add; building a local OSTree repository would add machinery without teaching anything the objective asks for. Lab 2 therefore needs internet, and the module says so. |
+| R3 Lab 2 installs an app, then removes it | Leaving `org.gnome.Calculator` installed would contradict the challenge's "no Flatpak application" requirement, so `check r03 all` could never pass. The lab ends with a configured remote and an empty store; the challenge tests that same end state from scratch. |
+| R3 checker pins every `dnf` query to one repository | `--disablerepo='*' --enablerepo=<id>` keeps the checker off the network: same answer offline, and a distro repo that happens to carry the package cannot make a pass look real. |
 | Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
 
 ---
@@ -342,7 +356,14 @@ When adding or revising a foundation, repeat the same five steps:
   - The umask is set per user in `~/.bash_profile`, not system-wide in `/etc/profile.d`. A system-wide `027` would make files root creates in later modules `640`, which can break services that need to read them as another user.
   - Password hashes are never asserted. The checker proves usability (`passwd -S` → `P`/`L`, printed `PS`/`LK` on older releases) rather than the password itself.
   - A negative check (`labuser still has sudo through wheel`) catches a learner who removed `-a` from `usermod -aG`.
-- **R3:** DNF repositories, RPM install/remove, Flatpak remotes and packages. Teach repository configuration with a local directory of RPMs used as a `baseurl` (not an installation DVD — `LAB_ISO` was removed). For the exam's no-internet condition, disconnect the VM's network in a lab step instead of attaching media. `flatpak` must be installed inside the lab, not added to `PACKAGES`.
+- **R3 — done and validated 2026-11-10 (33/33 from a clean snapshot).** DNF repositories, RPM install/remove, Flatpak remotes and packages. Design decisions worth keeping:
+  - The local repository is a plain directory of RPMs served over `file://`, built with `createrepo_c`. No ISO, no DVD, no `LAB_ISO`.
+  - The exam's no-internet condition is simulated by persistently disabling the four distro repositories, not by cutting the VM's network. Cutting the interface also kills the learner's SSH session, which teaches the wrong lesson (see the decisions table).
+  - `flatpak` is installed inside the lab, not added to `PACKAGES`.
+  - Lab 2 installs Flathub's `org.gnome.Calculator`, inspects it, removes it, and runs `flatpak uninstall --unused`, so the lab ends with a configured remote and an empty store. That end state is what the challenge also expects, which is why `check r03 all` can pass: the three lab end states stack instead of overwriting each other.
+  - Every `dnf` query in the checker is pinned with `--disablerepo='*'` and one explicit `--enablerepo`, so the checker never contacts a mirror and gives the same answer on an offline machine.
+  - Package provenance is asserted with the `@repo` column of `dnf list`, not by trusting that the learner used a particular command.
+  - The challenge requires the distro repositories to stay disabled, so the docs tell the learner to run the checker **before** re-enabling them; `all` assumes the challenge end state, the same way R1 `all` assumes every lab's files are still present.
 - **R4:** conditionals, loops, arguments, command substitution. Checker runs the learner's script against test inputs.
 
 ### M3 — R5–R11
@@ -373,6 +394,7 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **The lab kit has been validated on one KVM host only.** The 2026-11-10 run used Fedora, Vagrant 2.3.4, vagrant-libvirt 0.11.2, and `almalinux/10` 10.2. Re-validate on other host distributions and Vagrant/plugin versions. The Vagrantfile forces the system libvirt connection and provisioning configures the private NIC with NetworkManager, which should remove the two most common failure modes.
 - **A rebuilt lab changes the guest host keys.** `labs/provision/common.sh` sets `StrictHostKeyChecking accept-new` for `server` and `node2`, so a first connection succeeds, but an entry left over from a destroyed VM makes the next `ssh` fail with `REMOTE HOST IDENTIFICATION HAS CHANGED`. `docs/start-here/lab-setup.md` tells the learner to clear it with `ssh-keygen -R 10.10.10.11`; `./bin/lab ssh` is unaffected because it goes through Vagrant.
 - **First boot requires internet.** Provisioning installs base packages from AlmaLinux's online repositories, and there is no offline path since `LAB_ISO` was removed on 2026-11-08. A learner behind a restrictive proxy fails at `dnf install`.
+- **R3 Lab 2 pulls about 1.5 GB from Flathub.** Installing `org.gnome.Calculator` brings in `org.gnome.Platform` and its graphics extensions, and the download rate is out of anyone's control: the same host measured roughly 2 MB/s and roughly 150 KB/s on the same day. On a slow link the download takes hours. The outputs recorded in the lab came from a fast run, and the checker only looks at the remote and the end state of the store, so a slow link does not block validation — but a learner may give up before the install finishes.
 - **Windows and macOS hosts are unsupported.** The lab needs KVM. The only Windows route is WSL2 with nested virtualization, documented as a non-supported note in `lab-setup.md`; macOS Apple Silicon has no tested path.
 - **`SITE_URL` fallback is a placeholder.** The workflow sets it from the repository owner/name. Change the fallback if a custom domain replaces the default Pages URL.
 - **Material for MkDocs reaches end of life on 2027-05-05.** Critical fixes continue until then. Zensical is the maintained successor; migration is not urgent but should be evaluated before the EOL.
@@ -404,6 +426,10 @@ cd labs
 ./bin/lab check r02 lab1
 ./bin/lab check r02 lab2
 ./bin/lab check r02 challenge
+./bin/lab check r03 lab1
+./bin/lab check r03 lab2
+./bin/lab check r03 challenge
+./bin/lab check r03 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

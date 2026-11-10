@@ -108,6 +108,13 @@ nav:
           - "Challenge — Onboarding wave 2": rhcsa/r02-users-and-groups/labs/challenge-onboarding.md
           - Knowledge check: rhcsa/r02-users-and-groups/quiz.md
           - Cheat sheet: rhcsa/r02-users-and-groups/cheatsheet.md
+      - "R3 — Software and repositories":
+          - Theory: rhcsa/r03-software-and-repositories/index.md
+          - "Lab 1 — RPM repositories": rhcsa/r03-software-and-repositories/labs/lab-1-rpm-repositories.md
+          - "Lab 2 — Flatpak": rhcsa/r03-software-and-repositories/labs/lab-2-flatpak.md
+          - "Challenge — The offline build server": rhcsa/r03-software-and-repositories/labs/challenge-offline-build.md
+          - Knowledge check: rhcsa/r03-software-and-repositories/quiz.md
+          - Cheat sheet: rhcsa/r03-software-and-repositories/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

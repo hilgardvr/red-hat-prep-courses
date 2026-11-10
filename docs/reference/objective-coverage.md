@@ -27,14 +27,14 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 2. Manage software
 
-**Module R3** — <span class="badge badge-planned">Planned</span>
+**Module R3** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
-| Configure access to RPM repositories | R3 |
-| Install and remove RPM software packages | R3 |
-| Configure access to Flatpak repositories | R3 |
-| Install and remove Flatpak software packages | R3 |
+| Configure access to RPM repositories | [R3 — Repository configuration](../rhcsa/r03-software-and-repositories/index.md#repository-configuration-files) and [Local repository](../rhcsa/r03-software-and-repositories/index.md#building-a-local-repository) |
+| Install and remove RPM software packages | [R3 — `dnf`: transactions](../rhcsa/r03-software-and-repositories/index.md#dnf-transactions) |
+| Configure access to Flatpak repositories | [R3 — Remotes](../rhcsa/r03-software-and-repositories/index.md#remotes) |
+| Install and remove Flatpak software packages | [R3 — Installing and removing applications](../rhcsa/r03-software-and-repositories/index.md#installing-and-removing-applications) |
 
 ## 3. Create simple shell scripts
 
@@ -91,7 +91,7 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 7. Deploy, configure, and maintain systems
 
-**Modules R8, R11, and R3** — <span class="badge badge-planned">Planned</span>
+**Modules R8, R11, and R3** — R3 is <span class="badge badge-ready">Covered</span>; R8 and R11 are <span class="badge badge-planned">Planned</span>.
 
 | Objective | Where |
 |---|---|
@@ -99,7 +99,7 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 | Start and stop services and configure services to start automatically at boot | R8 |
 | Configure systems to boot into a specific target automatically | R8 / R11 |
 | Configure time service clients | R8 |
-| Install and update software packages from the Red Hat CDN, a remote repository, or the local filesystem | R3 / R11 |
+| Install and update software packages from the Red Hat CDN, a remote repository, or the local filesystem | [R3 — `dnf`: transactions](../rhcsa/r03-software-and-repositories/index.md#dnf-transactions) and [Building a local repository](../rhcsa/r03-software-and-repositories/index.md#building-a-local-repository); R11 will cover updates |
 | Modify the system bootloader | R11 |
 
 ## 8. Manage basic networking
