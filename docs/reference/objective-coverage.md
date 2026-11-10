@@ -79,15 +79,15 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 6. Create and configure file systems
 
-**Module R7** — <span class="badge badge-planned">Planned</span>
+**Module R7** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
-| Create, mount, unmount, and use VFAT, ext4, and XFS file systems | R7 |
-| Mount and unmount network file systems using NFS | R7 |
-| Configure autofs | R7 |
-| Extend existing logical volumes | R7 |
-| Diagnose and correct file permission problems | R7, with R1 and R2 foundations |
+| Create, mount, unmount, and use VFAT, ext4, and XFS file systems | [R7 — Choosing a filesystem](../rhcsa/r07-file-systems/index.md#choosing-a-filesystem), [VFAT](../rhcsa/r07-file-systems/index.md#vfat), and [Lab 1](../rhcsa/r07-file-systems/labs/lab-1-vfat.md) |
+| Mount and unmount network file systems using NFS | [R7 — NFS](../rhcsa/r07-file-systems/index.md#nfs), [Mounting](../rhcsa/r07-file-systems/index.md#mounting-again), and [Lab 2](../rhcsa/r07-file-systems/labs/lab-2-nfs-autofs.md) |
+| Configure autofs | [R7 — autofs](../rhcsa/r07-file-systems/index.md#autofs) and [Lab 2](../rhcsa/r07-file-systems/labs/lab-2-nfs-autofs.md) |
+| Extend existing logical volumes | [R7 — Growing and shrinking](../rhcsa/r07-file-systems/index.md#growing-and-shrinking) and the [challenge](../rhcsa/r07-file-systems/labs/challenge-grow-ext4.md) (R6 covers XFS) |
+| Diagnose and correct file permission problems | [R7 — `root_squash` and `nobody`](../rhcsa/r07-file-systems/index.md#root_squash-and-nobody), [Permission problems on NFS](../rhcsa/r07-file-systems/index.md#permission-problems-on-nfs), and [Common traps](../rhcsa/r07-file-systems/index.md#common-traps), with R1 and R2 foundations |
 
 ## 7. Deploy, configure, and maintain systems
 

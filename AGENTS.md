@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1–R6 validated; R7 next |
-| **Next milestone** | R7 |
+| **Current milestone** | M2 — R1–R7 validated; R8 next |
+| **Next milestone** | R8 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -46,7 +46,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R4 — Shell scripting | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (14 + 13 + 13 = 40). Checker runs the learner's scripts against its own fixtures; walked end to end on a fresh lab, 40/40 after a reboot. |
 | R5 — Processes and services | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 7 + 10 = 27). Checker reads live systemd/journald/tuned state; walked end to end on a fresh lab, 27/27 after a reboot. |
 | R6 — Local storage | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 12 + 12 = 36). Checker reads the live partition table, LVM metadata, mounts, and fstab; walked end to end on a fresh lab, 36/36 after a reboot. |
-| R7–R11 | **Planned** | See the curriculum map below |
+| R7 — File systems and sharing | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 15 + 16 = 42). Checker reads live partition, superblock, mount, export, and firewalld state on `server`, and reaches `node2` over SSH for the autofs half; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
+| R8–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -92,7 +93,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r06-local-storage/
+│   │   ├── r06-local-storage/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r07-file-systems/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -109,6 +115,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r04/check.sh    # R4 automated checker
 │   ├── checks/r05/check.sh    # R5 automated checker
 │   ├── checks/r06/check.sh    # R6 automated checker
+│   ├── checks/r07/check.sh    # R7 automated checker (server + node2)
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -168,6 +175,8 @@ R5 has no off-VM path at all: `systemctl show`, `is-enabled`, `MainPID`, `journa
 
 R6 has the same limitation for the same reason: `parted`, `sfdisk`, `pvs`, `vgs`, `lvs`, `blkid`, `findmnt`, and `swapon` are the subject. It was validated only on `server`, from the `clean` snapshot, by walking both labs and the challenge, rebooting, and running `./bin/lab check r06 all`.
 
+R7 is the first checker that is deliberately **not** confined to one machine. Its `lab2` and `challenge` phases run on `server` and reach `node2` as `labuser` over SSH, using the key and `~/.ssh/config` entries that provisioning installs. That means both blocks of the checker depend on the lab kit being provisioned normally: if `ssh labuser@node2` does not work from `server`, the autofs checks fail no matter how correct the client configuration is. `runuser -u labuser -- ssh ...` is used on purpose: it exercises the same path a learner uses and proves the shared key works. Validate it with both VMs running, from `clean`, by walking Lab 1, Lab 2, and the challenge, rebooting both machines, and running `./bin/lab check r07 all`.
+
 ### Real lab validation
 
 ```bash
@@ -199,6 +208,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R4 lab 1 (14), lab 2 (13), and the challenge (13) passed; `./bin/lab check r04 all` passed 40/40 after rebooting `server`. The three scripts were written and exercised in order on one machine from the clean snapshot. Unlike R1–R3, the R4 checks do not inspect the lab's own files: they create fresh fixtures in `mktemp -d`, run each script against them, and compare stdout plus exit status, so the lab's sample outputs are never the thing being tested.
 - R5 lab 1 (10), lab 2 (7), and the challenge (10) passed; `./bin/lab check r05 all` passed 27/27 after rebooting `server`. The walk started from `clean`, ran Lab 1, Lab 2, and the challenge on one machine, rebooted, and only then ran the checker, because two Lab 2 checks require a journal entry from an earlier boot. Lab 1 deliberately produces a `203/EXEC` failure first: a program under `/srv` is labelled `var_t`, and systemd (`init_t`) may not execute it. The walk confirmed that `SIGTERM` leaves the unit `inactive (dead)` with `Deactivated successfully`, while `SIGKILL` leaves it `failed` with `Result: signal`; the docs and quiz say exactly that.
 - R6 lab 1 (12), lab 2 (12), and the challenge (12) passed; `./bin/lab check r06 all` passed 36/36 after rebooting `server`. The walk started from `clean`, installed `lvm2`, created the 5 GiB GPT partition on `/dev/vdb`, built `r6vg` with a 2 GiB XFS `r6data` mounted by UUID, added a 512 MiB swap LV and a 512 MiB ext4 `r6label` mounted by `LABEL=r6label`, then added `/dev/vdb2`, extended the VG, grew `r6data` to 4 GiB, and ran `xfs_growfs`. A marker file written before the resize was readable after the reboot. `findmnt --verify` reported no errors at the end of each phase.
+- R7 lab 1 (11), lab 2 (15), and the challenge (16) passed; `./bin/lab check r07 all` passed 42/42 after rebooting **both** machines. The walk started from `clean`, created a 512 MiB VFAT partition on `/dev/vdb` with `uid=`/`gid=`/`umask=` mount options, exported `/srv/r7/export` to `10.10.10.0/24` from `server` and opened `nfs`, `mountd`, and `rpc-bind`, mounted it by hand and then through autofs on `node2`, and built `r7vg` on a 1.5 GiB second partition with a 512 MiB ext4 `r7data`. A 100 MB `blob.bin` was written before `lvextend -L +512M` and `resize2fs`, and its checksum was unchanged after an offline `e2fsck -fy` and a reboot. Writing to the export as root failed with `Permission denied` (`root_squash`), and writing as `labuser` produced a file owned by `labuser` on both machines. `findmnt --verify` reported no errors at the end of each phase.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -357,7 +367,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R4 | Shell scripting | 3 | **Validated 2026-11-10** |
 | R5 | Processes, systemd services, journald, tuned | 4 | **Validated 2026-11-10** |
 | R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | **Validated 2026-11-10** |
-| R7 | VFAT, NFS, autofs, filesystem repair and resize | 6 | Planned |
+| R7 | VFAT, NFS, autofs, filesystem repair and online ext4 growth | 6 | **Validated 2026-11-10** |
 | R8 | cron, at, systemd timers, chrony | 7 | Planned |
 | R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | Planned |
 | R10 | SELinux, SSH keys, firewall hardening | 10 | Planned |
@@ -413,6 +423,13 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R6 teaches `lvextend` and `xfs_growfs` as separate steps (2026-11-10) | `lvextend -r` does both, and the theory mentions it. The labs split them because the exam may ask which layer changed: `lvs` proves the volume grew, and `df` proves the filesystem followed. A single command hides that distinction. |
 | R6's checker reads live block state and cannot run off-VM (2026-11-10) | The module is about partitions, LVM, filesystems, and mounts; faking `parted`, `pvs`, `blkid`, and `findmnt` would only test the fakes. Like R5, it was validated on `server` only, and it asserts sizes as ranges because alignment and filesystem overhead make exact byte counts wrong. |
 | Force `qemu_use_session = false`; configure the private NIC in provisioning | vagrant-libvirt 0.11.x defaults to session mode, where `private_network` fails with "Network ... is not available". NetworkManager makes the static address reliable across Vagrant and AlmaLinux 10 versions. |
+| R7 uses LVM for the ext4 growth challenge, not `parted resizepart` (2026-11-10) | `parted -s /dev/vdb resizepart 2 ...` refuses a mounted partition with "Partition /dev/vdb2 is being used", and the objective is to grow a filesystem **while it is in use**. LVM grows online, which is what the exam asks for; the partition is created once at a fixed 1.5 GiB and never resized. |
+| R7's challenge partition is 1.5 GiB, not the rest of the disk (2026-11-10) | A 1.5 GiB PV is about 1533 MiB of extents. A 512 MiB LV leaves roughly 1 GiB free, which is exactly enough for `lvextend -L +512M`. Taking the whole disk would leave no visible constraint and no `VFree` arithmetic to reason about; sizing it tightly makes "is there room?" a real question the learner must answer with `vgs`. |
+| R7's checker spans two machines (2026-11-10) | NFS is a two-machine lesson by definition. The checker runs on `server` and reaches `node2` as `labuser` over the shared lab key, so Lab 2's autofs state is verified where it actually lives. This is the first checker that depends on provisioning (the `~/.ssh/config` entries and the installed key), which is one more reason to run `./bin/lab check r07 lab2` with both VMs up. |
+| R7 teaches `root_squash` through a failure, not a definition (2026-11-10) | The lab has the learner write to the export as root and meet `Permission denied`, then write as `labuser` and watch the ownership pass through. The mistake is the lesson: root on a client is not root on a server, and disabling the squash is the wrong fix. |
+| R7 splits ext4 and XFS grow tools by argument (2026-11-10) | R6 grows XFS with `xfs_growfs <mount point>`; R7 grows ext4 with `resize2fs <device>`. The two are one line apart in the exam objective and are the most common tool/argument mix-up, so the challenge uses ext4 deliberately and the cheat sheet puts the two side by side. |
+| R7 documents `e2fsck`'s "need terminal" behaviour (2026-11-10) | A non-interactive `e2fsck -f` exits 8 with `need terminal for interactive repairs` even on a clean filesystem, because it cannot ask questions. The lab says so once and gives `-y` for scripts, so a learner whose terminal is a pipe does not conclude the filesystem is damaged. |
+| Vagrantfile pins `lv.cpu_mode = "host-passthrough"` (2026-11-10) | Newer libvirt/QEMU rejected the `host-model` CPU XML vagrant-libvirt generated (`CPU vendor specified without CPU model`), which made an existing domain un-updatable and `vagrant up` fail on `node2`. `host-passthrough` exposes the host CPU without the vendor/model pair. It was needed to get `node2` Vagrant-managed again and does not change the guest's view of the CPU. |
 
 ---
 
@@ -430,7 +447,7 @@ When adding or revising a foundation, repeat the same five steps:
 4. Link it from `docs/foundations/index.md`, and update the previous module's `## Next` link.
 5. Run `mkdocs build --strict`.
 
-### M2 — R2, R3, R4, R5, R6
+### M2 — R2, R3, R4, R5, R6, R7
 
 - **R2 — done and validated 2026-11-10 (88/88 from a clean snapshot).** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
   - The module creates its own sudo drop-in (`/etc/sudoers.d/10-r2-operators`) and never touches `90-rhcsa-labuser`, so a learner editing sudoers cannot lock out the lab account by accident.
@@ -470,10 +487,18 @@ When adding or revising a foundation, repeat the same five steps:
   - Every fstab edit is followed by `systemctl daemon-reload`, `mount -a` (or `swapon -a`), and `findmnt --verify`. The lab calls out the daemon-reload warning by name, because skipping it produces a configuration that works now and fails later.
   - `lvextend` and `xfs_growfs` are separate steps in the labs; `lvextend -r` is mentioned in the theory as the one-command alternative. The challenge checks both `lvs` and the mounted filesystem size, because growing only the LV is the common mistake.
   - The walk started from `clean`, ran Lab 1, Lab 2, and the challenge on one machine, rebooted, and then ran `./bin/lab check r06 all`: 36/36. The marker file written before the resize was still readable after the reboot, which is the non-destructive part of the objective.
+- **R7 — done and validated 2026-11-10 (42/42 from a clean snapshot).** VFAT with mount-supplied ownership, an NFS export with the firewall opened correctly, autofs on the client, ext4 online growth, and an offline `e2fsck`. Design decisions worth keeping:
+  - The module is the first two-machine one. Lab 2 needs `server` and `node2` at the same time, and the checker proves it by reaching `node2` over SSH as `labuser`. Everything in `lab2` and `challenge` fails if the lab kit was not provisioned normally, so the docs say "both VMs must be running" once, in the lab.
+  - Lab 1 is built around what VFAT **cannot** do. A `chmod` that succeeds and changes nothing, an `ln -s` that is refused, and a case-insensitive filename are three checks that cannot pass on a stand-in ext4 mount, so the checker's behavioural checks prove the filesystem type as well as the options.
+  - The NFS lab teaches `root_squash` by making it hurt: root's write fails with `Permission denied`, and the fix is to write as `labuser`, not to add `no_root_squash`. The export directory is `labuser`-owned and mode `755`, which is the other half of the permission story.
+  - The firewall lesson is the failure mode, not the port number. Opening `nfs` alone leaves `mountd` and `rpc-bind` blocked, and the client's error is `access denied by server`, which reads like an exports problem.
+  - The challenge grows ext4 online with `lvextend` + `resize2fs`, because `parted resizepart` refuses a mounted partition. `resize2fs` takes the device and `xfs_growfs` takes the mount point; the cheat sheet puts them side by side and the quiz asks which is which.
+  - `e2fsck -f` on a non-terminal exits 8 with `need terminal for interactive repairs` even on a clean filesystem. The docs explain it and give `-fy` for scripts so a learner does not read a healthy filesystem as broken.
+  - The walk started from `clean`, ran Lab 1 and the challenge on `server` and Lab 2 across both machines, rebooted **both**, and then ran `./bin/lab check r07 all`: 42/42. The 100 MB `blob.bin` checksum was unchanged after the online grow and the offline check.
 
-### M3 — R7–R11
+### M3 — R8–R11
 
-Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R7 (NFS/autofs), R10 (SELinux), R11 (boot recovery).
+Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R10 (SELinux) and R11 (boot recovery).
 
 ### M4 — R12 and polish
 
@@ -514,6 +539,13 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **R6's fstab lines are appended, not merged.** The labs use `printf ... >> /etc/fstab` so the command is reproducible, which means walking a lab twice leaves duplicate lines. The documented recovery is `./bin/lab restore clean` before repeating a lab; a real edit would use an editor and replace the line.
 - **R6 output is size- and UUID-sensitive.** `parted` prints decimal sizes, `lsblk` prints binary, XFS reports slightly less than the LV size, and every UUID is generated. The docs say this once in Lab 1. The checker uses ranges and reads the identifiers from the machine, so a different disk or filesystem build does not produce false failures.
 - **R6's challenge assumes `/dev/vdb1` ends at `5121MiB`.** That is what Lab 1 creates. A learner who chose a different end sector must start `/dev/vdb2` at the matching offset or leave a gap; the checker only requires that `vdb2` exists, is about 5 GiB, is LVM-typed, and is in the VG, so a sensible variation still passes.
+- **R7's `lab2` and `challenge` checks need `node2` running and reachable.** Three checks in `lab2` and two in `challenge` run over SSH as `labuser`. If `node2` is halted, or the shared key was never installed, they fail even when `server` is configured perfectly. `./bin/lab status` is the first thing to check.
+- **R7's challenge partition size is load-bearing.** `/dev/vdb2` must be about 1.5 GiB so `r7vg` has ~1 GiB free after the 512 MiB LV. A smaller partition makes `lvextend -L +512M` fail with `Insufficient free space`, and the checker will then fail the "grew to about 1 GiB" checks. Recover with `./bin/lab restore clean`, not by guessing sizes.
+- **R7's ext4 challenge uses LVM, not partition resize.** `parted -s /dev/vdb resizepart` refuses while the partition is mounted, so the online-growth lesson is built on `lvextend` + `resize2fs`. A learner who tries the partition route mid-lab meets `Partition /dev/vdb2 is being used`; that is why the challenge specifies LVM.
+- **R7 Lab 2 needs `autofs` from a repository.** It is not in the base image and not in `PACKAGES`, so the lab installs it. A learner who left R3's distro repositories disabled must re-enable them first, exactly as with R6's `lvm2`.
+- **R7 output is protocol- and UUID-sensitive.** `exportfs -v` prints defaults (`root_squash`, `secure`, `wdelay`) that the learner did not type, `findmnt` prints `uid=` as a number, and the VFAT UUID is short (`FBF7-223A`). The docs say this once; the checker reads identifiers from the machine, so a different walk does not produce false failures.
+- **R7's VFAT UUID format is not interchangeable with XFS/ext4 UUIDs.** A `UUID=` line copied from an ext4 lab will never match a VFAT volume, and `LABEL=` is capped at 11 characters.
+- **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 
 ---
 
@@ -554,6 +586,10 @@ cd labs
 ./bin/lab check r06 lab2
 ./bin/lab check r06 challenge
 ./bin/lab check r06 all
+./bin/lab check r07 lab1
+./bin/lab check r07 lab2
+./bin/lab check r07 challenge
+./bin/lab check r07 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

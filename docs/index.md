@@ -68,7 +68,8 @@
 | **R4 — Shell scripting** | Arguments, conditionals, loops, command substitution, exit codes | <span class="badge badge-ready">Available</span> |
 | **R5 — Processes and services** | systemd units, drop-ins, journald, process priority, tuned | <span class="badge badge-ready">Available</span> |
 | **R6 — Local storage** | GPT partitions, LVM, XFS and ext4, swap, UUID and label mounts | <span class="badge badge-ready">Available</span> |
-| **R7–R11** | Filesystems, scheduling, networking, security, boot | <span class="badge badge-planned">Planned</span> |
+| **R7 — File systems and sharing** | VFAT, NFS, autofs, filesystem repair and online growth | <span class="badge badge-ready">Available</span> |
+| **R8–R11** | Scheduling and time, networking, security, boot | <span class="badge badge-planned">Planned</span> |
 | **R12 — Capstone** | Timed mock exams and a full review | <span class="badge badge-planned">Planned</span> |
 
 [See the full module roadmap](rhcsa/index.md){ .md-button }

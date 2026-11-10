@@ -136,6 +136,13 @@ nav:
           - "Challenge — Extend storage": rhcsa/r06-local-storage/labs/challenge-extend-storage.md
           - Knowledge check: rhcsa/r06-local-storage/quiz.md
           - Cheat sheet: rhcsa/r06-local-storage/cheatsheet.md
+      - "R7 — File systems and sharing":
+          - Theory: rhcsa/r07-file-systems/index.md
+          - "Lab 1 — A VFAT volume": rhcsa/r07-file-systems/labs/lab-1-vfat.md
+          - "Lab 2 — NFS and autofs": rhcsa/r07-file-systems/labs/lab-2-nfs-autofs.md
+          - "Challenge — Grow ext4": rhcsa/r07-file-systems/labs/challenge-grow-ext4.md
+          - Knowledge check: rhcsa/r07-file-systems/quiz.md
+          - Cheat sheet: rhcsa/r07-file-systems/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

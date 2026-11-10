@@ -42,6 +42,12 @@ Vagrant.configure("2") do |config|
     # set. Session mode cannot create the private lab network, so force the
     # system connection that `./bin/lab doctor` checks.
     lv.qemu_use_session = false
+
+    # Newer libvirt/QEMU releases reject the host-model CPU block that
+    # vagrant-libvirt generates on some hosts ("CPU vendor specified without
+    # CPU model"), which makes an existing domain inaccessible to Vagrant.
+    # host-passthrough exposes the host CPU without a vendor/model pair.
+    lv.cpu_mode = "host-passthrough"
   end
 
   nodes = {
