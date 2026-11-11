@@ -144,9 +144,9 @@ If a row scares you, that is the module to redo. The capstone is a bad place to 
 |---|---|---|
 | [Lab 1 — The full-stack rehearsal](labs/lab-1-rehearsal.md) | A guided build of one service host: storage, account, SELinux, web, firewall, timer, boot | ~2 hours |
 | [Lab 2 — The diagnostic loop](labs/lab-2-diagnosis.md) | Three deliberate breakages, and the evidence that identifies each one | ~45 minutes |
-| Mock exam A | Single machine, mixed domains | 2 hours |
-| Mock exam B | Two machines, sharing and time | 2 hours |
-| Mock exam C | Security, boot, and maintenance | 2 hours |
+| [Mock exam A — The web host](exams/exam-a-web-host.md) | Single machine: storage, account, service, firewall, script, timer | 2 hours |
+| [Mock exam B — Sharing and time](exams/exam-b-sharing-and-time.md) | Two machines: NFS export, a client mount, chrony server and client, cron, name resolution | 2 hours |
+| [Mock exam C — Security, service, and maintenance](exams/exam-c-security-and-maintenance.md) | SSH hardening, SELinux, kernel audit argument, archive, update | 2 hours |
 
 Do Lab 1 and Lab 2 first. They teach the shape of the work and the habit of reading a failure. Then take the exams **from a clean snapshot**, one at a time, with a clock running. Restore `clean` before each one:
 

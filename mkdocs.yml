@@ -175,6 +175,9 @@ nav:
           - Theory: rhcsa/r12-capstone/index.md
           - "Lab 1 — The full-stack rehearsal": rhcsa/r12-capstone/labs/lab-1-rehearsal.md
           - "Lab 2 — The diagnostic loop": rhcsa/r12-capstone/labs/lab-2-diagnosis.md
+          - "Mock exam A — The web host": rhcsa/r12-capstone/exams/exam-a-web-host.md
+          - "Mock exam B — Sharing and time": rhcsa/r12-capstone/exams/exam-b-sharing-and-time.md
+          - "Mock exam C — Security, service, and maintenance": rhcsa/r12-capstone/exams/exam-c-security-and-maintenance.md
           - Knowledge check: rhcsa/r12-capstone/quiz.md
           - Cheat sheet: rhcsa/r12-capstone/cheatsheet.md
   - Reference:

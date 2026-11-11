@@ -276,11 +276,13 @@ cmd_reset() {
 cmd_check() {
   local module="${1:-}"
   local lab="${2:-all}"
-  [ -n "$module" ] || die "usage: lab check <module> [lab1|lab2|challenge|all]"
+  [ -n "$module" ] || die "usage: lab check <module> [lab1|lab2|challenge|all|<phase>]"
 
+  # Phases are module-defined: R1-R11 use lab1, lab2, challenge, all; the R12
+  # capstone adds exama, examb, examc. Accept any short lowercase phase name so
+  # a new module can add one without editing this wrapper.
   case "$lab" in
-    lab1|lab2|challenge|all) ;;
-    *) die "invalid lab '$lab' (use lab1, lab2, challenge, or all)" ;;
+    *[!a-z0-9]*) die "invalid lab '$lab' (use lowercase letters and digits)" ;;
   esac
 
   local script="$LAB_DIR/checks/$module/check.sh"

@@ -80,10 +80,11 @@ If you are new to Linux, work through [Foundations F1–F8](../foundations/index
 
 ## The capstone
 
-R12 will contain:
+R12 contains:
 
-- Three full mock exams in the style of EX200, each with a task sheet and a grading script.
-- A two-node scenario for SSH, NFS, and firewall tasks.
+- [Lab 1 — The full-stack rehearsal](r12-capstone/labs/lab-1-rehearsal.md): one host built from storage, an account, SELinux, a web service, the firewall, a timer, and the boot target.
+- [Lab 2 — The diagnostic loop](r12-capstone/labs/lab-2-diagnosis.md): three deliberate breakages and the evidence that identifies each layer.
+- Three timed mock exams in the style of EX200 — [A](r12-capstone/exams/exam-a-web-host.md), [B](r12-capstone/exams/exam-b-sharing-and-time.md), and [C](r12-capstone/exams/exam-c-security-and-maintenance.md) — each with a task sheet and a grading script.
 - A review checklist organized by the "persistence four": mounts, services, firewall, SELinux.
 
 The capstone is where the domains stop being separate topics and become one system, which is how the exam presents them.

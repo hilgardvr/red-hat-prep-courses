@@ -303,3 +303,7 @@ The freshness check waits up to ninety seconds. A reboot restores a snapshot clo
 ## Next
 
 The three mock exams are next. Restore the clean snapshot before each one, put the notes away, and start a clock.
+
+- [Mock exam A — The web host](../exams/exam-a-web-host.md)
+- [Mock exam B — Sharing and time](../exams/exam-b-sharing-and-time.md)
+- [Mock exam C — Security, service, and maintenance](../exams/exam-c-security-and-maintenance.md)
