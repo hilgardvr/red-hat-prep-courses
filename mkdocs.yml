@@ -46,6 +46,19 @@ extra_css:
 extra:
   generator: false
 
+plugins:
+  - search
+  # Combine every page into one printable page (footer link "Print / PDF").
+  # The banner is a local template, not the plugin's stock one, so the copy
+  # matches the field guide and carries the unofficial disclaimer.
+  - print-site:
+      add_to_navigation: true
+      print_page_title: "Print / PDF"
+      add_print_site_banner: true
+      print_site_banner_template: "print/banner.tpl"
+      # Relative links break once the page is printed, so make them absolute.
+      add_full_urls: true
+
 markdown_extensions:
   - admonition
   - attr_list

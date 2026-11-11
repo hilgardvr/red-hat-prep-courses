@@ -34,6 +34,10 @@ mkdocs build --strict
 
 The output is written to `site/`.
 
+### Print or PDF
+
+The site also builds a single **Print / PDF** page that combines every page in course order. Open it from the last item in the site navigation, then use your browser's **File → Print → Save as PDF**. It is generated at build time by `mkdocs-print-site-plugin`, so it always matches the published pages and needs no separate export step.
+
 ## Deploy to GitHub Pages
 
 The workflow in `.github/workflows/pages.yml` builds the site on every push to `main` and deploys it with GitHub Pages.

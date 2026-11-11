@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-11 |
-| **Current milestone** | M4 — R12 validated; PDF/print export next |
-| **Next milestone** | PDF/print export, objective-matrix review |
+| **Current milestone** | M4 complete — R1–R12 validated, objective matrix audited, print/PDF page shipped |
+| **Next milestone** | Maintenance: re-validate the lab kit on other hosts, watch Material EOL |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -52,7 +52,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R10 — Security: SELinux and SSH | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 10 + 21 = 42). Checker reads live SELinux state (mode, file label, `semanage fcontext`/`port` records, Boolean pair), the effective `sshd` configuration plus two real logins, and firewalld rich-rule state, then fetches `/api/` through Apache and the hardened port from `node2`; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
 | R11 — Boot, rescue, and updates | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 8 + 13 = 31). Checker reads the default target and its symlink, both GRUB layers (`/etc/default/grub` and `grub.cfg`), every BLS entry with `grubby --info=ALL`, `/etc/kernel/cmdline`, the live `/proc/cmdline` and `/proc/sys/kernel/panic_on_warn`, the `dnf` history and `check-update`, root's `passwd -S` status, the recovery marker and both SELinux labels; walked from `clean` through Lab 1, Lab 2 (`rd.break` + relabel), the challenge, a reboot of `server`, and passed 31/31. |
 | R12 — Capstone | **Validated 2026-11-11** | Theory, 2 guided labs, 3 timed mock exams, quiz, cheat sheet, checker (35 + 42, plus `exama` 37, `examb` 38, `examc` 25). Lab 1 builds the full-stack host; Lab 2 breaks it in three layers and repairs it; the exams are self-contained task sheets graded from `clean`. `lab1` 35/35, `lab2` 42/42 after repairs, `all` 77/77 after a reboot, and each exam passed after its own reboot: A 37/37, B 38/38 (both VMs), C 25/25. |
-| PDF export | **Planned** | M4 |
+| PDF export | **Complete 2026-11-11** | `mkdocs-print-site-plugin` generates `/print_page/`, a single page of the whole course for browser **File → Print → Save as PDF**. Linked as **Print / PDF** in the navigation. No headless renderer, so no extra system dependency. |
 
 **Definition of done for a module:** theory, two guided labs, a challenge lab, a reboot-persistence test, a knowledge check, a cheat sheet, and a passing automated checker from a clean snapshot.
 
@@ -65,7 +65,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 ├── AGENTS.md                  # this file
 ├── README.md                  # public project overview
 ├── mkdocs.yml                 # site config and navigation
-├── requirements.txt           # mkdocs-material
+├── requirements.txt           # mkdocs-material + print-site plugin
+├── print/banner.tpl           # banner shown on the generated print page
 ├── docs/
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
@@ -121,14 +122,15 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r11-boot-rescue-updates/
-│   │       ├── index.md       # theory
-│   │       ├── labs/          # 2 guided labs + challenge
-│   │       ├── quiz.md
-│   │       └── cheatsheet.md
+│   │   ├── r11-boot-rescue-updates/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
 │   │   └── r12-capstone/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # rehearsal + diagnostic loop
+│   │       ├── exams/         # 3 timed mock exams
 │   │       ├── quiz.md
 │   │       └── cheatsheet.md
 │   ├── reference/             # objective coverage, glossary, RHEL 9 vs 10
@@ -465,6 +467,7 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R11's snapshot clock can be stale | A restored snapshot carries the clock it was saved with. Lab 1 does not schedule anything, so it does not matter here, but a learner who compares `date` to the host should know that R8's `chronyc waitsync` is the fix, not a broken VM. |
 | Target EX200 v10 / RHEL 10 | Current exam platform; adds Flatpak and systemd timers; drops Podman and set-GID |
 | MkDocs Material | Markdown-first, good search/navigation, easy GitHub Pages deploy |
+| Print/PDF export uses `mkdocs-print-site-plugin`, not a headless browser | One Python plugin gives a single-page, course-ordered build that the browser prints to PDF. A headless Chromium/WeasyPrint pipeline would add a large system dependency to CI and the maintainer host, need per-page page breaks and header/footer tuning, and would drift from the live HTML. The generated page is also useful on its own for searching across every module at once. `print/banner.tpl` is local so the page carries the field-guide disclaimer instead of the plugin's stock marketing banner. |
 | GitHub Pages + Actions | Free hosting, no server to maintain |
 | AlmaLinux 10 as the lab OS | No public generic RHEL 10 Vagrant box; AlmaLinux is RHEL-compatible and subscription-free |
 | Two VMs (`server`, `node2`) | Needed for SSH, NFS, firewall, and client/server exercises |
@@ -661,12 +664,13 @@ When adding or revising a foundation, repeat the same five steps:
   - **The update loop's `blkid` race is real.** `mkfs.ext4` followed immediately by `blkid` can return an empty UUID before udev has scanned the device; the automated walk hit it and booted into emergency mode with `UUID=` in fstab. The fix is `udevadm settle` (or `blkid -p`) before writing fstab. A human typing the commands usually waits long enough, but the module's own automation now settles first.
   - The walks started from `clean` each time. Lab 1, Lab 2, the break/repair cycle, and a reboot produced 35/35, 12 failures, 42/42, and 77/77. Each exam was then walked from a fresh `clean`: A 37/37, B 38/38, C 25/25.
 
-### M4 — polish
+### M4 — polish — **done 2026-11-11**
 
-- PDF/print export (consider `mkdocs-print-site-plugin` or browser print).
-- Review the objective matrix for gaps.
-- Update README status and this file.
-- Keep an eye on Material for MkDocs support until the 2027-05-05 EOL.
+- **PDF/print export — done.** `mkdocs-print-site-plugin` builds a single `/print_page/` containing every page in course order, reachable as **Print / PDF** in the navigation. `requirements.txt` pins the plugin, `print/banner.tpl` replaces the stock banner with field-guide copy and the disclaimer, and `add_full_urls: true` prints external URLs after each link. The flow is browser **File → Print → Save as PDF**, so there is no headless renderer, no Chromium, and no new system dependency on the CI runner or the maintainer host.
+- **Objective matrix — reviewed.** Every bullet of the official EX200 v10 list maps to a lesson and lab; the R12 capstone re-tests the whole list under exam conditions. The matrix's status badges were normalized to `Covered` now that all twelve modules are validated.
+- **Status pages — updated** (README, `docs/index.md`, `docs/rhcsa/index.md`, this file).
+
+**Next:** maintenance only — re-validate the lab kit on other hosts, watch Material's 2027-05-05 EOL, and re-check the objective list before the next exam revision.
 
 ### Immediate handoff checklist for a new agent
 
@@ -688,6 +692,8 @@ When adding or revising a foundation, repeat the same five steps:
 - **Windows and macOS hosts are unsupported.** The lab needs KVM. The only Windows route is WSL2 with nested virtualization, documented as a non-supported note in `lab-setup.md`; macOS Apple Silicon has no tested path.
 - **`SITE_URL` fallback is a placeholder.** The workflow sets it from the repository owner/name. Change the fallback if a custom domain replaces the default Pages URL.
 - **Material for MkDocs reaches end of life on 2027-05-05.** Critical fixes continue until then. Zensical is the maintained successor; migration is not urgent but should be evaluated before the EOL.
+- **The print page is a single large HTML file.** Every page of the course is combined into `/print_page/index.html` (about 2.6 MB on the 2026-11-11 build). It is fine for a browser print, but a very slow device may take a few seconds to lay it out, and the browser's own print preview is what paginates it — the plugin does not control page breaks. The banner says so, and the page is not part of the normal reading path.
+- **`mkdocs-print-site-plugin` is a third-party dependency.** It is pinned `<3` in `requirements.txt`. If it stops tracking MkDocs Material, the fallback is to remove the plugin and add a `@media print` stylesheet to `extra.css`; no course content depends on it.
 - **Snapshots consume disk.** The lab docs explain cleanup, but a learner with a small disk can still run out.
 - **`lab check` depends on `vagrant upload`.** Vagrant 2.0+ provides it. If an older Vagrant is used, replace the upload step with `cat | vagrant ssh`.
 - **The R1 `all` checker is not the normal workflow.** Restoring the clean snapshot between labs removes Lab 1's end state. Check labs individually unless the learner did them continuously.

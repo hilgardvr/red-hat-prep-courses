@@ -2,7 +2,7 @@
 
 This page maps the current EX200 v10 objectives to the course. Use it to find the lesson for a weak area, or to audit the course for gaps.
 
-**Status legend:** <span class="badge badge-ready">Covered</span> means the lesson and labs exist. <span class="badge badge-planned">Planned</span> means the module is scheduled but not yet published.
+**Status legend:** <span class="badge badge-ready">Covered</span> means the lesson, labs, challenge, and automated checker exist and the module has been validated on the lab.
 
 !!! warning "Use the official list as the source of truth"
     Red Hat can change the objectives. The list below reflects the RHEL 10 / EX200 v10 grouping as published at the time of writing. Confirm it on the [official EX200 page](https://www.redhat.com/en/services/training/ex200-red-hat-certified-system-administrator-rhcsa-exam) before booking.
@@ -104,7 +104,7 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 8. Manage basic networking
 
-**Module R9** — <span class="badge badge-ready">Available</span>
+**Module R9** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
@@ -115,7 +115,7 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 9. Manage users and groups
 
-**Module R2** — <span class="badge badge-ready">Available</span>
+**Module R2** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
@@ -126,7 +126,7 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 10. Manage security
 
-**Module R10** — <span class="badge badge-ready">Available</span>
+**Module R10** — <span class="badge badge-ready">Covered</span>
 
 | Objective | Where |
 |---|---|
