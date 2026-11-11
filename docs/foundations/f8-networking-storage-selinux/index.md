@@ -228,6 +228,7 @@ The unprivileged `du` prints a few `Permission denied` lines for subdirectories 
 If `df` says a filesystem is full while `du` does not, look for **deleted files that are still open**:
 
 ```bash
+sudo dnf install -y lsof      # lsof is not in the base image
 sudo lsof +L1
 ```
 
@@ -354,9 +355,11 @@ sudo setsebool -P httpd_can_network_connect on
 When SELinux blocks something, it writes an **AVC denial**:
 
 ```bash
-sudo ausearch -m AVC -ts recent
-journalctl -t audit -n 20 --no-pager
+sudo ausearch -if /var/log/audit/audit.log -m AVC | tail
+sudo grep ': avc:' /var/log/audit/audit.log | tail
 ```
+
+`auditd` owns the kernel's audit socket, so `journalctl` never receives these records: `journalctl -t audit` prints nothing even on a machine full of denials. Read the audit log itself.
 
 A denial names the source context, the target context, and the permission that was refused. It is evidence, not noise: the fix is usually a label, a boolean, or a policy module, in that order. Disabling SELinux destroys the evidence and fails the exam's expectations.
 

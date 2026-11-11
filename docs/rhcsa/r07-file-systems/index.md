@@ -223,13 +223,19 @@ TARGET      SOURCE                     FSTYPE OPTIONS
 
 ### `root_squash` and `nobody`
 
-Write to the export **as root** on the client and look at the owner on the server:
+Write to the export **as root** on the client:
 
-```text { .no-copy }
--rw-r--r--. 1 nobody  nobody  system_u:object_r:var_t:s0 19 Nov 10 05:46 from-node2.txt
+```bash
+echo "written as root" > /mnt/r7-nfs/root-file.txt
 ```
 
-That is `root_squash` working. The client's UID 0 is not trusted; the server maps it to `nobody`. A normal user's UID is passed through unchanged, so a file written by `labuser` is owned by `labuser` on both machines.
+```text { .no-copy }
+bash: /mnt/r7-nfs/root-file.txt: Permission denied
+```
+
+That is `root_squash` working. The client's UID 0 is not trusted; the server maps it to `nobody`. The export directory is owned by `labuser` with mode `755`, and `nobody` is not the owner, so the write is refused. If the directory were world-writable the write would succeed — and the file would appear as `nobody` on the server.
+
+A normal user's UID is passed through unchanged, so a file written by `labuser` is owned by `labuser` on both machines. That is the fix: write as a user, or change the directory's ownership, not the squash setting.
 
 This is a security feature, not a bug. `no_root_squash` exists for a reason — exporting a home directory to a trusted backup server, for example — but it lets any root on any allowed client write as root on the server. Do not add it to solve a permission problem; fix the directory's ownership instead.
 
@@ -401,7 +407,7 @@ Shrinking is not part of this module's challenge, and it is not something to do 
 | Creating a symlink on VFAT | `Operation not permitted` | Use a Unix filesystem, or copy the file |
 | Mounting NFS without `_netdev` | Boot may hang waiting for the network | Add `_netdev` (and usually `nofail`) |
 | Firewall opens only `nfs` | Mount fails with `access denied by server` | Add `mountd` and `rpc-bind` |
-| Writing as root over NFS | Files owned by `nobody` | `root_squash` is doing its job; write as a user |
+| Writing as root over NFS | `Permission denied`, or files owned by `nobody` | `root_squash` is doing its job; write as a user |
 | Leaving `no_root_squash` on | Any root on any allowed client is root on the server | Remove it; fix ownership instead |
 | Editing `/etc/exports` but not exporting | Clients see the old export | `exportfs -rav` |
 | autofs map changed, not restarted | Old map still in effect | `systemctl restart autofs` |

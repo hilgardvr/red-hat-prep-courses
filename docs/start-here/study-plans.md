@@ -35,17 +35,19 @@ This plan assumes little or no Linux experience. It includes the full foundation
 | Week | Focus | Modules |
 |---|---|---|
 | 1 | What Linux is; installing and using the lab | F1, F2 |
-| 2 | Shell, commands, help system | F3 |
-| 3 | Filesystem hierarchy and file operations | F4 |
-| 4 | Streams, pipes, grep, and regex | F5 |
-| 5 | Users, permissions, and ownership | F6 |
-| 6 | Processes, systemd, and logs | F7 |
-| 7 | Networking and storage foundations; SELinux intro | F8 |
-| 8 | Essential tools consolidation | R1 |
-| 9 | Users, groups, sudo; software management | R2, R3 |
-| 10 | Shell scripting; processes and services | R4, R5 |
-| 11 | Storage and filesystems | R6, R7 |
-| 12 | Scheduling, networking, security, boot; capstone | R8–R12 |
+| 2 | Shell, files, and the help system | F3, F4 |
+| 3 | Streams, users, and permissions | F5, F6 |
+| 4 | Processes, networking, and SELinux | F7, F8 |
+| 5 | Essential tools | R1 |
+| 6 | Users, groups, and software | R2, R3 |
+| 7 | Shell scripting and services | R4, R5 |
+| 8 | Storage and filesystems | R6, R7 |
+| 9 | Scheduling and networking | R8, R9 |
+| 10 | Security and boot | R10, R11 |
+| 11 | Capstone: build, break, and repair; Exam A | R12 Lab 1–2, Exam A |
+| 12 | Mock exams B and C, then targeted repair | R12 Exams B–C |
+
+A week that lists two modules takes about twice the hours in the rhythm above. If 5–7 hours a week is your limit, stretch this plan to 16 weeks by giving each module its own week; the order does not change.
 
 If a week slips, move the schedule rather than skipping the labs. The capstone will expose gaps.
 

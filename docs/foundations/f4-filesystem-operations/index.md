@@ -34,7 +34,7 @@ On the lab you will see the root filesystem on a virtio disk, mounted at `/`. Th
 ├── usr      programs, libraries, documentation
 ├── home     user home directories
 ├── root     root's home, not under /home
-├── tmp      scratch space, cleared at boot
+├── tmp      scratch space, aged out by systemd-tmpfiles
 └── ...
 ```
 
@@ -52,7 +52,7 @@ RHEL follows the FHS. You do not need to memorize every directory, but you do ne
 | `/usr/bin`, `/usr/sbin` | User and administrative commands | Where most commands live |
 | `/home` | Regular users' home directories | Permissions, SSH keys, quotas |
 | `/root` | root's home directory | Not under `/home`, mode 700 |
-| `/tmp` | Temporary files, world-writable with the sticky bit | Cleared at boot; never store real data |
+| `/tmp` | Temporary files, world-writable with the sticky bit | Aged out by `systemd-tmpfiles`; never store real data |
 | `/opt` | Optional add-on software | Third-party applications |
 | `/srv` | Data served by this system | Web and FTP content by convention |
 | `/boot` | Kernel and bootloader files | Never fill it; R11 works here |
@@ -82,7 +82,7 @@ Three distinctions explain most placement decisions:
 
 - **Static versus variable.** Programs and libraries change only when packages change, so they live in `/usr` and can be mounted read-only. Logs, mail, spools, and databases change constantly, so they live in `/var`.
 - **Shareable versus host-specific.** `/usr` can be shared between machines of the same architecture. `/etc` is specific to this host and is never shared.
-- **Persistent versus runtime.** `/run` and `/tmp` are wiped at boot. Nothing you need later belongs there.
+- **Persistent versus runtime.** `/run` is a `tmpfs` in memory and is wiped at boot. `/tmp` is on the root filesystem and survives a reboot, but `systemd-tmpfiles` deletes files that have sat unused for ten days (`/var/tmp` gets thirty). Neither is a place for data you need later.
 
 When the exam asks you to configure a service, you write to `/etc`. When it asks you to inspect state, you read `/var/log`, `/proc`, or `journalctl`. That mapping is the whole module in one sentence.
 
@@ -214,7 +214,10 @@ touch ~/f4/docs/a.txt
 
 ### Copying
 
+Run these from `~/f4`, the tree the previous block created:
+
 ```bash
+cd ~/f4
 cp docs/a.txt archive/
 cp -v docs/a.txt archive/a-copy.txt
 cp -a docs archive/docs-backup
@@ -235,7 +238,10 @@ cp -a docs archive/docs-backup
 
 ### Moving and renaming
 
+Still in `~/f4`. The first line creates `docs/b.txt` so the rename has something to act on; `archive/a-copy.txt` is the file the `cp -v` line above made:
+
 ```bash
+printf 'beta\n' > docs/b.txt
 mv docs/b.txt docs/b.bak
 mv archive/a-copy.txt archive/a-old.txt
 ```
@@ -249,12 +255,16 @@ That distinction matters on the exam. Moving a file into a directory does not al
 
 ### Deleting
 
+Still in `~/f4`:
+
 ```bash
-rmdir ~/f4/archive/emptydir   # only works if empty, if it exists
+mkdir -p archive/emptydir    # rmdir needs a directory, and it must be empty
+rmdir archive/emptydir
 rm docs/b.bak
-rm -r docs-backup             # recurse
-rm -rf ~/f4                   # recurse, no prompts
+rm -r archive/docs-backup     # recurse
 ```
+
+`rmdir` refuses a directory with anything in it, which is a useful safety property: it can only ever remove an empty one. `rm -r` removes a tree, and `rm -rf` adds "stop asking".
 
 Linux has no recycle bin. `rm` unlinks the name; when the last name and open file descriptors are gone, the data is gone.
 
@@ -264,11 +274,12 @@ Linux has no recycle bin. `rm` unlinks the name; when the last name and open fil
 - Quote variables and guard them:
 
     ```bash
-    target="$HOME/f4"
+    mkdir -p ~/f4/scratch
+    target="$HOME/f4/scratch"
     rm -rf "${target:?}"
     ```
 
-    `${target:?}` makes the shell abort if the variable is empty or unset.
+    `${target:?}` makes the shell abort if the variable is empty or unset. The target here is a scratch directory, so the example is safe to run; the pattern is what matters.
 - Never run it from `/` with a trailing wildcard you have not inspected.
 
 ### `install` for precise results

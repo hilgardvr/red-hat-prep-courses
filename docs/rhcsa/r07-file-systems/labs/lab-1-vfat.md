@@ -226,10 +226,11 @@ TARGET       SOURCE    FSTYPE OPTIONS
 /srv/r7/vfat /dev/vdb1 vfat   rw,relatime,uid=1001,gid=1001,fmask=0077,dmask=0077,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro
 
 total 4
+-rwx------. 1 labuser labuser  5 Nov 10 05:46 CaseFile.txt
 -rwx------. 1 labuser labuser 16 Nov 10 05:46 note.txt
 ```
 
-The mount came back from fstab, and the ownership still comes from the fstab options. If `findmnt` prints nothing, compare `blkid -s UUID -o value /dev/vdb1` with the fstab line and run `mount -a` to read the error.
+The mount came back from fstab, and the ownership and mode still come from the fstab options: `CaseFile.txt` was written by root, but `uid=` and `fmask=` apply to every file on the filesystem. If `findmnt` prints nothing, compare `blkid -s UUID -o value /dev/vdb1` with the fstab line and run `mount -a` to read the error.
 
 ## Verify with the checker
 

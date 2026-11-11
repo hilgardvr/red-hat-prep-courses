@@ -4,7 +4,7 @@ A free, lab-first course for the **Red Hat Certified System Administrator (RHCSA
 
 The course teaches the underlying Linux theory first, then turns every exam objective into hands-on practice on disposable RHEL-compatible virtual machines. It is designed for learners starting with little or no Linux experience.
 
-> **Status:** Modules **R1 (Essential tools)**, **R2 (Users and groups)**, **R3 (Software and repositories)**, **R4 (Shell scripting)**, **R5 (Processes and services)**, **R6 (Local storage)**, **R7 (File systems and sharing)**, **R8 (Scheduling and time)**, **R9 (Networking and firewalld)**, **R10 (Security: SELinux and SSH)**, and **R11 (Boot, rescue, and updates)**, Foundations **F1–F8**, and the validated lab kit are available. The **R12 capstone** (full-stack rehearsal, diagnostic lab, and timed mock exams) is available; the remaining polish is PDF/print export.
+> **Status:** Complete. Foundations **F1–F8**, modules **R1–R12** (the capstone includes three timed mock exams), the validated lab kit, and the printable **Print / PDF** edition are all available. The course covers every objective in the official EX200 v10 list.
 
 ## What is here
 

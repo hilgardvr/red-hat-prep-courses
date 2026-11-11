@@ -76,50 +76,12 @@ The Vagrantfile attaches both VMs to the libvirt network `rhcsa-lab` with DHCP d
 Checkers live in `checks/<module>/check.sh` and run inside `server` as root. The `lab check` wrapper uploads the script and executes it:
 
 ```bash
-./bin/lab check r02 lab1
-./bin/lab check r02 lab2
-./bin/lab check r02 challenge
-./bin/lab check r02 all
-./bin/lab check r03 lab1
-./bin/lab check r03 lab2
-./bin/lab check r03 challenge
-./bin/lab check r03 all
-./bin/lab check r04 lab1
-./bin/lab check r04 lab2
-./bin/lab check r04 challenge
-./bin/lab check r04 all
-./bin/lab check r05 lab1
-./bin/lab check r05 lab2
-./bin/lab check r05 challenge
-./bin/lab check r05 all
-./bin/lab check r06 lab1
-./bin/lab check r06 lab2
-./bin/lab check r06 challenge
+./bin/lab check r01 lab1
 ./bin/lab check r06 all
-./bin/lab check r07 lab1
-./bin/lab check r07 lab2
-./bin/lab check r07 challenge
-./bin/lab check r07 all
-./bin/lab check r08 lab1
-./bin/lab check r08 lab2
-./bin/lab check r08 challenge
-./bin/lab check r08 all
-./bin/lab check r09 lab1
-./bin/lab check r09 lab2
-./bin/lab check r09 challenge
-./bin/lab check r09 all
-./bin/lab check r10 lab1
-./bin/lab check r10 lab2
-./bin/lab check r10 challenge
-./bin/lab check r10 all
-./bin/lab check r11 lab1
-./bin/lab check r11 lab2
-./bin/lab check r11 challenge
-./bin/lab check r11 all
-./bin/lab check r12 lab1
-./bin/lab check r12 lab2
-./bin/lab check r12 all
+./bin/lab check r12 exama
 ```
+
+Modules R1–R11 accept `lab1`, `lab2`, `challenge`, or `all`. R12 adds `exama`, `examb`, and `examc`, which are graded from a clean snapshot; `r12 all` means Lab 1 plus Lab 2 and never includes the exams. The phase defaults to `all`.
 
 `all` assumes the end states of every lab in that module are present at the same time. If you restored the clean snapshot between labs, check them individually.
 

@@ -92,7 +92,7 @@ Every module repeats this rule in context. Treat "it worked until I rebooted" as
 
 | Plan | Time | Best for |
 |---|---|---|
-| **12 weeks** | 5–7 hours per week | Complete beginners, alongside a job or study |
+| **12 weeks** | 5–7 hours per week, more in paired weeks | Complete beginners, alongside a job or study |
 | **6 weeks** | 10–12 hours per week | Some Linux experience, focused schedule |
 | **2 weeks** | 25–30 hours per week | Experienced admins refreshing for the exam |
 

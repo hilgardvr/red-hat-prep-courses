@@ -251,7 +251,7 @@ The marker's timestamp and its boot ID belong to the **previous** boot — `-1` 
 ./bin/lab check r05 lab2
 ```
 
-Two of the checks compare the marker's boot ID with the current one. If you run the checker **before** rebooting, those two fail by design: the marker is from this boot, which proves nothing. After the reboot they pass, and that is the persistence test.
+One of the checks compares the marker's boot ID with the current one. If you run the checker **before** rebooting, that one fails by design: the marker is from this boot, which proves nothing. After the reboot it passes, and that is the persistence test.
 
 <details>
 <summary>Show the expected check output</summary>
@@ -260,7 +260,7 @@ Two of the checks compare the marker's boot ID with the current one. If you run 
 R5 Lab 2 — Logs that survive, and a tuning profile
   PASS  /var/log/journal exists
   PASS  a journal file is stored under /var/log/journal
-  PASS  journalctl reports the journal's disk usage
+  PASS  the journal holds entries for this boot
   PASS  the merged journald configuration caps SystemMaxUse at 100M
   PASS  the journal contains the r5-journal marker
   PASS  the marker was written before the current boot

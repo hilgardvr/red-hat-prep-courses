@@ -135,7 +135,7 @@ dnf -y upgrade                   # apply them (alias: update)
 dnf history                      # every transaction
 dnf history info <id>            # return code, user, packages
 dnf history undo <id>            # reverse a transaction (not a backup)
-needs-restarting -r              # 0 = reboot needed (dnf-plugins-core)
+needs-restarting -r              # 1 = reboot needed (dnf-plugins-core)
 dnf offline-upgrade download     # production-safe path: download...
 dnf offline-upgrade reboot       # ...then apply before services start
 ```

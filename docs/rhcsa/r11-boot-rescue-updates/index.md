@@ -212,7 +212,7 @@ done
 
 Do not edit `grub.cfg` by hand. The next kernel update or `grub2-mkconfig` run will overwrite it. Change `/etc/default/grub`, then regenerate.
 
-The output mentions a UEFI firmware entry even on this BIOS machine; that is GRUB's probe being helpful, not a sign that something is wrong.
+The output mentions a UEFI firmware entry even though this VM boots legacy BIOS. `/etc/grub.d/30_uefi-firmware` prints that line every time it runs, whatever the firmware. The `menuentry` it writes is wrapped in `if [ "$grub_platform" = "efi" ]`, and `/sys/firmware/efi` does not exist here, so the entry never reaches the menu. The message is normal.
 
 ### Boot Loader Specification (BLS)
 
@@ -490,7 +490,7 @@ ID     | Command line             | Date and time    | Action(s)      | Altered
 
 ### Does the update need a reboot?
 
-`dnf needs-restarting -r` answers that question: exit `0` means a reboot is needed, `1` means it is not. The command comes from `dnf-plugins-core`, which is not installed in the base image. Install it in the lab if you want to use it; the checker deliberately does not depend on it.
+`dnf needs-restarting -r` answers that question: it exits `1` when a reboot is needed and `0` when it is not, so a script can branch on the status directly. The command comes from `dnf-plugins-core`, which is not installed in the base image. Install it in the lab if you want to use it; the checker deliberately does not depend on it.
 
 The older, still useful `needs-restarting` without `-r` lists processes that are running an old version of a library. On a server, the honest answer after a kernel or systemd update is "reboot at the next maintenance window".
 

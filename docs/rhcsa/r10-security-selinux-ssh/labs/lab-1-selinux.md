@@ -182,7 +182,7 @@ ls -l /srv/r10/www/index.html
 ```
 
 ```text { .no-copy }
--rw-r--r--. 1 root root 17 Nov 10 05:46 /srv/r10/www/index.html
+-rw-r--r--. 1 root root 16 Nov 10 05:46 /srv/r10/www/index.html
 ```
 
 `0644`, root-owned, readable by everyone — and unreadable to `httpd`, because the type is wrong. This is the moment to understand the two models: **permissions decided nothing here, the label did.**

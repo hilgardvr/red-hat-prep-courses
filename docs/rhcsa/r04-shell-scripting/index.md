@@ -366,7 +366,7 @@ That last point is a classic trap:
 ```bash
 count=0
 grep -c . /etc/passwd | while read -r n; do count=$n; done
-echo "$count"      # empty: the pipeline ran the loop in a subshell
+echo "$count"      # 0: the pipeline ran the loop in a subshell
 ```
 
 Anything on the right of a `|` runs in a subshell. Assignments inside it are lost when it exits. Redirect the file into the loop instead, or use process substitution (`done < <(command)`) when you need the output of a command.

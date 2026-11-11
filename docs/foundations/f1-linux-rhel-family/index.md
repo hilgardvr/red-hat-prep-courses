@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Time** | 45–60 minutes |
-| **Prerequisites** | None. The commands work on any Linux system. |
+| **Prerequisites** | None. The commands are RHEL-family commands; run them in the lab. |
 | **Lab** | A short command walkthrough on the lab `server` |
 | **Self-check** | At the end of the page |
 
@@ -223,7 +223,7 @@ The exam is performance-based. You will be given tasks on a live system and judg
 
 ## Lab: identify the system
 
-Run these commands on the lab `server` (or any Linux system you have). If the lab is not running yet, you can read the output first and run them after F2.
+Run these commands on the lab `server` (or any RHEL-family system you have). If the lab is not running yet, you can read the output first and run them after F2.
 
 ```bash
 cat /etc/os-release

@@ -90,7 +90,7 @@ That is why the course teaches domains together in the capstone instead of as is
 
 - Reboot.
 - Re-check every task after the reboot.
-- Verify mounts with `findmnt`, services with `systemctl is-enabled --now`, firewall with `firewall-cmd --list-all`, SELinux with `ls -Z` and `getenforce`.
+- Verify mounts with `findmnt`, services with `systemctl is-enabled` **and** `systemctl is-active`, firewall with `firewall-cmd --list-all`, SELinux with `ls -Z` and `getenforce`.
 - Do not leave a task half-configured because you ran out of ideas. A partially correct persistent configuration scores better than a perfect temporary one.
 
 ## What the exam does not test

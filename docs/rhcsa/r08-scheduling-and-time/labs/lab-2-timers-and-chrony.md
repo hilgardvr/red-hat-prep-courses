@@ -21,7 +21,7 @@
 | `server` | NTP server | `allow 10.10.10.0/24` in `chrony.conf`, `ntp` open in firewalld |
 | `server` | Timezone | `Europe/Berlin` |
 | `node2` | NTP client | `server 10.10.10.10 iburst`, selected as its source |
-| Persistence | Both machines reboot and the timer and the time source come back |
+| Both | Persistence | Reboot both machines; the timer and the time source come back |
 
 This lab replaces the cron job with a systemd timer, then turns the pair of VMs into a small time hierarchy: `server` follows the internet, `node2` follows `server`.
 
@@ -215,7 +215,7 @@ MS Name/IP address         Stratum Poll Reach LastRx Last sample
 
 Reference ID    : 29AF2428 (41.175.36.40)
 Stratum         : 3
-Ref time (UTC)  : Tue 2026-11-10 19:51:19 2026
+Ref time (UTC)  : Tue Nov 10 19:51:19 2026
 System time     : 0.054164037 seconds fast of NTP time
 ```
 
@@ -274,7 +274,7 @@ MS Name/IP address         Stratum Poll Reach LastRx Last sample
 
 Reference ID    : 0A0A0A0A (server)
 Stratum         : 4
-Ref time (UTC)  : Tue 2026-11-10 19:50:19 2026
+Ref time (UTC)  : Tue Nov 10 19:50:19 2026
 System time     : 0.000003803 seconds fast of NTP time
 Last offset     : +0.000005687 seconds
 RMS offset      : 0.000005687 seconds

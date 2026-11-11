@@ -232,7 +232,7 @@ Linux presents one unified directory tree. Disks and filesystems are **mounted**
 | `/root` | Root user's home directory |
 | `/var` | Variable data: logs, spools, caches, web content |
 | `/usr` | Installed software, libraries, documentation |
-| `/tmp` | Temporary files; often cleared on boot |
+| `/tmp` | Temporary files, cleaned periodically by `systemd-tmpfiles` |
 | `/srv` | Data served by the system (web, FTP, etc.) |
 | `/opt` | Optional add-on software |
 | `/proc`, `/sys` | Kernel and hardware information (virtual filesystems) |
@@ -248,14 +248,18 @@ cd /var/log               # change directory
 cd -                      # back to the previous directory
 cd ~                      # home directory
 
-mkdir -p /srv/r1/project/{docs,src,archive}
+mkdir -p ~/fsdemo/{docs,src,archive}
+cd ~/fsdemo                # the paths below are relative to this directory
 touch docs/readme.txt
 cp docs/readme.txt docs/notes.txt
 cp -a docs docs-backup     # preserve mode, ownership, timestamps
 mv docs/notes.txt archive/
-rm archive/old.txt
+mkdir -p empty-dir
 rmdir empty-dir            # only if empty
+rm -r docs-backup          # recurse
 ```
+
+`~/fsdemo` is a scratch tree for this page. The labs build their own tree under `/srv/r1`, so running this does not disturb them.
 
 | Command | Use |
 |---|---|

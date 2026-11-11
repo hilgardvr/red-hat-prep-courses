@@ -47,7 +47,7 @@
 
     ---
 
-    Every lab ships with a check script. It inspects the end state — including after a reboot — and tells you exactly what is missing.
+    Every RHCSA module lab ships with a check script. It inspects the end state — including after a reboot — and tells you exactly what is missing. The foundations end with a self-check instead.
 
 -   :material-school: **Exam-style challenges**
 

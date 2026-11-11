@@ -305,7 +305,7 @@ grep -E '^enabled=' /etc/yum.repos.d/almalinux-baseos.repo
 ```
 
 ```text { .no-copy }
-enabled=1
+enabled=0
 enabled=0
 enabled=0
 ```
@@ -348,7 +348,7 @@ sudo -i
 dnf repolist
 rpm -q zsh
 dnf list zsh
-dnf repoinfo r3-local | sed -n '1,4p;9p'
+dnf repoinfo r3-local | sed -n '1,3p;9p'
 dnf --disablerepo='*' --enablerepo=r3-local -q repoquery zsh
 ```
 

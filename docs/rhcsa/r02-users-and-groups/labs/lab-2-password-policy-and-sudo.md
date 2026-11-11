@@ -61,7 +61,7 @@ mira  P 2026-11-10 0 99999 7 -1
 Look at the hash without printing it in full:
 
 ```bash
-getent shadow devon | cut -d: -f1,2 | cut -c1-20
+getent shadow devon | cut -d: -f1,2 | cut -c1-12
 ```
 
 ```text { .no-copy }

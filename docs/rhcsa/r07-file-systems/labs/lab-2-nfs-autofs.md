@@ -21,7 +21,7 @@
 | `server` | Firewall | `nfs`, `mountd`, and `rpc-bind` allowed |
 | `node2` | Manual mount | Proved once by hand, then unmounted |
 | `node2` | autofs | `/mnt/r7auto/share` mounts on first access, at boot and after a reboot |
-| Persistence | Both machines reboot, and `node2` still reaches the export |
+| Both | Persistence | Reboot both machines; `node2` still reaches the export |
 
 This lab uses both VMs, which is why the course has two. `server` is the NFS server; `node2` is the client. You will meet `root_squash` and a real permission problem, and fix it on the correct machine.
 
@@ -131,7 +131,7 @@ ls -l /mnt/r7-nfs
 ```text { .no-copy }
 total 8
 -rw-r--r--. 1 labuser labuser 23 Nov 10 05:46 hello.txt
--rw-r--r--. 1 labuser labuser 16 Nov 10 19:21 user-file.txt
+-rw-r--r--. 1 labuser labuser 19 Nov 10 19:21 user-file.txt
 ```
 
 `labuser`'s UID was passed through, so the file is owned by `labuser` on both machines. Unmount the manual test; autofs takes over next:
@@ -172,7 +172,6 @@ findmnt /mnt/r7auto/share
 ```
 
 ```text { .no-copy }
-from-node2.txt
 hello.txt
 user-file.txt
 
@@ -210,7 +209,6 @@ findmnt /mnt/r7auto/share
 ```
 
 ```text { .no-copy }
-from-node2.txt
 hello.txt
 user-file.txt
 

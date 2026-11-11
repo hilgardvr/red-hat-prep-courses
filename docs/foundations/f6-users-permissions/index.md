@@ -28,14 +28,16 @@ getent group wheel
 ```
 
 ```text { .no-copy }
-uid=1000(labuser) gid=1000(labuser) groups=1000(labuser),10(wheel)
+uid=1001(labuser) gid=1001(labuser) groups=1001(labuser),10(wheel)
 labuser wheel
 labuser
-labuser:x:1000:1000::/home/labuser:/bin/bash
+labuser:x:1001:1001::/home/labuser:/bin/bash
 wheel:x:10:labuser
 ```
 
 `id` shows the primary group and every supplementary group. Group membership is decided at login; adding a user to a group does not affect sessions that already exist.
+
+The exact number depends on the image: `labuser` gets `1001` here because the box's own `vagrant` account already claimed `1000`. Your lab may show a different number of the same shape.
 
 ### Where the accounts live
 
@@ -49,7 +51,7 @@ wheel:x:10:labuser
 The fields in `/etc/passwd` are positional:
 
 ```text { .no-copy }
-labuser:x:1000:1000::/home/labuser:/bin/bash
+labuser:x:1001:1001::/home/labuser:/bin/bash
    |    |  |    |   |       |          |
    |    |  |    |   |       |          +-- login shell
    |    |  |    |   |       +------------- home directory

@@ -109,8 +109,10 @@ Priority is **niceness**, from -20 (most favorable) to 19 (least). Only root can
 
 ```bash
 nice -n 10 long-running-command &
-renice -n 5 -p PID
+renice -n 15 -p $!
 ```
+
+`$!` is the PID of the background job you just started. Raising the niceness (10 → 15) is something you may do to your own process; lowering it back needs root.
 
 ## systemd as PID 1
 
@@ -370,8 +372,10 @@ Start another one and stop it with a signal:
 ```bash
 sleep 300 &
 pgrep -af 'sleep 300'
-kill -TERM <PID>
+kill -TERM $!
 ```
+
+`$!` names the PID of that background job, so no number needs copying.
 
 ### 7. Survey the running system
 
