@@ -157,6 +157,13 @@ nav:
           - "Challenge — A named service host": rhcsa/r09-networking-and-firewall/labs/challenge-service-host.md
           - Knowledge check: rhcsa/r09-networking-and-firewall/quiz.md
           - Cheat sheet: rhcsa/r09-networking-and-firewall/cheatsheet.md
+      - "R10 — Security: SELinux and SSH":
+          - Theory: rhcsa/r10-security-selinux-ssh/index.md
+          - "Lab 1 — SELinux: a mode, a label, and a boolean": rhcsa/r10-security-selinux-ssh/labs/lab-1-selinux.md
+          - "Lab 2 — Keys, not passwords": rhcsa/r10-security-selinux-ssh/labs/lab-2-ssh-keys.md
+          - "Challenge — A hardened service host": rhcsa/r10-security-selinux-ssh/labs/challenge-hardened-host.md
+          - Knowledge check: rhcsa/r10-security-selinux-ssh/quiz.md
+          - Cheat sheet: rhcsa/r10-security-selinux-ssh/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

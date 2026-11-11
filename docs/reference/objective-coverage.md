@@ -126,18 +126,18 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 10. Manage security
 
-**Module R10** — <span class="badge badge-planned">Planned</span>
+**Module R10** — <span class="badge badge-ready">Available</span>
 
 | Objective | Where |
 |---|---|
-| Configure firewall settings using `firewall-cmd` / `firewalld` | R10, with R9 |
-| Manage default file permissions | R10, with [R2 — umask](../rhcsa/r02-users-and-groups/index.md#default-permissions-umask) and [R1 — Permissions](../rhcsa/r01-essential-tools/index.md#permissions) |
-| Configure key-based authentication for SSH | R10, previewed in [R1 — SSH](../rhcsa/r01-essential-tools/index.md#ssh-and-secure-file-transfer) |
-| Set enforcing and permissive modes for SELinux | R10 |
-| List and identify SELinux file and process context | R10 |
-| Restore default file contexts | R10 |
-| Manage SELinux port labels | R10 |
-| Use Boolean settings to modify system SELinux settings | R10 |
+| Configure firewall settings using `firewall-cmd` / `firewalld` | [R9 — firewalld](../rhcsa/r09-networking-and-firewall/index.md#firewalld), extended in [R10 — firewalld: narrowing the opening](../rhcsa/r10-security-selinux-ssh/index.md#firewalld-narrowing-the-opening) and the [challenge](../rhcsa/r10-security-selinux-ssh/labs/challenge-hardened-host.md) |
+| Manage default file permissions | [R2 — umask](../rhcsa/r02-users-and-groups/index.md#default-permissions-umask) and [R1 — Permissions](../rhcsa/r01-essential-tools/index.md#permissions) |
+| Configure key-based authentication for SSH | [R10 — SSH: keys instead of passwords](../rhcsa/r10-security-selinux-ssh/index.md#ssh-keys-instead-of-passwords) and [Lab 2](../rhcsa/r10-security-selinux-ssh/labs/lab-2-ssh-keys.md); previewed in [R1 — SSH](../rhcsa/r01-essential-tools/index.md#ssh-and-secure-file-transfer) |
+| Set enforcing and permissive modes for SELinux | [R10 — Modes](../rhcsa/r10-security-selinux-ssh/index.md#modes) and [Lab 1, Step 1](../rhcsa/r10-security-selinux-ssh/labs/lab-1-selinux.md) |
+| List and identify SELinux file and process context | [R10 — Contexts](../rhcsa/r10-security-selinux-ssh/index.md#selinux-the-model) |
+| Restore default file contexts | [R10 — File labels come from policy](../rhcsa/r10-security-selinux-ssh/index.md#file-labels-come-from-policy) and [Lab 1, Step 5](../rhcsa/r10-security-selinux-ssh/labs/lab-1-selinux.md) |
+| Manage SELinux port labels | [R10 — Port labels](../rhcsa/r10-security-selinux-ssh/index.md#port-labels) and [Lab 1, Step 4](../rhcsa/r10-security-selinux-ssh/labs/lab-1-selinux.md) |
+| Use Boolean settings to modify system SELinux settings | [R10 — Booleans](../rhcsa/r10-security-selinux-ssh/index.md#booleans) and [Lab 1, Step 6](../rhcsa/r10-security-selinux-ssh/labs/lab-1-selinux.md) |
 
 ## Capstone
 
@@ -154,4 +154,4 @@ The course is considered complete for a module when every objective bullet in th
 3. an automated check that verifies the result, and
 4. a persistence test where the objective changes system state.
 
-R1 and R2 meet this rule. The remaining modules are being written to the same standard.
+R1–R10 meet this rule; each has passed its checker from a clean snapshot after a reboot. R11 and R12 are being written to the same standard.

@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-11 |
-| **Current milestone** | M2 complete — R1–R9 validated; R10 next |
-| **Next milestone** | R10 |
+| **Current milestone** | M3 in progress — R1–R10 validated; R11 next |
+| **Next milestone** | R11 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -49,7 +49,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R7 — File systems and sharing | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 15 + 16 = 42). Checker reads live partition, superblock, mount, export, and firewalld state on `server`, and reaches `node2` over SSH for the autofs half; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
 | R8 — Scheduling and time | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (13 + 12 + 18 = 43). Checker reads live systemd timer properties, cron files, produced artefacts, and chrony state on `server`, and reaches `node2` over SSH for the client half; walked end to end on a fresh lab, 43/43 after rebooting both VMs. |
 | R9 — Networking and firewalld | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 10 + 13 = 35). Checker reads the `nmcli` profile, live addresses, `/etc/hosts`, and permanent/runtime firewalld state, then proves each open port by fetching it from `node2` with a listener the checker starts itself; walked end to end on a fresh lab, 35/35 after rebooting both VMs. |
-| R10–R11 | **Planned** | See the curriculum map below |
+| R10 — Security: SELinux and SSH | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 10 + 21 = 42). Checker reads live SELinux state (mode, file label, `semanage fcontext`/`port` records, Boolean pair), the effective `sshd` configuration plus two real logins, and firewalld rich-rule state, then fetches `/api/` through Apache and the hardened port from `node2`; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
+| R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -110,7 +111,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r09-networking-and-firewall/
+│   │   ├── r09-networking-and-firewall/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r10-security-selinux-ssh/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -130,6 +136,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r07/check.sh    # R7 automated checker (server + node2)
 │   ├── checks/r08/check.sh    # R8 automated checker (server + node2)
 │   ├── checks/r09/check.sh    # R9 automated checker (server + node2)
+│   ├── checks/r10/check.sh    # R10 automated checker (server + node2)
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -195,6 +202,8 @@ R8 is the second two-machine checker and adds a different problem: **a schedule 
 
 R9 is a networking checker and takes the next step: **configuration is not behaviour**. Half of it reads the `nmcli` profile, the live addresses, `/etc/hosts`, and both firewalld layers; the other half starts an HTTP listener on `server` and fetches it **from `node2` as `labuser`**, using the shared lab key and `~/.ssh/config`. That request is the only honest proof that a port is open in the right zone, and it is why `lab2` and `challenge` need both VMs running. The checker also asserts that `ssh` to `node2` still works after every change, because the module's whole risk is a firewall edit that ends the session. Validate it from `clean` by walking Lab 1, Lab 2 (both machines), and the challenge, rebooting both, and running `./bin/lab check r09 all`.
 
+R10 is the first checker that has to prove **policy** rather than a file or a service. SELinux is checked three ways: the live label with `ls -Z`, the persistent record with `semanage fcontext -l -C` / `semanage port -l -C`, and the Boolean pair from `semanage boolean -l`, because a `chcon` and a `setsebool` without `-P` both look correct until something relabels files or the machine reboots. SSH is checked with `sshd -T` **and** two real connections, because a drop-in that parses can still lose the first-value-wins race with `50-cloud-init.conf`. The Boolean is checked behaviourally: the checker kills anything on `18081`, starts its own fixture, and fetches `/api/` through Apache's `ProxyPass`, so a Boolean that is `on` in the store but not in force fails. The challenge reaches `node2` as `labuser` to prove the rich rule, so both VMs must be up. Validate it from `clean` by walking Lab 1, Lab 2, and the challenge, rebooting both, and running `./bin/lab check r10 all`.
+
 ### Real lab validation
 
 ```bash
@@ -229,6 +238,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R7 lab 1 (11), lab 2 (15), and the challenge (16) passed; `./bin/lab check r07 all` passed 42/42 after rebooting **both** machines. The walk started from `clean`, created a 512 MiB VFAT partition on `/dev/vdb` with `uid=`/`gid=`/`umask=` mount options, exported `/srv/r7/export` to `10.10.10.0/24` from `server` and opened `nfs`, `mountd`, and `rpc-bind`, mounted it by hand and then through autofs on `node2`, and built `r7vg` on a 1.5 GiB second partition with a 512 MiB ext4 `r7data`. A 100 MB `blob.bin` was written before `lvextend -L +512M` and `resize2fs`, and its checksum was unchanged after an offline `e2fsck -fy` and a reboot. Writing to the export as root failed with `Permission denied` (`root_squash`), and writing as `labuser` produced a file owned by `labuser` on both machines. `findmnt --verify` reported no errors at the end of each phase.
 - R8 lab 1 (13), lab 2 (12), and the challenge (18) passed; `./bin/lab check r08 all` passed 43/43 after rebooting **both** machines. The walk started from `clean`, corrected the snapshot's stale clock in Lab 1 Step 0 with `systemctl restart chronyd` and `chronyc waitsync 30 0.1`, then installed `at`, created `/etc/cron.d/r8-heartbeat` and a `labuser` crontab, and queued one `at` job. Lab 2 replaced the cron work with an `OnCalendar=*:0/2` timer, added `allow 10.10.10.0/24`, opened `ntp`, set `Europe/Berlin`, and pointed `node2` at `10.10.10.10`. The challenge added `/usr/local/sbin/r8-report` under an `hourly` `Persistent=true` timer and `/usr/local/sbin/r8-archive` under a Sunday 03:30 cron line, then proved pruning by running the report service four times. On the first clean walk the user cron job failed because `/srv/r8/home` was root-owned; the lab now creates it with `install -d -o labuser -g labuser`.
 - R9 lab 1 (12), lab 2 (10), and the challenge (13) passed; `./bin/lab check r09 all` passed 35/35 after rebooting **both** machines. The walk started from `clean`, created a dummy connection `lab0` with `192.0.2.10/24` and `2001:db8::10/64`, DNS `192.0.2.53`, search domain `r9.lab`, and `never-default` on both families, then added the `r9peer` hosts line. Lab 2 created the `r9web` zone with `http`, `8080/tcp`, and `lab0`, proved that `node2` could not reach `8080` through `public`, opened `9090` at runtime and watched it vanish on `--reload`, made `8080` permanent, and fetched the page from `node2`. The challenge set the static hostname `server.r9.lab`, added the `r9api` hosts line, opened `8443/tcp` permanently, and fetched both pages from `node2`. Two checker bugs were found and fixed during the walk: `nmcli -g ipv6.addresses` escapes the colons (`2001\:db8\:\:10/64`), so `conn_v6` strips backslashes before comparing; and the first `/etc/hosts` helper mis-parsed the file, so `hosts_has_ip` now matches the address in field 1 and the name in a later field. The docs also explain why `getent hosts <own-fqdn>` returns IPv6 and link-local answers through `myhostname`, while `getent ahostsv4` gives the address a service actually uses.
+- R10 lab 1 (11), lab 2 (10), and the challenge (21) passed; `./bin/lab check r10 all` passed 42/42 after rebooting **both** machines. The walk started from `clean`, installed `httpd` and `policycoreutils-python-utils` in Lab 1, hit the `name_bind` denial on `18443`, labelled the port, hit the `getattr` denial on `/srv/r10/www`, added the `semanage fcontext` mapping and relabelled, then hit the `name_connect` denial on the proxy and proved `setsebool -P httpd_can_network_connect on` fixes it. Lab 2 created `r10deploy`, generated `/home/labuser/.ssh/r10_ed25519`, installed the public key, and proved that `10-r10.conf` wins the first-value-wins race while `60-r10.conf` does not. The challenge added the source-restricted rich rule and fetched the page from `node2`. After the reboot `Enforcing`, the port label, the `fcontext` mapping, the Boolean, the `sshd` drop-in, and the key login all held; `/api/` returned `503` because the hand-started backend is not a service, which is why the checker starts its own. One checker bug was found and fixed during the walk: `semanage port -l -C` prints `type proto port`, so `port_label` reads field 2 and 3, not 3 and 4.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -302,19 +312,21 @@ Every RHCSA module follows the same anatomy:
 - The foundations are optional except F2. State that once, in `docs/start-here/how-to-use.md` and `docs/foundations/index.md`: an experienced admin may skip F1 and F3–F8, but F2 teaches the lab and snapshot workflow, which is course logistics rather than Linux knowledge. Do not add per-module "skip ahead to R1" links — they read as permission to skip the rest of the foundations.
 - `PACKAGES` in `labs/provision/common.sh` is base state only: things F1 and F2 assert, or that every module needs before it starts. A module that needs a package installs it in its own lab. Do not grow `PACKAGES` for module features — it would force every existing learner to rebuild mid-course.
 
-**Check-script conventions.** There are five reference implementations and they cover different kinds of state:
+**Check-script conventions.** The reference implementations cover different kinds of state:
 
 - **R1 (`labs/checks/r01/check.sh`) — filesystem state.** Use it as the model for anything under `LAB_ROOT`: files, links, modes, ownership, archives, checksums.
 - **R2 (`labs/checks/r02/check.sh`) — account state.** Use it as the model for users, groups, passwords, aging, `sudo`, and anything else that lives in a system database rather than a file under `/srv`.
 - **R4 (`labs/checks/r04/check.sh`) — program behaviour.** Use it when the deliverable is a script. It builds fixtures with `mktemp -d`, runs the learner's script against them, and compares stdout and exit status. Nothing in it greps the script's source for particular commands.
 - **R5 (`labs/checks/r05/check.sh`) — live service state.** Use it for systemd units, the journal, and `tuned`. It asks `systemctl`, `journalctl`, and `tuned-adm` what they think, and reads the process's real nice value with `ps`; one check is behavioural (kill the main PID, wait for a new one).
 - **R6 (`labs/checks/r06/check.sh`) — live block-device and mount state.** Use it for partitions, LVM, filesystems, swap, and fstab. It reads the partition table with `parted` and `sfdisk`, the LVM metadata with `pvs`/`vgs`/`lvs`, the superblocks with `blkid`, and the live mount table with `findmnt`. Size checks are ranges, not exact equality, because a correct disk loses a little room to alignment.
+- **R9 (`labs/checks/r09/check.sh`) — network configuration plus behaviour.** Use it when a rule can exist and still not work. It reads the `nmcli` keyfile, the live addresses, `/etc/hosts`, and both firewalld layers, then starts its own HTTP listener and fetches it from `node2` as `labuser`. That split — configuration questions answered from files, reachability answered by a real client — is the model for any networking check.
+- **R10 (`labs/checks/r10/check.sh`) — policy and daemon state.** Use it for SELinux and for any service whose configuration is merged from includes. It pairs evidence deliberately: the live file label with the persistent `semanage fcontext` record, the live port label with the `semanage port -l -C` record, the Boolean's running value with its persistent value, and the effective `sshd -T` output with two real logins. The Boolean is also proved behaviourally by proxying to a fixture the checker starts itself.
 
-All five follow these rules:
+All of them follow these rules:
 
 - Run as root inside `server`.
 - Accept `lab1|lab2|challenge|all`.
-- Use `LAB_ROOT` (default `/srv`) where the module has a file tree, so the tree checks can be tested without a VM. R5 and R6 have no tree; their state is live.
+- Use `LAB_ROOT` (default `/srv`) where the module has a file tree, so the tree checks can be tested without a VM. R5, R6, and R10 have no tree; their state is live.
 - Print `PASS`/`FAIL` per criterion and exit non-zero if any fail.
 - Inspect end state, not the commands used.
 - Include node2 checks where the lab involves the second machine.
@@ -390,7 +402,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R7 | VFAT, NFS, autofs, filesystem repair and online ext4 growth | 6 | **Validated 2026-11-10** |
 | R8 | cron, at, systemd timers, chrony, timezones | 7 | **Validated 2026-11-10** |
 | R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | **Validated 2026-11-11** |
-| R10 | SELinux, SSH keys, firewall hardening | 10 | Planned |
+| R10 | SELinux, SSH keys, firewall hardening | 10 | **Validated 2026-11-11** |
 | R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | Planned |
 | R12 | Capstone: timed mock exams and full review | All | Planned |
 
@@ -467,6 +479,17 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R9 matches hosts mappings by address, not by name (`hosts_has_ip`) (2026-11-11) | Grepping `/etc/hosts` for `r9peer` passes on a stale line under a different address, which is exactly the mistake the lab is about. The helper requires the documented address in field 1 and the name in a later field, so a partial edit fails. |
 | `conn_v6` strips `nmcli`'s backslash escapes (2026-11-11) | Terse `nmcli -g ipv6.addresses` prints `2001\:db8\:\:10/64`. Comparing that raw string fails a perfectly correct profile; stripping the backslashes keeps the profile as the subject of the check rather than the output format. |
 | R9 records why the `lab0` zone survives a reboot (2026-11-11) | firewalld asks NetworkManager to remember the zone, and the assignment lands in the profile as `connection.zone=r9web`. Without that note a learner would expect `--add-interface` to be undone when the firewall starts before the dummy device exists; the lab explains the race and the two files involved. |
+| R10 is one module, not two (2026-11-11) | SELinux and key-based SSH are separate exam bullets but the same lesson: the decision has already moved past the password and the permission bit. Building them as Labs 1 and 2 of one module lets the challenge combine them, and keeps the lab count at two guided labs plus a challenge, like every other module. |
+| R10 uses `httpd` on 18443, not 8443 (2026-11-11) | RHEL 10 already labels 8443 as `http_port_t` (it is the cockpit/TLS alternate), so a `Listen 8443` would start without a `name_bind` denial and Lab 1 would have nothing to teach. 18443 is unlabelled, so the first start fails, the AVC names the port, and `semanage port -a` is the visible fix. |
+| R10's custom document root is `/srv/r10/www` (2026-11-11) | `/srv` is `var_t`, so the `403` and the `getattr` AVC appear without any setup, and the module's own `semanage fcontext` mapping is what makes it work. Nothing in the lab touches `/var/www/html`, so the shipped label is still there to compare against. |
+| R10 proves `httpd_can_network_connect` with a local proxy (2026-11-11) | The Boolean has no visible effect on the static page; it only matters when httpd makes an **outbound** connection. A `ProxyPass /api/` to `127.0.0.1:18081` turns it into a `503` that becomes a `200` after `setsebool -P`, and produces the `name_connect` denial that pairs with Lab 1's `name_bind`. Using a real remote service would add a second machine and a network dependency to a SELinux lesson. |
+| R10's SSH hardening is applied to `server`, not `node2` (2026-11-11) | The checker must read the **effective** configuration with `sshd -T`, which needs root. Keeping the hardening on `server` lets the checker run locally and lets the learner test both the key path and the password path in the same shell. Hardening `node2` would need `sudo` over SSH from the checker and would test the transport instead of the policy. |
+| R10's drop-in is `/etc/ssh/sshd_config.d/10-r10.conf` (2026-11-11) | `sshd` is first-value-wins, and the AlmaLinux cloud image ships `50-cloud-init.conf` with `PasswordAuthentication yes`. A drop-in named 50 or above is parsed and ignored, which is a silent failure the learner cannot see without `sshd -T`. Numbering it 10 makes it win, and Lab 2 demonstrates the failure by renaming it to 60 and watching `sshd -T` flip back. |
+| R10's checker starts its own proxy backend (2026-11-11) | The lab's backend is `python3 -m http.server`, started by hand, so it is gone after the reboot. If the checker depended on it, a correct Boolean would fail the persistence test. Starting a fixture on 18081 means the Boolean is tested and the backend's lifetime is irrelevant. |
+| R10 checks the password path by connecting, not by grepping (`offered_methods`, 2026-11-11) | The method list in `Permission denied (publickey,…,password)` is the daemon's own answer after includes and `Match` blocks. A checker that greps `PasswordAuthentication no` passes a drop-in that lost the ordering race. |
+| R10 keeps `chcon` as a deliberate wrong turn (2026-11-11) | The lab applies `chcon`, shows the page working, then runs `restorecon` and breaks it again before writing the `fcontext` mapping. Telling a beginner that `chcon` is temporary does not stick; watching a working page revert does. |
+| R10's rich rule is a source rule, and `--query-port` answers `no` (2026-11-11) | The challenge requires the port to be restricted, so a plain `--add-port` is the failure mode being tested. `--query-port=18443/tcp` returning `no` is the correct state and would read as broken to anyone who has only used `--add-port`; the docs and the cheat sheet say so explicitly. |
+| R10 is the first module that installs its own web server (2026-11-11) | `httpd` and `policycoreutils-python-utils` are module features, not base state, so they stay out of `PACKAGES` and are installed in Lab 1. A learner who left R3's distro repositories disabled must re-enable them, exactly as with R6's `lvm2`, R7's `autofs`, and R8's `at`. |
 
 ---
 
@@ -555,7 +578,17 @@ When adding or revising a foundation, repeat the same five steps:
   - The challenge adds a fully qualified hostname, a second hosts-file name (`r9api`), and a second permanent port (`8443`), without undoing either lab. `getent hosts <own-fqdn>` answers through `myhostname` with IPv6 and link-local addresses; the docs and the checker use `getent ahostsv4` where a service address is what matters.
   - The walk started from `clean`, ran the three phases in order, rebooted **both** machines, and ran `./bin/lab check r09 all`: 35/35. Two checker bugs surfaced and were fixed: `conn_v6` strips `nmcli`'s escaped colons, and `hosts_has_ip` matches the address field rather than searching for the name anywhere in the line.
 
-R10 (SELinux) and R11 (boot recovery) remain, and they are the domains hardest to learn from prose. Add each with the full anatomy above.
+- **R10 — done and validated 2026-11-11 (42/42 from a clean snapshot).** SELinux modes, labels, port labels, Booleans, and AVC reading; SSH keys, `authorized_keys` permissions, drop-in ordering, and proving the password path is gone; a source-restricted firewalld rich rule. Design decisions worth keeping:
+  - The module walks into three failures in order and fixes each at the layer that refused it: `name_bind` on `18443`, `getattr` on `/srv/r10/www`, `name_connect` to `18081`. That sequence is the whole lesson — a hardened host has several independent "no"s, and fixing the most recent one is not the same as fixing the host.
+  - Lab 1 uses `18443` because RHEL 10 already labels `8443` as `http_port_t`; there would be no port denial to teach. It uses `/srv/r10/www` because `/srv` is `var_t`, so the file denial needs no setup.
+  - `chcon` is applied on purpose, the page works, then `restorecon` breaks it again before the `semanage fcontext` mapping is written. The wrong turn is the lesson.
+  - The Boolean is proved with a local proxy to `127.0.0.1:18081`, which produces a `503` and a `name_connect` denial, then a `200` after `setsebool -P`. A static page would never touch the Boolean at all.
+  - Lab 2 hardens `server`, not `node2`, so `sshd -T` can be read locally. The drop-in is `10-r10.conf` because `50-cloud-init.conf` sets `PasswordAuthentication yes` and first value wins; the lab renames it to `60` to show the setting silently reverting, then back.
+  - The checker proves SSH with `sshd -T` **and** three real connections (deploy key, forced password, lab key), and starts its own proxy fixture so the Boolean is tested after the hand-started backend is long gone.
+  - The challenge adds a source-restricted rich rule in `public` and fetches the page from `node2`, without undoing either lab. `--query-port=18443/tcp` correctly answers `no`; the docs and cheat sheet call that out, because it reads as broken to anyone used to `--add-port`.
+  - The walk started from `clean`, ran the three phases in order, rebooted **both** machines, and ran `./bin/lab check r10 all`: 42/42. One checker bug was fixed: `semanage port -l -C` prints `type proto port`, so `port_label` reads fields 2 and 3.
+
+R11 (boot recovery) remains, and it is the domain hardest to learn from prose without risking a machine. Add it with the full anatomy above.
 
 ### M4 — R12 and polish
 
@@ -614,6 +647,15 @@ R10 (SELinux) and R11 (boot recovery) remain, and they are the domains hardest t
 - **R9's `firewall-cmd --get-active-zones` formatting is version-sensitive.** firewalld 2.4.3 prints a zone with an interface but no `(active)` marker, while `--list-all` prints `(active)` for the same zone. The checker asks `--query-*` and `--list-interfaces` rather than parsing that prose, but a learner on another firewalld release may see slightly different text.
 - **R9's firewalld output includes `ingress-priority` and `egress-priority`.** Those fields come from firewalld 2.4.3 — older releases omit them, and a learner comparing their output line by line will see a difference that is not a mistake.
 - **R9's dummy interface reports `UNKNOWN` operational state.** It has no carrier to report. `ip addr`, routing, and traffic all work; the lab notes it once.
+- **R10's Lab 1 installs `httpd` and `policycoreutils-python-utils` from a repository.** Neither is in the base image or in `PACKAGES`, so a learner who left R3's distro repositories disabled meets `Unable to find a match` before the first SELinux step. The module says to re-enable them, but the failure is the same one R6, R7, and R8 can produce.
+- **R10's Lab 1 backend is a hand-started `python3 -m http.server`.** It dies at the reboot, so `curl /api/` returns `503` afterwards even though the Boolean is correct. The lab states that this is expected and the checker starts its own backend; a learner who reads the `503` as a broken Boolean will chase a ghost.
+- **R10's `18443` is a free port, not a reserved one.** `semanage port -a` succeeds because nothing else claims it. Another package could label it in a future image; if that happens, `-a` fails with `Port 18443 already defined` and the lab must pick a new number.
+- **R10's SSH hardening locks out password login on `server`.** That is the objective, but a learner who removes `labuser`'s key from `authorized_keys` in the same session has no way back except the console. `./bin/lab ssh` uses Vagrant's own credentials and is the documented escape hatch, and the checker asserts the lab key still works for exactly this reason.
+- **R10 depends on `/etc/ssh/sshd_config.d/` being read at all.** The `Include` line is in the shipped `sshd_config` on this image. On a system where it has been removed, a drop-in does nothing, and `sshd -T` is the only way to notice.
+- **R10's `sshd -T` needs root.** `labuser` on `node2` cannot read `/etc/ssh/sshd_config`, so the checker runs on `server` as root. Do not move the hardening to `node2` without reworking the checker to use `sudo`.
+- **R10's rich rule cannot be tested from outside its source range.** Every machine in the lab is in `10.10.10.0/24`, so the checker proves the restriction by asking firewalld (`--query-port` must be `no`, the permanent rich rule must name the source) and proves reachability from `node2`. It cannot prove that a host outside the range is refused, because there is no such host.
+- **R10 output is label- and version-sensitive.** `restorecon -Rv` prints one line per relabelled path, `semanage` column widths change between policy releases, and the `PermitRootLogin` default prints as `without-password` here (`prohibit-password` elsewhere; they are the same setting). The docs say so where it matters, and the checker reads fields rather than prose.
+- **The audit log needs `auditd`.** `ausearch -m AVC -ts recent` returned `<no matches>` on this host even with denials present, while `ausearch -if /var/log/audit/audit.log -m AVC` and `grep ': avc:' /var/log/audit/audit.log` both worked. The module teaches the `grep` as the reliable fallback, and the checker never parses the log at all — it asks SELinux for the current state instead.
 - **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 
 ---
@@ -667,6 +709,10 @@ cd labs
 ./bin/lab check r09 lab2
 ./bin/lab check r09 challenge
 ./bin/lab check r09 all
+./bin/lab check r10 lab1
+./bin/lab check r10 lab2
+./bin/lab check r10 challenge
+./bin/lab check r10 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

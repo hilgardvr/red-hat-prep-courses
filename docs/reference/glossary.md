@@ -5,13 +5,17 @@ Terms used throughout the course. Links point to the module where the term is ex
 | Term | Meaning |
 |---|---|
 | **ACL** | Access control list. An extension to ugo/rwx permissions that grants rights to specific users or groups. Not a current RHCSA objective, but encountered in production. |
+| **AVC** | Access Vector Cache. The record of an SELinux decision; a denial appears in the audit log as `type=AVC … avc: denied { … }`. Covered in R10. |
 | **autofs** | A service that mounts filesystems on demand when a path is accessed. Covered in R7. |
 | **block device** | A device that reads and writes fixed-size blocks, such as a disk or partition (`/dev/vda`, `/dev/vdb1`). |
+| **Boolean (SELinux)** | A named on/off switch inside the policy for behaviour that is legitimate sometimes, such as `httpd_can_network_connect`. `setsebool -P` makes it persistent. Covered in R10. |
 | **bootloader** | The program that loads the kernel. On RHEL, GRUB 2. Covered in R11. |
 | **at** | A scheduler for one-off jobs that run once, later. The daemon is `atd`. Covered in R8. |
 | **chrony** | The NTP implementation on RHEL 10 (`chronyd`), which keeps the system clock accurate and can serve time to a network. Covered in R8. |
 | **CIDR** | Classless Inter-Domain Routing notation: an address followed by the number of network bits, such as `192.0.2.10/24`. The prefix decides which addresses are local. |
+| **context (SELinux)** | The four-field label `user:role:type:level` attached to a file, process, or port. Policy rules are written against the type. Covered in R10. |
 | **cron** | A scheduler for recurring jobs defined in crontabs. Covered in R8. |
+| **DAC / MAC** | Discretionary access control (the owner decides, via permissions) versus mandatory access control (the policy decides, whatever the owner wants). SELinux is MAC. Covered in R10. |
 | **DNF** | The package manager on RHEL 10 (`dnf`). It resolves dependencies and installs RPM packages from repositories. Covered in R3. |
 | **exit status** | The number a command returns to the shell: `0` for success, non-zero for failure. Read with `$?`. |
 | **fstab** | `/etc/fstab`, the file that defines filesystems to mount at boot. Covered in R6. |
@@ -36,6 +40,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **process** | A running instance of a program, with a PID, memory, and open file descriptors. |
 | **regular expression** | A pattern language for matching text, used by `grep`, `sed`, and many other tools. |
 | **repository** | A source of RPM packages, defined in `/etc/yum.repos.d/*.repo`. |
+| **rich rule** | A single firewalld rule combining a source, a port or service, and an action, such as accepting `18443/tcp` from one network only. Covered in R10. |
 | **RPM** | The Red Hat package format and the low-level tool (`rpm`) that manages it. |
 | **SELinux** | Security-Enhanced Linux. A mandatory access control system that labels files and processes and enforces policy. Covered in R10. |
 | **service** | A long-running background process managed by systemd, usually described by a unit file. |
