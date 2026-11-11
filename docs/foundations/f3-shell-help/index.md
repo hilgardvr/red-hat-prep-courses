@@ -20,13 +20,35 @@ The exam environment is a RHEL 10 system with no internet access. You cannot sea
 
     Command blocks have a copy button. Blocks **without** one are output, a transcript, or a syntax synopsis: they show what a command prints and are there to compare against, not to paste into a shell.
 
+## The words this page uses
+
+The shell has its own vocabulary. You do not need it to start, but this page leans on it. The table is the short version; the matching section below, or the module named in the last column, is the full one.
+
+| Term | Plain meaning | Full treatment |
+|---|---|---|
+| **Command** | The program or instruction you ask the shell to run | [Anatomy of a command](#anatomy-of-a-command) |
+| **Argument** | A word after the command that it acts on, such as a path | [Anatomy of a command](#anatomy-of-a-command) |
+| **Option** (or **flag**) | A word that changes how the command behaves, usually starting with `-` | [Anatomy of a command](#anatomy-of-a-command) |
+| **Variable** | A named value kept in the shell's memory. `HOME`, `PATH`, and `SHELL` are variables; `$HOME` reads one | [Quoting and expansion](#quoting-and-expansion) |
+| **`PATH`** | A variable holding the directories the shell searches, in order, for a command | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
+| **Expansion** | The shell replacing part of the line — a variable, a pattern, or a command's output — before the program runs | [Quoting and expansion](#quoting-and-expansion) |
+| **Command substitution** | Putting a command inside `$(...)` so its output becomes part of the line | [Quoting and expansion](#quoting-and-expansion) |
+| **Glob** | A filename pattern such as `*.txt` that the shell expands to the matching names | [Globbing and brace expansion](#globbing-and-brace-expansion) |
+| **Alias** | A shortcut name the shell expands into another command before running anything | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
+| **Builtin** | A command implemented inside the shell itself, such as `cd` | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
+| **External program** | A real file on disk that the shell starts as a child process | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
+| **Exit status** | The number a command returns: `0` for success, non-zero for failure | [Anatomy of a command](#anatomy-of-a-command) |
+| **Loop** | Repeating the same command once for each item in a list | [R4 — Shell scripting](../../rhcsa/r04-shell-scripting/index.md); used only as an example here |
+
+Loops are the one term with no full lesson on this page. The word-splitting examples use a one-line `for` loop because it is the clearest way to show the problem; [R4](../../rhcsa/r04-shell-scripting/index.md) teaches the syntax properly. Everything else is defined where it first appears below.
+
 ## What the shell actually does
 
 The shell is a userspace program (F1) whose job is to read a line, transform it, and ask the kernel to run something. For every command you type, it does roughly this:
 
 1. Read the line from your terminal.
 2. Split it into words.
-3. Expand aliases, variables, command substitutions, and filename patterns.
+3. Expand aliases, variables, command substitutions, and filename patterns — in plain terms, replace a shortcut with its command, `$NAME` with its value, `$(...)` with a command's output, and `*.txt` with the files it matches.
 4. Find the program in `PATH`, or recognize a shell builtin.
 5. Ask the kernel to run it with `execve()`.
 6. Wait for it to finish and record its **exit status**.
@@ -62,7 +84,7 @@ command [options] [arguments]
 
 | Part | Example | Meaning |
 |---|---|---|
-| Command | `ls` | The program, builtin, function, or alias to run |
+| Command | `ls` | The program, builtin, alias, or function to run |
 | Option (short) | `-l` | A single-letter switch, usually combinable: `-lh` |
 | Option (long) | `--human-readable` | A named switch, usually one per word |
 | Argument | `/etc` | What the command acts on |
@@ -221,24 +243,62 @@ type -a grep
 ```text { .no-copy }
 cd is a shell builtin
 ls is aliased to `ls --color=auto'
+grep is aliased to `grep --color=auto'
 grep is /usr/bin/grep
-grep is /bin/grep
 ```
 
-- A **builtin** runs inside the shell process (`cd`, `export`, `history`, `type`).
-- An **alias** is a saved expansion, usually set in `/etc/profile.d/` or `~/.bashrc`.
-- An **external program** is a file found through `PATH`.
+Read it in order. `cd` is a **builtin**: it runs inside the shell process, because it changes the shell's own working directory, and a separate child process could not change its parent. `ls` and `grep` are **aliases**: saved expansions set by `/etc/profile.d/colorls.sh` and `colorgrep.sh`. Typing the name substitutes the stored text first, so `grep` becomes `grep --color=auto`. `type -a` then keeps searching and prints the **external program** the alias expands into, `/usr/bin/grep` — a real file on disk.
 
-`command -v` prints the path the shell would use, which is what scripts should use when they need a portable check:
+That output is the expansion order in miniature: alias first, file second.
+
+`type -P` (capital `P`) skips aliases and builtins and prints only the file. `command -v` reports what the shell would actually run, so for an aliased name it prints the alias instead:
+
+```bash
+type -P grep
+command -v grep
+```
+
+```text { .no-copy }
+/usr/bin/grep
+alias grep='grep --color=auto'
+```
+
+That difference matters. `command -v` answers "what happens if I type this?", while `type -P` answers "where is the file?".
+
+The external program is found through `PATH`, the list of directories kept in a variable. It is colon-separated, searched left to right, and the first match wins:
+
+```bash
+echo "$PATH" | tr ':' '\n'
+```
+
+```text { .no-copy }
+/home/labuser/.local/bin
+/home/labuser/bin
+/usr/local/bin
+/usr/bin
+/usr/local/sbin
+/usr/sbin
+```
+
+That order is deliberate. `/usr/local/bin` comes before `/usr/bin`, so an administrator's own copy of a tool overrides the packaged one without replacing it. The order also explains why `type -P grep` finds `/usr/bin/grep`: no earlier directory contains a `grep`.
+
+`command -v` is also the portable existence check for scripts:
 
 ```bash
 command -v sshd
 command -v nosuchcommand || echo "not installed"
 ```
 
+```text { .no-copy }
+/usr/sbin/sshd
+not installed
+```
+
+`type` has one more answer you may meet: a **function**, a named block of commands defined inside the shell itself. This page and the labs define none, so you only need to recognize the word when `type` prints it.
+
 ## Quoting and expansion
 
-The shell transforms a line before the program ever sees it. Quoting decides which transformations happen.
+**Expansion** is the shell rewriting your line before any program sees it: `$HOME` becomes a path, `*.txt` becomes filenames, `$(whoami)` becomes a name. Quoting decides which expansions happen.
 
 | Form | Variables expand | Globs expand | Spaces preserved |
 |---|---|---|---|
@@ -278,7 +338,7 @@ printf '<%s>\n' *.txt
 
 Two arguments, one of which contains a space. Compare that with the unquoted variable case below, where splitting really does happen.
 
-Variables and command substitution behave the same way:
+Variables and command substitution behave the same way. A **variable** is a named value kept in the shell's memory; `$HOME` reads one. A **command substitution** runs a command and replaces `$(...)` with its output:
 
 ```bash
 echo "$HOME and $(whoami)"
@@ -290,7 +350,7 @@ echo '$HOME and $(whoami)'
 $HOME and $(whoami)
 ```
 
-`$(...)` runs a command and substitutes its output. Older documentation uses backticks for the same thing; prefer `$(...)` because it nests cleanly.
+Older documentation writes command substitution with backticks; prefer `$(...)` because it nests cleanly.
 
 ### Globbing and brace expansion
 
@@ -314,19 +374,23 @@ Brace expansion happens before globbing and does not require the names to exist.
 
 ### The word-splitting trap
 
+The `for f in ...; do ...; done` form is a **loop**: bash takes each word from the list, assigns it to `f`, and runs the body once. [R4](../../rhcsa/r04-shell-scripting/index.md) teaches the syntax properly; here the loop is only a way to count the words the shell produced.
+
 This looks reasonable and is wrong:
 
 ```bash
 for f in $(ls); do echo "file: $f"; done
 ```
 
-`ls` prints filenames separated by newlines. The shell splits that output on *all* whitespace, so `report final.txt` becomes two iterations. Use a glob instead:
+`ls` prints filenames separated by newlines. Command substitution hands that text back to the shell, which splits it on *all* whitespace, so `report final.txt` becomes two iterations. Use a glob instead:
 
 ```bash
 for f in *; do echo "file: $f"; done
 ```
 
-Quoting variables is the same discipline:
+The glob produced two words — `notes.txt` and `report final.txt` — so the loop ran twice. That is the difference between the shell's own filename expansion and a program's text output.
+
+Quoting variables is the same discipline. `name=value` stores a value in a variable; there are no spaces around the `=`, or bash reads `name` as a command. Run this in `~/f3`, where the quoting example above created the file; the second line really deletes `report final.txt`, so recreate it with `touch` if you want to repeat the example:
 
 ```bash
 name="report final.txt"
@@ -448,17 +512,18 @@ echo $SHELL
 echo $$
 type cd
 type ls
-command -v grep
+type -P grep
 ```
 
-Check that `cd` reports a builtin, `ls` reports an alias, and `grep` reports a path. Then confirm the alias is only a convenience:
+Check that `cd` reports a builtin, `ls` reports an alias, and `type -P grep` reports `/usr/bin/grep`. Then confirm the alias is only a convenience:
 
 ```bash
 \ls /etc | head -3
 alias ls
+command -v grep
 ```
 
-The backslash suppresses the alias for one command; `alias ls` shows the stored text.
+The backslash suppresses the alias for one command; `alias ls` shows the stored text, and `command -v grep` shows that the shell resolves the name to an alias before it looks for the file.
 
 ### 2. Prove how quoting changes the line
 
@@ -562,7 +627,7 @@ Note the form: a quoted, explicit path under your home directory. Never run `rm 
 | `rm -rf $DIR/` with `DIR` empty | Becomes `rm -rf /`, deleting the system | Quote and set a default: `rm -rf "${DIR:?}/"` |
 | `man name` gives the wrong page | Section 1 shadows section 5 or 8 | Specify the section: `man 5 name` |
 | `man -k` finds nothing | The `mandb` index is missing | `sudo mandb`, then retry |
-| Alias hides real behavior | Scripts and interactive shells behave differently | Use `\command`, `command command`, or scripts |
+| Alias hides real behavior | Scripts and interactive shells behave differently | Bypass it with `\ls` or `command ls`; scripts do not load aliases |
 | Assuming options are portable | `-h` means human-readable in `ls`, help in others | Check `--help` before using a flag in a script |
 
 ## Self-check
@@ -578,10 +643,10 @@ Your shell is PID 2417 and `systemd` is PID 1. What does that tell you about the
 
 ### 2. Builtins and aliases
 
-Why does `type cd` say "shell builtin" while `type grep` gives a path?
+`type cd` says "shell builtin", `type ls` says "aliased", and `type -P grep` gives a path. Why are these three different?
 
 ??? question "Answer"
-    `cd` must change the state of the shell process itself, so it is implemented inside bash. `grep` is a separate program on disk that the shell locates through `PATH` and runs as a child process.
+    `cd` must change the state of the shell process itself, so it is implemented inside bash. `ls` is an alias, a saved expansion the shell substitutes before it searches for anything. `grep` is a separate program on disk; `type -P` ignores the alias and shows the file the shell would run through `PATH`.
 
 ### 3. Quoting
 

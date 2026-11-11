@@ -149,7 +149,7 @@ The prompt changes:
 [labuser@server ~]$
 ```
 
-The `-` matters. `su - labuser` starts a login shell, reads the target user's profile, and resets `HOME`, `PATH`, and the working directory. `su labuser` keeps much of your current environment and can produce confusing `PATH` and permission behavior. Prefer `su -`.
+The `-` matters. `su - labuser` starts a login shell, reads the target user's profile, and resets `HOME`, `PATH` (the directories searched for commands), and the working directory. `su labuser` keeps much of your current environment and can produce confusing `PATH` and permission behavior. Prefer `su -`.
 
 When `labuser` runs `sudo`, it is asked for `labpass`. That is intentional: the labs practice normal sudo, not passwordless root.
 

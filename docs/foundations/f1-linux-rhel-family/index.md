@@ -89,7 +89,7 @@ The **shell** is a command interpreter. It is not the kernel. It reads a line, a
 
 That division of labor explains several things you will practice in R1:
 
-- `echo '$HOME'` prints the literal text because the shell does not expand variables inside single quotes.
+- `echo '$HOME'` prints the literal text because the shell does not expand variables (named values such as `HOME`) inside single quotes.
 - `ls -l /var/log` works because whitespace separates arguments; `ls -l/var/log` does not.
 - `command > out.txt 2>&1` redirects streams because the shell sets up file descriptors before the program starts.
 - `echo $?` shows the previous command's exit status because the shell remembers it.
