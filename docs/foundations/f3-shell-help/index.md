@@ -15,6 +15,8 @@ You will type thousands of commands during the exam. Almost none of them will be
 
 The exam environment is a RHEL 10 system with no internet access. You cannot search the web for a flag. Everything you need is on the machine: `--help`, `man`, `info`, the documentation under `/usr/share/doc`, and the package metadata. This module teaches you to read a command, quote it correctly, and find its options without a browser.
 
+You will meet commands you have not studied yet — `grep`, `find`, `tr`, `sort`, `tar`. None of them is the lesson. They are examples of syntax, and every one of them can explain itself with `--help` or `man`. That is the skill this page is really about.
+
 !!! note "Read it; do not memorise it"
     This page is a reference you will come back to, not a list to learn by heart. Run a command if your lab is up and watch what changes; if it is not, read the command and the block beneath it, which shows what it prints. The exam rewards finding and adapting commands, not recalling flags.
 
@@ -33,14 +35,15 @@ The shell has its own vocabulary. You do not need it to start, but this page lea
 | **`PATH`** | A variable holding the directories the shell searches, in order, for a command | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
 | **Expansion** | The shell replacing part of the line — a variable, a pattern, or a command's output — before the program runs | [Quoting and expansion](#quoting-and-expansion) |
 | **Command substitution** | Putting a command inside `$(...)` so its output becomes part of the line | [Quoting and expansion](#quoting-and-expansion) |
+| **Pipe** | The vertical bar between two commands, which sends the first command's output into the second | [F5 — Streams and text](../f5-streams-text/index.md) |
 | **Glob** | A filename pattern such as `*.txt` that the shell expands to the matching names | [Globbing and brace expansion](#globbing-and-brace-expansion) |
 | **Alias** | A shortcut name the shell expands into another command before running anything | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
 | **Builtin** | A command implemented inside the shell itself, such as `cd` | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
-| **External program** | A real file on disk that the shell starts as a child process | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
+| **External program** | A real file on disk that the shell starts as a separate process | [Builtins, aliases, and external programs](#builtins-aliases-and-external-programs) |
 | **Exit status** | The number a command returns: `0` for success, non-zero for failure | [Anatomy of a command](#anatomy-of-a-command) |
 | **Loop** | Repeating the same command once for each item in a list | [R4 — Shell scripting](../../rhcsa/r04-shell-scripting/index.md); used only as an example here |
 
-Loops are the one term with no full lesson on this page. The word-splitting examples use a one-line `for` loop because it is the clearest way to show the problem; [R4](../../rhcsa/r04-shell-scripting/index.md) teaches the syntax properly. Everything else is defined where it first appears below.
+Loops and pipes are the two terms with no full lesson on this page. The word-splitting example uses a one-line `for` loop because it is the clearest way to show the problem, and [R4](../../rhcsa/r04-shell-scripting/index.md) teaches the syntax. Several examples use `|` to feed one command into the next, and [F5](../f5-streams-text/index.md) covers that properly. Everything else is defined where it first appears below.
 
 ## What the shell actually does
 
@@ -48,12 +51,14 @@ The shell is a userspace program (F1) whose job is to read a line, transform it,
 
 1. Read the line from your terminal.
 2. Split it into words.
-3. Expand aliases, variables, command substitutions, and filename patterns — in plain terms, replace a shortcut with its command, `$NAME` with its value, `$(...)` with a command's output, and `*.txt` with the files it matches.
+3. Expand aliases, variables, command substitutions, and filename patterns.
 4. Find the program in `PATH`, or recognize a shell builtin.
-5. Ask the kernel to run it with `execve()`.
+5. Ask the kernel to run it. The system call behind this is `execve()`, which is simply the kernel's way of starting a program.
 6. Wait for it to finish and record its **exit status**.
 
-Steps 3 and 4 are where beginners get surprised. `echo *` is not the same as `echo '*'`, and `ls` may not be `/usr/bin/ls` at all.
+Step 3 is the one to slow down on. In plain terms, an alias is replaced by its stored command, `$NAME` by its value, `$(...)` by a command's output, and `*.txt` by the files it matches. That rewriting is what makes the shell useful and what makes quoting matter.
+
+Two consequences of steps 3 and 4 surprise beginners: `echo *` is not the same as `echo '*'`, and `ls` may not be `/usr/bin/ls` at all.
 
 Confirm what you are running:
 
@@ -63,7 +68,7 @@ echo $$
 ps -p $$ -o pid,comm,args
 ```
 
-Expected output on the lab:
+Expected output on the lab (your PID will differ):
 
 ```text { .no-copy }
 /bin/bash
@@ -72,7 +77,11 @@ Expected output on the lab:
    2417 bash            -bash
 ```
 
-`$SHELL` is the login shell recorded for your account. `$$` is the PID of the current shell. The `-bash` in the arguments means this is a login shell, which is why it read `/etc/profile` and `~/.bash_profile` when you logged in.
+Every output block on this page comes from one lab run. PIDs, dates, sizes, and man-page wording differ between machines; compare the shape and the fields, not the digits.
+
+`$SHELL` is the login shell recorded for your account. `$$` is the **PID** — the process ID — of the current shell. The `-bash` in the arguments means this is a login shell, which is why it read `/etc/profile` and `~/.bash_profile` when you logged in.
+
+The `COMMAND` heading appears twice because `comm` and `args` share one column name. The first column is the program name; the second is its full command line, where the leading `-` shows the login shell.
 
 ## Anatomy of a command
 
@@ -99,7 +108,7 @@ ls --human-readable --directory /etc
 
 Programs are not consistent. `ls` accepts options after arguments; `tar` traditionally wants the archive name right after `-f`; some tools use `-n` for "dry run" and others for "numeric". That inconsistency is exactly why you need the help system rather than a memory of flags.
 
-Three small examples of the same inconsistency.
+Here are three small examples of that inconsistency.
 
 **Options after arguments.** GNU `ls` does not care where the options go:
 
@@ -114,7 +123,7 @@ ls /etc/hostname -l
 
 The option moved; the output did not change.
 
-`find` does care. Its paths must come **before** the expression:
+`find` does care. Its paths must come **before** the expression — the tests such as `-name`:
 
 ```bash
 find /etc -maxdepth 1 -name hostname
@@ -135,7 +144,7 @@ find: paths must precede expression: `/etc'
 find: possible unquoted pattern after predicate `-maxdepth'?
 ```
 
-**A value belongs to one option.** `-f` takes the archive name, and the name is the next word after the whole cluster `-czf`. Run both lines in your home directory: the first creates `demo.tar.gz` there, and the second reads that same file, so it only works after the first has succeeded.
+**A value belongs to one option.** `-f` takes the archive name, and the name is the next word after the whole cluster `-czf`. Run both lines in your home directory: the first creates `demo.tar.gz` there, and the second reads that same file, so it only works after the first has succeeded. (`~` is shorthand for your home directory; the shell expands it before `cd` runs.)
 
 ```bash
 cd ~
@@ -148,9 +157,13 @@ tar: Removing leading `/' from member names
 etc/hostname
 ```
 
-The first line is a warning on stderr, not part of the archive; `etc/hostname` is the member it contains.
+The first line is a warning on **stderr** — the separate error stream — and is not part of the archive; `etc/hostname` is the member it contains. F5 covers the streams properly.
 
-Leave the value out and `tar` stops instead of guessing:
+Leave the value out and `tar` stops instead of guessing. This run names no archive at all:
+
+```bash
+tar -czf
+```
 
 ```text { .no-copy }
 tar: option requires an argument -- 'f'
@@ -168,7 +181,7 @@ grep -n root /etc/passwd
 10:operator:x:11:0:operator:/root:/usr/sbin/nologin
 ```
 
-In `sort` it changes the comparison from text to arithmetic, which reorders the same input:
+In `sort` it changes the comparison from text to arithmetic, which reorders the same input. The `|` is a **pipe**: it feeds the output of the command on the left into the command on the right. [F5](../f5-streams-text/index.md) covers streams and pipes in full; here a pipe is only a way to give `sort` some lines:
 
 ```bash
 printf '10\n2\n1\n' | sort -n
@@ -228,7 +241,7 @@ Two syntax rules are universal enough to rely on:
     2
     ```
 
-    Exit status is how scripts make decisions. R4 builds on this.
+    Two redirections appear here. `> /dev/null` sends normal output to `/dev/null`, a file that discards everything written to it. `2>` sends the error stream there instead. Redirection only moves text; it does not change the exit status, so the second command reports the status `ls` itself produced — `2`, that program's own code for "cannot access". Non-zero meanings vary by tool; what is universal is `0`. Exit status is how scripts make decisions. R4 builds on this.
 
 ### Builtins, aliases, and external programs
 
@@ -247,7 +260,7 @@ grep is aliased to `grep --color=auto'
 grep is /usr/bin/grep
 ```
 
-Read it in order. `cd` is a **builtin**: it runs inside the shell process, because it changes the shell's own working directory, and a separate child process could not change its parent. `ls` and `grep` are **aliases**: saved expansions set by `/etc/profile.d/colorls.sh` and `colorgrep.sh`. Typing the name substitutes the stored text first, so `grep` becomes `grep --color=auto`. `type -a` then keeps searching and prints the **external program** the alias expands into, `/usr/bin/grep` — a real file on disk.
+Read it in order. `cd` is a **builtin**: it runs inside the shell process, because it changes the shell's own working directory, and a separate child process — a program the shell starts — could not change its parent. `ls` and `grep` are **aliases**: saved expansions set by `/etc/profile.d/colorls.sh` and `colorgrep.sh`. Typing the name substitutes the stored text first, so `grep` becomes `grep --color=auto`. `type -a` then keeps searching and prints the **external program** the alias expands into, `/usr/bin/grep` — a real file on disk.
 
 That output is the expansion order in miniature: alias first, file second.
 
@@ -265,7 +278,7 @@ alias grep='grep --color=auto'
 
 That difference matters. `command -v` answers "what happens if I type this?", while `type -P` answers "where is the file?".
 
-The external program is found through `PATH`, the list of directories kept in a variable. It is colon-separated, searched left to right, and the first match wins:
+The external program is found through `PATH`, a variable holding a list of directories. It is colon-separated, searched left to right, and the first match wins:
 
 ```bash
 echo "$PATH" | tr ':' '\n'
@@ -280,7 +293,7 @@ echo "$PATH" | tr ':' '\n'
 /usr/sbin
 ```
 
-That order is deliberate. `/usr/local/bin` comes before `/usr/bin`, so an administrator's own copy of a tool overrides the packaged one without replacing it. The order also explains why `type -P grep` finds `/usr/bin/grep`: no earlier directory contains a `grep`.
+That order is deliberate. `/usr/local/bin` comes before `/usr/bin`, so an administrator's own copy of a tool overrides the packaged one without replacing it. The order also explains why `type -P grep` finds `/usr/bin/grep`: no earlier directory contains a `grep`. The two `sbin` directories sit at the end for a normal user and near the front for root. Either way they are in `PATH`, which is why `labuser` can run `sshd` even though the program lives in `/usr/sbin`.
 
 `command -v` is also the portable existence check for scripts:
 
@@ -370,6 +383,12 @@ ls /etc/[abc]*
 echo /usr/bin/{ls,cp,mv}
 ```
 
+The first two commands print file lists; the second also prints the *contents* of any matched directory, because that is what `ls` does with a directory. The third prints three paths, because brace expansion happened before `echo` ran:
+
+```text { .no-copy }
+/usr/bin/ls /usr/bin/cp /usr/bin/mv
+```
+
 Brace expansion happens before globbing and does not require the names to exist. That is why `mkdir -p ~/f3/{docs,logs}` works even though nothing is there yet.
 
 ### The word-splitting trap
@@ -382,10 +401,23 @@ This looks reasonable and is wrong:
 for f in $(ls); do echo "file: $f"; done
 ```
 
-`ls` prints filenames separated by newlines. Command substitution hands that text back to the shell, which splits it on *all* whitespace, so `report final.txt` becomes two iterations. Use a glob instead:
+`ls` prints filenames separated by newlines. Command substitution hands that text back to the shell, which splits it on *all* whitespace, so `report final.txt` becomes two iterations. In the directory from the quoting example above, the loop prints:
+
+```text { .no-copy }
+file: notes.txt
+file: report
+file: final.txt
+```
+
+One file, three lines, and two of those lines point at names that do not exist. Use a glob instead:
 
 ```bash
 for f in *; do echo "file: $f"; done
+```
+
+```text { .no-copy }
+file: notes.txt
+file: report final.txt
 ```
 
 The glob produced two words — `notes.txt` and `report final.txt` — so the loop ran twice. That is the difference between the shell's own filename expansion and a program's text output.
@@ -428,7 +460,7 @@ echo !$
 
 ## Finding help without the internet
 
-Work down this list. The first four entries are always available on a RHEL system.
+Work down this list. The first four are part of a standard RHEL install and need no network.
 
 | You want | Use |
 |---|---|
@@ -437,12 +469,14 @@ Work down this list. The first four entries are always available on a RHEL syste
 | A file format such as `/etc/fstab` | `man 5 fstab` |
 | A concept, when you know a keyword | `man -k keyword` or `apropos keyword` |
 | A one-line description | `whatis command` |
-| GNU tool documentation with examples | `info command` |
+| GNU tool documentation with examples | `info command` (package `info`) |
 | Shipped examples and notes | `/usr/share/doc/<package>/` |
 | Which files a package installed | `rpm -ql <package>` / `rpm -qd <package>` |
 | Shell builtin help | `help cd` |
 | Subcommand help | `dnf help install` |
 | systemd unit documentation | `systemctl help sshd` |
+
+The `info` reader is a separate package and this image does not install it. The manuals themselves are already on disk under `/usr/share/info`; `sudo dnf install -y info` adds the reader.
 
 ### Man page sections
 
@@ -497,13 +531,20 @@ rpm -qd bash | head
 
 ## Lab: drive the shell and the docs
 
-Log in to the lab and switch to the lab user as in F2:
+Start from the repository root on your host and open the `server` VM:
 
 ```bash
 cd labs
 ./bin/lab ssh
+```
+
+Inside the VM, switch to the lab user as in F2. The `sudo` password is `labpass`:
+
+```bash
 sudo su - labuser
 ```
+
+Your prompt becomes `[labuser@server ~]$`, which is how you know every command below runs as `labuser` on `server` and not on your host.
 
 ### 1. Identify your shell and your commands
 
@@ -552,7 +593,7 @@ ls -d ~/f3/*
 
 Brace expansion created three directories in one command even though none existed.
 
-The `ls /etc/[abc]*` line may also print a couple of `Permission denied` lines for `/etc/credstore` and `/etc/credstore.encrypted`. Those are directories owned by `root` with no access for other users, and `ls` reports the failure on stderr while still listing everything it can read. It is normal noise on a RHEL system, not a mistake in your command.
+The `ls /etc/[abc]*` line may also print a couple of `Permission denied` lines for `/etc/credstore` and `/etc/credstore.encrypted`. Those are directories owned by `root` with mode `700`, so `ls` cannot list their contents; it reports the failure on stderr and still lists everything it can read. It is normal noise on a RHEL system, not a mistake in your command.
 
 ### 4. Reuse history
 
@@ -574,13 +615,25 @@ whatis cp
 man 5 passwd
 ```
 
-Inside `man 5 passwd`, search for the field description:
+`man -k` lists pages whose short description mentions the keyword; `whatis` prints just that one-line description for a command.
+
+Inside `man 5 passwd`, search for the field list:
 
 ```text { .no-copy }
-/^ *root
+/colon-separated fields
 ```
 
-You should land on the `root:x:0:0:root:/root:/bin/bash` example and be able to name each colon-separated field without leaving the page. Quit with `q`.
+You land on `name:password:UID:GID:GECOS:directory:shell`, followed by a paragraph for each field. Quit with `q`, then map that order onto the real file:
+
+```bash
+head -1 /etc/passwd
+```
+
+```text { .no-copy }
+root:x:0:0:Super User:/root:/bin/bash
+```
+
+Seven fields: `root`, `x`, `0`, `0`, `Super User`, `/root`, `/bin/bash`. If you can name them without reopening the page, the section number and the man page did their job.
 
 Now find a flag you do not remember:
 
@@ -588,25 +641,32 @@ Now find a flag you do not remember:
 man ls
 ```
 
-Search for `recursive`. The entry explains `-R` and points to `--recursive`. Quit, then confirm with the short form:
+Search for `recursive`. The entry explains `-R` and points to `--recursive`. Quit, then confirm with `--help` and the long form:
 
 ```bash
 ls --help | grep -- --recursive
+```
+
+```text { .no-copy }
+  -R, --recursive            list subdirectories recursively
 ```
 
 ### 6. Explore offline documentation
 
 ```bash
 help cd
-info coreutils
 ```
 
-`help` prints bash's own documentation for a builtin. `info` opens the GNU manual; navigate with ++space++ and quit with `q`.
+`help` prints bash's own documentation for a builtin. That is the one place `cd` is documented: `man cd` finds nothing, because `cd` is not a file on disk.
+
+Then look at what a package ships:
 
 ```bash
 ls /usr/share/doc/bash
 rpm -qd bash | head
 ```
+
+GNU `info` manuals are already on disk (`ls /usr/share/info` shows 29 files), but the `info` reader is a separate package this image does not install: `sudo dnf install -y info`, then `info coreutils`. `man` answers the same questions for these tools.
 
 ### 7. Clean up
 
@@ -615,7 +675,15 @@ cd ~
 rm -rf ~/f3
 ```
 
-Note the form: a quoted, explicit path under your home directory. Never run `rm -rf` with a variable you have not checked.
+Note the form: one explicit path under your home directory, with no variable to expand. Never run `rm -rf` with a variable you have not checked.
+
+## What to remember
+
+- The shell rewrites the line before any program sees it: aliases, variables, `$(...)`, globs. Quoting decides which rewrites happen.
+- A typed name can be a builtin, an alias, or a file found through `PATH`. `type` says which; `type -P` gives the file.
+- Quote variables (`"$name"`) and let the shell expand globs (`*`) instead of parsing `$(ls)`.
+- `--help` first, then `man`, then `man -k`; use `man 5` for file formats.
+- Exit status `0` means success. Any other number is the program's own way of saying what went wrong.
 
 ## Common traps
 
@@ -627,7 +695,7 @@ Note the form: a quoted, explicit path under your home directory. Never run `rm 
 | `rm -rf $DIR/` with `DIR` empty | Becomes `rm -rf /`, deleting the system | Quote and set a default: `rm -rf "${DIR:?}/"` |
 | `man name` gives the wrong page | Section 1 shadows section 5 or 8 | Specify the section: `man 5 name` |
 | `man -k` finds nothing | The `mandb` index is missing | `sudo mandb`, then retry |
-| Alias hides real behavior | Scripts and interactive shells behave differently | Bypass it with `\ls` or `command ls`; scripts do not load aliases |
+| Alias hides real behavior | A shell you type into has aliases; a script does not | Bypass it with `\ls` or `command ls`; scripts see only the file |
 | Assuming options are portable | `-h` means human-readable in `ls`, help in others | Check `--help` before using a flag in a script |
 
 ## Self-check
@@ -636,7 +704,7 @@ Answer first, then open the answer. If you miss one, reread the matching section
 
 ### 1. Shell versus kernel
 
-Your shell is PID 2417 and `systemd` is PID 1. What does that tell you about the shell?
+Your shell reports PID 2417 and `systemd` is PID 1. What does that tell you about the shell?
 
 ??? question "Answer"
     The shell is an ordinary userspace process started after boot, not part of the kernel and not the init system. It asks the kernel to run programs through system calls.
@@ -695,7 +763,7 @@ The exam machine has no internet and you have never used `dnf repoquery`. Name t
 You are in `/etc` and type `ls *.conf`. What does the shell pass to `ls` if five matching files exist? What if none exist?
 
 ??? question "Answer"
-    With matches, the shell passes the five expanded filenames. With no matches, bash leaves the pattern unchanged and passes the literal string `*.conf`, which `ls` then reports as missing. That is why `nullglob` and `failglob` exist in scripts (R4).
+    With matches, the shell passes the five expanded filenames. With no matches, bash leaves the pattern unchanged and passes the literal string `*.conf`, which `ls` then reports as missing. `shopt -s nullglob` makes an unmatched pattern expand to nothing instead, and `shopt -s failglob` turns it into an error; R4 uses `nullglob`.
 
 ## Next
 

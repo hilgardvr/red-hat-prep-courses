@@ -85,13 +85,13 @@ That single line explains a lot of later material. Services are not started by m
 
 ### The shell
 
-The **shell** is a command interpreter. It is not the kernel. It reads a line, applies quoting and expansion, finds the program, asks the kernel to run it, waits for it to finish, and records its exit status.
+The **shell** is a command interpreter. It is not the kernel. It reads a line, applies quoting and expansion (replacing `$HOME` with its value, `*.txt` with the files it matches), finds the program, asks the kernel to run it, waits for it to finish, and records its exit status.
 
 That division of labor explains several things you will practice in R1:
 
 - `echo '$HOME'` prints the literal text because the shell does not expand variables (named values such as `HOME`) inside single quotes.
 - `ls -l /var/log` works because whitespace separates arguments; `ls -l/var/log` does not.
-- `command > out.txt 2>&1` redirects streams because the shell sets up file descriptors before the program starts.
+- `command > out.txt 2>&1` redirects streams because the shell sets up file descriptors — the numbered channels (0 for input, 1 for output, 2 for errors) a program reads and writes — before the program starts.
 - `echo $?` shows the previous command's exit status because the shell remembers it.
 
 You can confirm which shell you are using:
@@ -101,7 +101,7 @@ echo "$SHELL"
 ps -p $$ -o comm=
 ```
 
-`$$` is the process ID of the current shell.
+`$$` is the process ID (PID) of the current shell.
 
 ## Why distributions exist
 
