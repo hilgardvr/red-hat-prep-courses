@@ -72,7 +72,7 @@
 | **R8 — Scheduling and time** | cron, at, systemd timers, chrony, timezones | <span class="badge badge-ready">Available</span> |
 | **R9 — Networking and firewalld** | nmcli, IPv4 and IPv6, name resolution, firewalld zones | <span class="badge badge-ready">Available</span> |
 | **R10 — Security: SELinux and SSH** | SELinux labels, port labels, Booleans, SSH keys, `sshd` hardening | <span class="badge badge-ready">Available</span> |
-| **R11** | Boot targets, GRUB, rescue, updates | <span class="badge badge-planned">Planned</span> |
+| **R11 — Boot, rescue, and updates** | Targets, GRUB, BLS, kernel arguments, `rd.break`, root recovery, `dnf` updates | <span class="badge badge-ready">Available</span> |
 | **R12 — Capstone** | Timed mock exams and a full review | <span class="badge badge-planned">Planned</span> |
 
 [See the full module roadmap](rhcsa/index.md){ .md-button }

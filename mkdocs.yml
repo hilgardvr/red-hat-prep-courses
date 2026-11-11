@@ -164,6 +164,13 @@ nav:
           - "Challenge — A hardened service host": rhcsa/r10-security-selinux-ssh/labs/challenge-hardened-host.md
           - Knowledge check: rhcsa/r10-security-selinux-ssh/quiz.md
           - Cheat sheet: rhcsa/r10-security-selinux-ssh/cheatsheet.md
+      - "R11 — Boot, rescue, and updates":
+          - Theory: rhcsa/r11-boot-rescue-updates/index.md
+          - "Lab 1 — Targets, the menu, and a persistent kernel argument": rhcsa/r11-boot-rescue-updates/labs/lab-1-targets-and-grub.md
+          - "Lab 2 — Recovering a locked root account": rhcsa/r11-boot-rescue-updates/labs/lab-2-recovery.md
+          - "Challenge — Update the system and harden the boot": rhcsa/r11-boot-rescue-updates/labs/challenge-update-and-boot.md
+          - Knowledge check: rhcsa/r11-boot-rescue-updates/quiz.md
+          - Cheat sheet: rhcsa/r11-boot-rescue-updates/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

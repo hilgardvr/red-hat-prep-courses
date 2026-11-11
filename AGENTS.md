@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-11 |
-| **Current milestone** | M3 in progress — R1–R10 validated; R11 next |
-| **Next milestone** | R11 |
+| **Current milestone** | M3 complete — R1–R11 validated; R12 next |
+| **Next milestone** | R12 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -38,7 +38,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 |---|---|---|
 | Site scaffold | **Complete** | MkDocs Material, nav, theme, landing page, reference pages |
 | GitHub Pages workflow | **Validated 2026-11-10** | `.github/workflows/pages.yml` has run and deployed successfully on `main` |
-| Lab kit | **Validated 2026-11-10** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, `visudo -c` clean on both nodes. Rebuilt from scratch and re-walked on 2026-11-10 against AlmaLinux 10.2 (box `10.2.20260914`). |
+| Lab kit | **Validated 2026-11-10** | Vagrant 2.3.4 + vagrant-libvirt 0.11.2, two nodes, cross-VM SSH, reboot persistence, `visudo -c` clean on both nodes. A serial console is provisioned on both nodes (`console=tty0 console=ttyS0,115200n8`) with the GRUB menu visible (`GRUB_TIMEOUT=5`, `menu_auto_hide=0`), and `./bin/lab console` attaches to it for R11. Rebuilt from scratch and re-walked on 2026-11-10 against AlmaLinux 10.2 (box `10.2.20260914`); the serial console was re-validated on 2026-11-11. |
 | Foundations F1–F8 | **Complete; walked 2026-11-10** | Eight modules under `docs/foundations/`; every command in F1 and F3–F8 was run on the 2026-11-10 lab. F2 was walked with the lab kit. No automated checkers, by decision. |
 | R1 — Essential tools | **Validated** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker. 66/66 on 2026-11-07 and again on 2026-11-10 after a reboot. |
 | R2 — Users and groups | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (27 + 26 + 35 = 88). Walked end to end on a fresh lab, 88/88 after a reboot. |
@@ -50,7 +50,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R8 — Scheduling and time | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (13 + 12 + 18 = 43). Checker reads live systemd timer properties, cron files, produced artefacts, and chrony state on `server`, and reaches `node2` over SSH for the client half; walked end to end on a fresh lab, 43/43 after rebooting both VMs. |
 | R9 — Networking and firewalld | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 10 + 13 = 35). Checker reads the `nmcli` profile, live addresses, `/etc/hosts`, and permanent/runtime firewalld state, then proves each open port by fetching it from `node2` with a listener the checker starts itself; walked end to end on a fresh lab, 35/35 after rebooting both VMs. |
 | R10 — Security: SELinux and SSH | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 10 + 21 = 42). Checker reads live SELinux state (mode, file label, `semanage fcontext`/`port` records, Boolean pair), the effective `sshd` configuration plus two real logins, and firewalld rich-rule state, then fetches `/api/` through Apache and the hardened port from `node2`; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
-| R11 | **Planned** | See the curriculum map below |
+| R11 — Boot, rescue, and updates | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 8 + 13 = 31). Checker reads the default target and its symlink, both GRUB layers (`/etc/default/grub` and `grub.cfg`), every BLS entry with `grubby --info=ALL`, `/etc/kernel/cmdline`, the live `/proc/cmdline` and `/proc/sys/kernel/panic_on_warn`, the `dnf` history and `check-update`, root's `passwd -S` status, the recovery marker and both SELinux labels; walked from `clean` through Lab 1, Lab 2 (`rd.break` + relabel), the challenge, a reboot of `server`, and passed 31/31. |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -116,7 +116,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r10-security-selinux-ssh/
+│   │   ├── r10-security-selinux-ssh/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r11-boot-rescue-updates/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -137,6 +142,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r08/check.sh    # R8 automated checker (server + node2)
 │   ├── checks/r09/check.sh    # R9 automated checker (server + node2)
 │   ├── checks/r10/check.sh    # R10 automated checker (server + node2)
+│   ├── checks/r11/check.sh    # R11 automated checker (boot state)
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -240,6 +246,8 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R9 lab 1 (12), lab 2 (10), and the challenge (13) passed; `./bin/lab check r09 all` passed 35/35 after rebooting **both** machines. The walk started from `clean`, created a dummy connection `lab0` with `192.0.2.10/24` and `2001:db8::10/64`, DNS `192.0.2.53`, search domain `r9.lab`, and `never-default` on both families, then added the `r9peer` hosts line. Lab 2 created the `r9web` zone with `http`, `8080/tcp`, and `lab0`, proved that `node2` could not reach `8080` through `public`, opened `9090` at runtime and watched it vanish on `--reload`, made `8080` permanent, and fetched the page from `node2`. The challenge set the static hostname `server.r9.lab`, added the `r9api` hosts line, opened `8443/tcp` permanently, and fetched both pages from `node2`. Two checker bugs were found and fixed during the walk: `nmcli -g ipv6.addresses` escapes the colons (`2001\:db8\:\:10/64`), so `conn_v6` strips backslashes before comparing; and the first `/etc/hosts` helper mis-parsed the file, so `hosts_has_ip` now matches the address in field 1 and the name in a later field. The docs also explain why `getent hosts <own-fqdn>` returns IPv6 and link-local answers through `myhostname`, while `getent ahostsv4` gives the address a service actually uses.
 - R10 lab 1 (11), lab 2 (10), and the challenge (21) passed; `./bin/lab check r10 all` passed 42/42 after rebooting **both** machines. The walk started from `clean`, installed `httpd` and `policycoreutils-python-utils` in Lab 1, hit the `name_bind` denial on `18443`, labelled the port, hit the `getattr` denial on `/srv/r10/www`, added the `semanage fcontext` mapping and relabelled, then hit the `name_connect` denial on the proxy and proved `setsebool -P httpd_can_network_connect on` fixes it. Lab 2 created `r10deploy`, generated `/home/labuser/.ssh/r10_ed25519`, installed the public key, and proved that `10-r10.conf` wins the first-value-wins race while `60-r10.conf` does not. The challenge added the source-restricted rich rule and fetched the page from `node2`. After the reboot `Enforcing`, the port label, the `fcontext` mapping, the Boolean, the `sshd` drop-in, and the key login all held; `/api/` returned `503` because the hand-started backend is not a service, which is why the checker starts its own. One checker bug was found and fixed during the walk: `semanage port -l -C` prints `type proto port`, so `port_label` reads field 2 and 3, not 3 and 4.
 
+- R11 lab 1 (10), lab 2 (8), and the challenge (13) passed; `./bin/lab check r11 all` passed 31/31 after rebooting `server`. The walk started from `clean`. Lab 1 read `get-default`, demonstrated `isolate graphical.target` (default unchanged), then `set-default graphical.target`, rebooted through the serial console, confirmed `graphical.target` was active, and set the default back to `multi-user.target`. It set `GRUB_TIMEOUT=10`, ran `grub2-mkconfig`, forced `menu_auto_hide=0`, watched the ten-second menu, added `panic=10` with `grubby --update-kernel=ALL`, and proved `/proc/cmdline` did not have it until the next boot. The one-boot override used `systemd.unit=graphical.target` in the GRUB editor: the target became active while `get-default` stayed `multi-user.target`, and the following unedited reboot dropped the override and kept `panic=10`. Lab 2 locked root (`root L never`), booted `rd.break`, remounted `/sysroot` read-write, chrooted, set the password to `R11-recovery`, touched `/.autorelabel` and `/root/r11-recovered`, watched `ls -Z` show `?`, and let the relabel boot finish. After it, `root P 2026-11-11`, `shadow_t`, `admin_home_t`, no `/.autorelabel`, `Enforcing`, and a root console login worked; a second reboot kept all of it. The challenge ran `dnf -y upgrade` (66 altered), confirmed `check-update` moved from 100 to 0, added `panic_on_warn=1` to every entry, rebooted, and proved `panic_on_warn=1` in `/proc/cmdline` and `1` in the live sysctl, with `uname -r` equal to the newest `kernel-core`. One checker bug was found and fixed: `grep -q` in a pipeline under `set -o pipefail` failed with SIGPIPE, so `cmdline_has`, `label_is`, and `upgrade_ok` now use `grep ... >/dev/null`. Lab 1's expected target was also changed to `multi-user.target` when the lab was changed to end on the production default rather than leave the machine graphical.
+
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
 **Base-image bug found and fixed on 2026-11-10:** the AlmaLinux box ships `/etc/sudoers.d/vagrant` at mode `0644`. `sudo` still works because `90-cloud-init-users` repeats the grant, but `visudo -c` reports `bad permissions` and exits 1, which failed the R2 `the whole sudoers configuration parses` check on an otherwise perfect lab. `labs/provision/common.sh` now chmods it to `0440`. Do not weaken that checker: a bad mode is exactly the kind of real misconfiguration it exists to catch.
@@ -276,7 +284,9 @@ This host is one data point. Re-run the smoke test after changing the Vagrantfil
 
 **Private network:** the Vagrantfile forces `qemu_use_session = false` because vagrant-libvirt 0.11.x otherwise defaults to the session connection, which cannot create the private lab network. Both VMs attach to the libvirt network `rhcsa-lab` with DHCP disabled. `provision/common.sh` configures the second NIC with a NetworkManager profile named `lab-private`, so `10.10.10.10` / `10.10.10.11` survive reboot.
 
-**Lab commands:** `./bin/lab doctor|up|status|ssh|snapshot|restore|check|halt|reset|destroy`.
+**Lab commands:** `./bin/lab doctor|up|status|ssh|console|snapshot|restore|check|halt|reset|destroy`.
+
+**Serial console:** `./bin/lab console [server|node2]` wraps `virsh -c qemu:///system console rhcsa<name>`; ++ctrl++] detaches and the VM keeps running. Both nodes boot with `console=tty0 console=ttyS0,115200n8`, and provisioning also enables `serial-getty@ttyS0` so a login prompt appears there. R11 needs it: SSH cannot show GRUB, the initramfs, or `sulogin`.
 
 **Checker wrapper:** `./bin/lab check <module> [lab1|lab2|challenge|all]` uploads `labs/checks/<module>/check.sh` to `server` and runs it as root.
 
@@ -321,6 +331,7 @@ Every RHCSA module follows the same anatomy:
 - **R6 (`labs/checks/r06/check.sh`) — live block-device and mount state.** Use it for partitions, LVM, filesystems, swap, and fstab. It reads the partition table with `parted` and `sfdisk`, the LVM metadata with `pvs`/`vgs`/`lvs`, the superblocks with `blkid`, and the live mount table with `findmnt`. Size checks are ranges, not exact equality, because a correct disk loses a little room to alignment.
 - **R9 (`labs/checks/r09/check.sh`) — network configuration plus behaviour.** Use it when a rule can exist and still not work. It reads the `nmcli` keyfile, the live addresses, `/etc/hosts`, and both firewalld layers, then starts its own HTTP listener and fetches it from `node2` as `labuser`. That split — configuration questions answered from files, reachability answered by a real client — is the model for any networking check.
 - **R10 (`labs/checks/r10/check.sh`) — policy and daemon state.** Use it for SELinux and for any service whose configuration is merged from includes. It pairs evidence deliberately: the live file label with the persistent `semanage fcontext` record, the live port label with the `semanage port -l -C` record, the Boolean's running value with its persistent value, and the effective `sshd -T` output with two real logins. The Boolean is also proved behaviourally by proxying to a fixture the checker starts itself.
+- **R11 (`labs/checks/r11/check.sh`) — boot state.** Use it for targets, the bootloader, kernel arguments, and recovery. It reads `/etc/default/grub` and `grub.cfg` separately, every BLS entry with `grubby --info=ALL`, `/etc/kernel/cmdline`, and the running `/proc/cmdline`; a setting that reaches only one of those layers is the mistake being checked. It proves recovery by account usability (`passwd -S` `P*`, a date that is not `never`), a marker file, and the labels only a finished relabel boot restores — never the password. It proves an update two ways (`dnf history` return code plus `dnf check-update` exit 0) and requires `uname -r` to match the newest installed `kernel-core`.
 
 All of them follow these rules:
 
@@ -370,6 +381,16 @@ Block-state checks (R6) add these rules:
 - Prove non-destructive growth in two parts: `lvs` for the logical volume and `findmnt -b -o SIZE` for the filesystem. `lvextend` alone leaves `df` at the old size, which is the mistake the challenge exists to catch.
 - Include regression checks. R6 Lab 2 asserts Lab 1's mount still works, and the challenge asserts both earlier labs are intact, because `all` runs the three phases as one state stack.
 
+Boot-state checks (R11) add these rules:
+
+- Read the **intent** and the **generated** bootloader files separately. `/etc/default/grub`, `/boot/grub2/grub.cfg`, `/boot/loader/entries/*.conf`, and `/etc/kernel/cmdline` can disagree, and each disagreement is a real failure mode.
+- Check a kernel argument on **every** BLS entry with `grubby --info=ALL` **and** in `/proc/cmdline`. The first proves what the next boot will do; the second proves what this boot did.
+- Treat a kernel argument as a promise about the next boot. The live `/proc/cmdline` and `/proc/sys/kernel/*` checks must fail until the learner reboots; say so in the failure text.
+- Prove recovery without asserting a password: `passwd -S root` must return a `P*` status, the last-change field must not be `never`, the marker file must exist and be root-owned, and `/etc/shadow` plus the marker must carry `shadow_t` and `admin_home_t`. `/.autorelabel` must be gone.
+- Prove an update two ways: an `upgrade`/`update` transaction in `dnf history` whose `Return-Code` is `Success`, and `dnf check-update` exiting 0. Require `uname -r` to equal the newest installed `kernel-core`, which forces the reboot.
+- Guard the stack: Lab 1 must leave the production default target that the challenge also expects, or `all` (which runs lab1, lab2, and challenge against one end state) can never pass. The R11 lab proves `set-default` by visiting `graphical.target` and returning to `multi-user.target`.
+- Never assert a boot *duration*, a GRUB menu screenshot, or a timer's `NEXT` value. Read the setting (`GRUB_TIMEOUT`, `set timeout=`) and the produced state (`/proc/cmdline`), not the numbers a particular boot happened to print.
+
 ---
 
 ## 7. Curriculum map
@@ -403,7 +424,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R8 | cron, at, systemd timers, chrony, timezones | 7 | **Validated 2026-11-10** |
 | R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | **Validated 2026-11-11** |
 | R10 | SELinux, SSH keys, firewall hardening | 10 | **Validated 2026-11-11** |
-| R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | Planned |
+| R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | **Validated 2026-11-11** |
 | R12 | Capstone: timed mock exams and full review | All | Planned |
 
 Status values: **Validated** means the checker has passed from a clean snapshot on a real lab. **Complete; walked** (foundations) means every command in the page was run on the 2026-11-10 lab; foundations have no automated checkers. **Content complete; validation pending** means the full anatomy is written and syntax-checked but has not been walked end to end on a VM. **Planned** means not started. A module moves to **Validated** only after its checkers are re-run on `server`, not because the files exist.
@@ -416,6 +437,14 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 
 | Decision | Rationale |
 |---|---|
+| R11 ends on `multi-user.target`, not `graphical.target` | The `all` checker runs lab1, lab2, and challenge against one end state. Lab 1 proves `set-default` by setting `graphical.target`, rebooting, and then returning to `multi-user.target`, so the challenge can require the headless default without contradicting Lab 1. The graphical round-trip is the proof; multi-user is the production setting. |
+| R11 needs a serial console, so the lab kit gained one | GRUB, the initramfs, `sulogin`, and a locked root account are invisible over SSH. Provisioning now sets `console=tty0 console=ttyS0,115200n8`, `GRUB_TERMINAL_INPUT/OUTPUT="console serial"`, `GRUB_SERIAL_COMMAND`, and `serial-getty@ttyS0`; `./bin/lab console` wraps `virsh console`. Without it the module could not be taught or checked honestly. |
+| R11's challenge argument is `panic_on_warn=1` | `panic_on_oops` is already 1 on this image, `loglevel=7` is already the printk default, and `nmi_watchdog` is already 0, so none of those produces a visible change. `panic_on_warn` defaults to 0, is readable at `/proc/sys/kernel/panic_on_warn`, and pairs with `panic=10` to describe a server that reboots itself. |
+| R11 proves an update two-sided | `dnf history` alone passes a no-op transaction; `dnf check-update` alone passes a machine that was never updated but has no pending packages after a partial mirror. The checker requires a successful `upgrade`/`update` transaction **and** `check-update` exiting 0, then `uname -r` matching the newest `kernel-core` so the kernel reboot is part of the task. |
+| R11 never asserts a root password | The lesson is recovery, not secret storage. `passwd -S root` (`P*` and a date that is not `never`), the marker file, and the labels restored by the relabel boot prove the account is usable and the repair completed. A test password in the repository would be both a secret and a brittleness trap. |
+| R11 teaches `rd.break` before `init=/bin/bash` and rescue mode | `rd.break` is the tool the exam is most likely to ask for and the one that needs `/sysroot` remounted and `/.autorelabel` touched. The other two doors are demonstrated afterwards so the learner knows when each is the right choice: `init=/bin/bash` for a real-root shell without systemd, rescue mode when the root password still works. |
+| `grep -q` is forbidden in R11's pipeline predicates | With `set -o pipefail`, `grep -q` closes the pipe early, the upstream command dies of SIGPIPE, and the predicate returns failure even though the match succeeded. `cmdline_has`, `label_is`, and `upgrade_ok` use `grep ... >/dev/null` and read the whole input. |
+| R11's snapshot clock can be stale | A restored snapshot carries the clock it was saved with. Lab 1 does not schedule anything, so it does not matter here, but a learner who compares `date` to the host should know that R8's `chronyc waitsync` is the fix, not a broken VM. |
 | Target EX200 v10 / RHEL 10 | Current exam platform; adds Flatpak and systemd timers; drops Podman and set-GID |
 | MkDocs Material | Markdown-first, good search/navigation, easy GitHub Pages deploy |
 | GitHub Pages + Actions | Free hosting, no server to maintain |
@@ -588,7 +617,18 @@ When adding or revising a foundation, repeat the same five steps:
   - The challenge adds a source-restricted rich rule in `public` and fetches the page from `node2`, without undoing either lab. `--query-port=18443/tcp` correctly answers `no`; the docs and cheat sheet call that out, because it reads as broken to anyone used to `--add-port`.
   - The walk started from `clean`, ran the three phases in order, rebooted **both** machines, and ran `./bin/lab check r10 all`: 42/42. One checker bug was fixed: `semanage port -l -C` prints `type proto port`, so `port_label` reads fields 2 and 3.
 
-R11 (boot recovery) remains, and it is the domain hardest to learn from prose without risking a machine. Add it with the full anatomy above.
+- **R11 — done and validated 2026-11-11 (31/31 from a clean snapshot).** Boot chain, targets, GRUB 2 and BLS, temporary and persistent kernel arguments, `rd.break` root recovery with `/.autorelabel`, `init=/bin/bash`, rescue mode, and `dnf` update/history. Design decisions worth keeping:
+  - **The module ends on `multi-user.target`.** Lab 1 sets `graphical.target`, reboots to prove `set-default` survives, then sets `multi-user.target` back. The challenge requires the headless default as a regression, and `all` passes because lab1, lab2, and the challenge all agree on the end state. A lab that ended graphical would make `all` impossible.
+  - **The serial console is part of the lab kit.** GRUB, the initramfs, and `sulogin` cannot be reached over SSH. `common.sh` now sets `console=tty0 console=ttyS0,115200n8`, `GRUB_TERMINAL_INPUT/OUTPUT`, `GRUB_SERIAL_COMMAND`, `GRUB_TIMEOUT=5`, `menu_auto_hide=0`, and enables `serial-getty@ttyS0`; `./bin/lab console [server|node2]` wraps `virsh console`. The console was validated end to end (menu, `e`, Ctrl-X, login) during the R11 walk.
+  - **`grubby` is the tool for kernel arguments, not `grub2-mkconfig`.** The lab reads all three layers: `/etc/default/grub`, `grub.cfg`, and the BLS entries. `grubby --update-kernel=ALL --args=panic=10` updates every entry plus `/etc/default/grub` and `/etc/kernel/cmdline`; `grub2-mkconfig` would leave the BLS entries alone. The checker asserts all three and then `/proc/cmdline`, so a setting that reaches only one layer fails.
+  - **The challenge argument is `panic_on_warn=1`.** `panic_on_oops` is already 1 on this image, `loglevel=7` is already the printk default, and `nmi_watchdog` is already 0. `panic_on_warn` starts at 0, is visible at `/proc/sys/kernel/panic_on_warn`, and pairs with `panic=10` to describe a server that reboots itself.
+  - **Recovery is proved without a password.** `passwd -S root` must say `P*` with a date that is not `never`, `/root/r11-recovered` must be root-owned, `/etc/shadow` must be `shadow_t`, the marker must be `admin_home_t`, `/.autorelabel` must be gone, and SELinux must still be `Enforcing`. The password the learner chose is never stored or asserted.
+  - **The read-only root is the lesson.** `rd.break` lands with `/sysroot` read-only; skipping `mount -o remount,rw /sysroot` produces `Authentication token manipulation error`, which reads like a password bug. The lab walks into it, and the `?` in `ls -Z` explains why `/.autorelabel` is the second half of the repair.
+  - **The update check is two-sided.** A successful `upgrade`/`update` transaction in `dnf history` plus `dnf check-update` exiting 0 plus `uname -r` equal to the newest `kernel-core`. That last one forces the reboot and proves the new kernel is actually running.
+  - **`grep -q` in a pipeline is a trap under `pipefail`.** `cmdline_has`, `label_is`, and `upgrade_ok` all closed the pipe early and turned SIGPIPE into a false failure. They now use `grep ... >/dev/null` and read the whole input.
+  - The walk started from `clean`, ran Lab 1 (including the graphical round-trip and the GRUB-editor override), Lab 2 (lock, `rd.break`, relabel, root console login, second reboot), and the challenge (`dnf -y upgrade`, `panic_on_warn=1`, reboot), then ran `./bin/lab check r11 all`: 31/31.
+
+R12 (capstone and mock exams) remains.
 
 ### M4 — R12 and polish
 
@@ -655,6 +695,14 @@ R11 (boot recovery) remains, and it is the domain hardest to learn from prose wi
 - **R10's `sshd -T` needs root.** `labuser` on `node2` cannot read `/etc/ssh/sshd_config`, so the checker runs on `server` as root. Do not move the hardening to `node2` without reworking the checker to use `sudo`.
 - **R10's rich rule cannot be tested from outside its source range.** Every machine in the lab is in `10.10.10.0/24`, so the checker proves the restriction by asking firewalld (`--query-port` must be `no`, the permanent rich rule must name the source) and proves reachability from `node2`. It cannot prove that a host outside the range is refused, because there is no such host.
 - **R10 output is label- and version-sensitive.** `restorecon -Rv` prints one line per relabelled path, `semanage` column widths change between policy releases, and the `PermitRootLogin` default prints as `without-password` here (`prohibit-password` elsewhere; they are the same setting). The docs say so where it matters, and the checker reads fields rather than prose.
+- **R11's relabel boot is slow and must not be interrupted.** After `rd.break` and `touch /.autorelabel`, the next boot rewrites every SELinux label and reboots itself. On this host it finished in well under a minute, but a busy or slow disk can take several minutes. A learner who power-cycles during the relabel ends up with half-labelled files and a login that rejects every password; the recovery is another `rd.break` and another `/.autorelabel`.
+- **R11's serial console needs a real TTY.** `virsh console` is interactive and `./bin/lab console` is meant for a terminal window. In a script, attach through `tmux new-session -d` (as the maintainer validation does) or use `virsh console` under `script`; reading `/dev/pts/N` directly needs root. The construct is not part of the learner workflow, which is why it is not shipped in `bin/lab`.
+- **R11's cold first boot can exceed Vagrant's default timeout.** A rebuilt lab spends minutes in `NetworkManager-wait-online` before provisioning finishes, and the 300 s default aborted `./bin/lab reset`. The Vagrantfile now sets `config.vm.boot_timeout = 600`. Keep that value unless the slow-boot cause is removed.
+- **R11's update checks need a working repository and internet.** `dnf history` can show a perfect transaction on an offline machine, but `dnf check-update` will fail, and the challenge cannot be completed without downloading 65 packages. A learner who left R3's distro repositories disabled meets `There are no enabled repositories` before the first update step, exactly as in R6, R7, R8, and R10.
+- **R11's GRUB line numbers and `timeout_style` output are version-sensitive.** `grub2-mkconfig` emits `set timeout_style=menu` on this image, and the line numbers move when the file grows. The checker greps for `set timeout=` and reads the number; the docs quote the line numbers from the 2026-11-11 walk, and a different image may show different ones.
+- **R11's `all` check runs against the challenge end state.** `lab1`'s `/proc/cmdline` line and the challenge's live sysctl only pass after the reboot, and `all` expects Lab 1's arguments, Lab 2's recovered account, and the challenge's update at the same time. Run the phases in order; restore `clean` and use the individual checks otherwise.
+- **R11 leaves `panic_on_warn=1` in the running kernel.** A kernel warning during the rest of the lab will panic the machine after ten seconds and reboot it. That is the configured policy working, not a broken VM, but it makes the machine unsuitable for unrelated long-running work until the argument is removed with `grubby --remove-args=panic_on_warn`.
+- **R11's snapshot clock is stale.** A restored `clean` snapshot carries the clock it was saved with. R11 does not schedule anything, so it only affects timestamps a learner compares by eye; R8's `chronyc waitsync 30 0.1` is the fix.
 - **The audit log needs `auditd`.** `ausearch -m AVC -ts recent` returned `<no matches>` on this host even with denials present, while `ausearch -if /var/log/audit/audit.log -m AVC` and `grep ': avc:' /var/log/audit/audit.log` both worked. The module teaches the `grep` as the reliable fallback, and the checker never parses the log at all — it asks SELinux for the current state instead.
 - **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 
@@ -713,6 +761,10 @@ cd labs
 ./bin/lab check r10 lab2
 ./bin/lab check r10 challenge
 ./bin/lab check r10 all
+./bin/lab check r11 lab1
+./bin/lab check r11 lab2
+./bin/lab check r11 challenge
+./bin/lab check r11 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

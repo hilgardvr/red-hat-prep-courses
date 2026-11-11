@@ -7,7 +7,7 @@ The lab kit lives in the `labs/` directory of the course repository.
 ```text { .no-copy }
 labs/
 ├── Vagrantfile          # two VMs: server and node2
-├── bin/lab              # up | halt | reset | snapshot | restore | check | ssh | doctor
+├── bin/lab              # up | halt | reset | snapshot | restore | check | ssh | console | doctor
 ├── provision/           # first-boot configuration
 ├── checks/              # automated lab verification
 └── keys/                # generated lab SSH key (gitignored)
@@ -205,9 +205,22 @@ Other useful commands:
 | `./bin/lab reset` | Destroy and rebuild both VMs from scratch |
 | `./bin/lab destroy` | Delete both VMs (asks for confirmation) |
 | `./bin/lab ssh node2` | Log in to the second machine |
+| `./bin/lab console server` | Attach to the serial console (Ctrl+] to leave); needed to see GRUB and rescue mode |
 | `./bin/lab check r01 lab1` | Run the automated checker for a lab |
 
 Snapshots consume disk. If you run low on space, delete old snapshots with `cd labs && vagrant snapshot list` and `vagrant snapshot delete <machine> <name>`.
+
+### The serial console
+
+Both VMs are configured to send the GRUB menu, the boot messages, and a login prompt to a serial console. `./bin/lab ssh` cannot show any of that: it connects to a machine that is already running. When a lab asks you to interrupt the boot, open a second terminal with:
+
+```bash
+./bin/lab console server
+```
+
+You will see the same login prompt as the virtual screen. Log in as `labuser` (password `labpass`), or press a key during the GRUB countdown to stop it. `Ctrl+]` detaches; the VM keeps running.
+
+This is the console R11 uses to edit the bootloader and reach the emergency shell. It is also the way back in if an SSH setting locks you out.
 
 ## Verifying the lab
 

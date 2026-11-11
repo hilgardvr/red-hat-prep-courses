@@ -176,6 +176,50 @@ Host 10.10.10.*
 EOF
 
 # ---------------------------------------------------------------------------
+# Serial console
+# ---------------------------------------------------------------------------
+# R11 teaches boot interruption: the GRUB menu and the emergency shell have to
+# be reachable from a terminal that is not the graphical console. The image
+# boots with GRUB_TIMEOUT=0 and kernel output on tty0 only, which makes the
+# menu invisible and the serial port silent. Configure both, so a learner can
+# run `./bin/lab console server` and see everything from GRUB onwards.
+
+set_grub_default() {
+  local key=$1 value=$2
+  if grep -q "^${key}=" /etc/default/grub; then
+    sed -i "s|^${key}=.*|${key}=${value}|" /etc/default/grub
+  else
+    printf '%s=%s\n' "$key" "$value" >> /etc/default/grub
+  fi
+}
+
+set_grub_default GRUB_TIMEOUT 5
+set_grub_default GRUB_TERMINAL_INPUT '"console serial"'
+set_grub_default GRUB_TERMINAL_OUTPUT '"console serial"'
+set_grub_default GRUB_SERIAL_COMMAND \
+  '"serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1"'
+set_grub_default GRUB_CMDLINE_LINUX \
+  '"console=tty0 console=ttyS0,115200n8 no_timer_check biosdevname=0 net.ifnames=0"'
+
+# The BLS entries carry their own options line, and grub2-mkconfig rewrites
+# only grub.cfg. Update the entries too, or the kernel never learns about ttyS0.
+# Pass both consoles in one call: grubby treats `console=` as a single-valued
+# argument and would drop tty0 if the two were added separately.
+if ! grep -q 'console=ttyS0,115200n8' /proc/cmdline; then
+  grubby --update-kernel=ALL --args="console=tty0 console=ttyS0,115200n8"
+fi
+
+grub2-mkconfig -o /boot/grub2/grub.cfg >/dev/null
+
+# 12_menu_auto_hide hides the menu when the last boot succeeded, which would
+# undo GRUB_TIMEOUT=5 after the first clean boot. Turn the auto-hide off so the
+# five-second menu is always there to interrupt.
+grub2-editenv - set menu_auto_hide=0
+
+systemctl enable serial-getty@ttyS0.service >/dev/null 2>&1 || true
+systemctl start serial-getty@ttyS0.service
+
+# ---------------------------------------------------------------------------
 # Base state
 # ---------------------------------------------------------------------------
 # The course documents a RHEL-like base: SELinux enforcing and firewalld

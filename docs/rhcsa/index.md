@@ -16,7 +16,7 @@ The course is organized around the ten objective groups Red Hat publishes for EX
 | **R8** | cron, at, systemd timers, chrony | 7 — Deploy, configure, and maintain systems | <span class="badge badge-ready">Available</span> |
 | **R9** | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 — Manage basic networking | <span class="badge badge-ready">Available</span> |
 | **R10** | SELinux, SSH key authentication, firewall hardening | 10 — Manage security | <span class="badge badge-ready">Available</span> |
-| **R11** | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | <span class="badge badge-planned">Planned</span> |
+| **R11** | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | <span class="badge badge-ready">Available</span> |
 | **R12** | Capstone: timed mock exams and full review | All | <span class="badge badge-planned">Planned</span> |
 
 ## How the modules fit together
@@ -65,6 +65,8 @@ The order is pedagogical, not mandatory. Storage depends on users and permission
 [R9 — Networking and firewalld](r09-networking-and-firewall/index.md) connects the machine to everything else: NetworkManager connection profiles, static IPv4 and IPv6 on the same interface, name resolution through `/etc/hosts` and DNS, and firewalld zones. It teaches the firewall on a dummy interface, so a mistake cannot end your SSH session, and then proves every rule with a real request from `node2`.
 
 [R10 — Security: SELinux and SSH](r10-security-selinux-ssh/index.md) adds the two defences that decide what happens after a password or a firewall rule has already failed: SELinux labels and types, and key-based SSH with the password path turned off. It deliberately walks into a `403`, a failed bind, and a `503`, and fixes each at the layer that refused it. The challenge then restricts the service port to the lab network and proves the whole stack survives a reboot.
+
+[R11 — Boot, rescue, and updates](r11-boot-rescue-updates/index.md) goes below the running system: firmware, GRUB 2, the initramfs, systemd targets, and the bootloader's two layers. It teaches the difference between a runtime change and a persistent one, then breaks the root login on purpose and recovers it through `rd.break`, a relabel, and a second boot. The challenge applies a full package update and adds a second kernel argument without losing the recovery.
 
 Before R1, make sure the lab is running:
 

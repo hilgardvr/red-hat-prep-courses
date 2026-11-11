@@ -49,13 +49,13 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 4. Operate running systems
 
-**Module R5** — <span class="badge badge-ready">Covered</span>; **boot and recovery are R11**; **secure file transfer** is covered in R1
+**Modules R5 and R11** — <span class="badge badge-ready">Covered</span>; **secure file transfer** is covered in R1
 
 | Objective | Where |
 |---|---|
-| Boot, reboot, and shut down a system normally | [R5 — What survives a reboot](../rhcsa/r05-processes-and-services/index.md#what-survives-a-reboot) (R11 covers the boot process itself) |
-| Boot systems into different targets manually | R11 |
-| Interrupt the boot process in order to gain access to a system | R11 |
+| Boot, reboot, and shut down a system normally | [R11 — The boot chain](../rhcsa/r11-boot-rescue-updates/index.md#the-boot-chain) and [R5 — What survives a reboot](../rhcsa/r05-processes-and-services/index.md#what-survives-a-reboot) |
+| Boot systems into different targets manually | [R11 — Targets](../rhcsa/r11-boot-rescue-updates/index.md#targets) |
+| Interrupt the boot process in order to gain access to a system | [R11 — Interrupting the boot](../rhcsa/r11-boot-rescue-updates/index.md#interrupting-the-boot) and [Lab 2](../rhcsa/r11-boot-rescue-updates/labs/lab-2-recovery.md) |
 | Identify CPU/memory intensive processes and kill processes | [R5 — Processes](../rhcsa/r05-processes-and-services/index.md#processes) and [Signals](../rhcsa/r05-processes-and-services/index.md#signals) |
 | Adjust process scheduling | [R5 — Scheduling priority: nice](../rhcsa/r05-processes-and-services/index.md#scheduling-priority-nice) |
 | Manage tuning profiles | [R5 — tuned](../rhcsa/r05-processes-and-services/index.md#tuned) |
@@ -91,16 +91,16 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 7. Deploy, configure, and maintain systems
 
-**Modules R8, R11, and R3** — R3 and R8 are <span class="badge badge-ready">Covered</span>; R11 is <span class="badge badge-planned">Planned</span>.
+**Modules R3, R5, R8, and R11** — <span class="badge badge-ready">Covered</span>.
 
 | Objective | Where |
 |---|---|
 | Schedule tasks using `at`, `cron`, and systemd timer units | [R8 — Choosing a scheduler](../rhcsa/r08-scheduling-and-time/index.md#choosing-a-scheduler), [cron](../rhcsa/r08-scheduling-and-time/index.md#cron), [at](../rhcsa/r08-scheduling-and-time/index.md#at), and [systemd timers](../rhcsa/r08-scheduling-and-time/index.md#systemd-timers) |
 | Start and stop services and configure services to start automatically at boot | [R5 — systemd: units, services, and targets](../rhcsa/r05-processes-and-services/index.md#systemd-units-services-and-state); R8 adds timer units on top |
-| Configure systems to boot into a specific target automatically | R11 |
+| Configure systems to boot into a specific target automatically | [R11 — Targets](../rhcsa/r11-boot-rescue-updates/index.md#targets) and [Lab 1](../rhcsa/r11-boot-rescue-updates/labs/lab-1-targets-and-grub.md) |
 | Configure time service clients | [R8 — chrony](../rhcsa/r08-scheduling-and-time/index.md#chrony) and [Lab 2](../rhcsa/r08-scheduling-and-time/labs/lab-2-timers-and-chrony.md); the timezone is in [Timezones](../rhcsa/r08-scheduling-and-time/index.md#timezones) |
-| Install and update software packages from the Red Hat CDN, a remote repository, or the local filesystem | [R3 — `dnf`: transactions](../rhcsa/r03-software-and-repositories/index.md#dnf-transactions) and [Building a local repository](../rhcsa/r03-software-and-repositories/index.md#building-a-local-repository); R11 will cover updates |
-| Modify the system bootloader | R11 |
+| Install and update software packages from the Red Hat CDN, a remote repository, or the local filesystem | [R3 — `dnf`: transactions](../rhcsa/r03-software-and-repositories/index.md#dnf-transactions), [Building a local repository](../rhcsa/r03-software-and-repositories/index.md#building-a-local-repository), and [R11 — Software updates](../rhcsa/r11-boot-rescue-updates/index.md#software-updates) |
+| Modify the system bootloader | [R11 — The bootloader](../rhcsa/r11-boot-rescue-updates/index.md#the-bootloader) and [Kernel arguments](../rhcsa/r11-boot-rescue-updates/index.md#kernel-arguments) |
 
 ## 8. Manage basic networking
 
@@ -154,4 +154,4 @@ The course is considered complete for a module when every objective bullet in th
 3. an automated check that verifies the result, and
 4. a persistence test where the objective changes system state.
 
-R1–R10 meet this rule; each has passed its checker from a clean snapshot after a reboot. R11 and R12 are being written to the same standard.
+R1–R11 meet this rule; each has passed its checker from a clean snapshot after a reboot. R12 is being written to the same standard.

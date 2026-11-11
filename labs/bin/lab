@@ -7,6 +7,7 @@
 #   ./bin/lab up
 #   ./bin/lab status
 #   ./bin/lab ssh [server|node2]
+#   ./bin/lab console [server|node2]
 #   ./bin/lab snapshot [name]
 #   ./bin/lab restore [name]
 #   ./bin/lab check <module> [lab1|lab2|challenge|all]
@@ -36,6 +37,7 @@ RHCSA lab control
   ./bin/lab up                     Create or start both VMs
   ./bin/lab status                 Show VM status
   ./bin/lab ssh [server|node2]     Log in (default: server)
+  ./bin/lab console [server|node2] Attach to the serial console (Ctrl+] to leave)
   ./bin/lab snapshot [name]        Snapshot both VMs (default: clean)
   ./bin/lab restore [name]         Restore both VMs (default: clean)
   ./bin/lab check <module> [lab]   Run a lab checker (default lab: all)
@@ -203,6 +205,25 @@ cmd_ssh() {
   vagrant_cmd ssh "${1:-server}"
 }
 
+cmd_console() {
+  local machine="${1:-server}"
+  case "$machine" in
+    server|node2) ;;
+    *) die "usage: lab console [server|node2]" ;;
+  esac
+
+  command -v virsh >/dev/null 2>&1 || die "virsh is required for the serial console"
+
+  # Keep this in step with lv.default_prefix in the Vagrantfile.
+  local domain="rhcsa${machine}"
+  if ! virsh --connect qemu:///system dominfo "$domain" >/dev/null 2>&1; then
+    die "domain '$domain' not found; run ./bin/lab up"
+  fi
+
+  info "Attaching to the $machine serial console (Ctrl+] to leave)"
+  virsh --connect qemu:///system console "$domain"
+}
+
 cmd_snapshot() {
   prepare
   local name="${1:-clean}"
@@ -276,6 +297,7 @@ case "${1:-help}" in
   up)       cmd_up ;;
   status)   cmd_status ;;
   ssh)      shift; cmd_ssh "$@" ;;
+  console)  shift; cmd_console "$@" ;;
   snapshot) shift; cmd_snapshot "$@" ;;
   restore)  shift; cmd_restore "$@" ;;
   halt)     cmd_halt ;;

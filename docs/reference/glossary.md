@@ -8,6 +8,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **AVC** | Access Vector Cache. The record of an SELinux decision; a denial appears in the audit log as `type=AVC … avc: denied { … }`. Covered in R10. |
 | **autofs** | A service that mounts filesystems on demand when a path is accessed. Covered in R7. |
 | **block device** | A device that reads and writes fixed-size blocks, such as a disk or partition (`/dev/vda`, `/dev/vdb1`). |
+| **BLS** | Boot Loader Specification. The scheme where each kernel has its own file in `/boot/loader/entries/`, and GRUB builds the menu from them with `blscfg`. `grub2-mkconfig` does not update these files; `grubby` does. Covered in R11. |
 | **Boolean (SELinux)** | A named on/off switch inside the policy for behaviour that is legitimate sometimes, such as `httpd_can_network_connect`. `setsebool -P` makes it persistent. Covered in R10. |
 | **bootloader** | The program that loads the kernel. On RHEL, GRUB 2. Covered in R11. |
 | **at** | A scheduler for one-off jobs that run once, later. The daemon is `atd`. Covered in R8. |
@@ -23,9 +24,10 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **Firewalld** | The dynamic firewall manager on RHEL, controlled with `firewall-cmd`. Covered in R9/R10. |
 | **Flatpak** | A cross-distribution application packaging and sandboxing system. A current RHCSA objective. Covered in R3. |
 | **GPT** | GUID Partition Table. The current partition table format for the exam; MBR is no longer listed. Covered in R6. |
-| **GRUB** | The bootloader used by RHEL. Covered in R11. |
+| **GRUB** | GRUB 2, the bootloader used by RHEL. It reads `/boot/grub2/grub.cfg` and builds the menu from the BLS entries. Covered in R11. |
 | **hard link** | A directory entry that shares an inode with another entry. See [R1 — Hard and symbolic links](../rhcsa/r01-essential-tools/index.md#hard-and-symbolic-links). |
 | **inode** | The metadata structure for a file: mode, owner, size, timestamps, and data block pointers. A filename points to an inode. |
+| **initramfs** | A small temporary root filesystem, built by dracut, that the kernel runs before the real root is mounted. `rd.break` stops inside it. Covered in R11. |
 | **journald** | The systemd logging service. Read logs with `journalctl`. Covered in R5. |
 | **NTP** | Network Time Protocol. The protocol chrony uses to synchronise clocks over the network. Covered in R8. |
 | **LVM** | Logical Volume Manager. A layer that pools physical volumes into volume groups and carves out logical volumes. Covered in R6. |
@@ -38,6 +40,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **PID 1** | The first process started by the kernel; on RHEL it is `systemd`. |
 | **pipe** | The `\|` operator, which connects one command's stdout to the next command's stdin. |
 | **process** | A running instance of a program, with a PID, memory, and open file descriptors. |
+| **rd.break** | A dracut kernel argument that stops the boot in the initramfs, before `switch_root`. The real root is mounted at `/sysroot`, read-only. Covered in R11. |
 | **regular expression** | A pattern language for matching text, used by `grep`, `sed`, and many other tools. |
 | **repository** | A source of RPM packages, defined in `/etc/yum.repos.d/*.repo`. |
 | **rich rule** | A single firewalld rule combining a source, a port or service, and an action, such as accepting `18443/tcp` from one network only. Covered in R10. |
@@ -48,10 +51,11 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **snapshot** | A saved state of a virtual machine. The lab uses snapshots to reset between exercises. |
 | **stdin / stdout / stderr** | File descriptors 0, 1, and 2: input, normal output, and error output. |
 | **sudo** | A program that runs a command as another user according to `/etc/sudoers` policy. |
+| **sulogin** | The program rescue and emergency mode use to ask for the root password before giving a maintenance shell. Covered in R11. |
 | **symbolic link** | A file whose content is a path to another file or directory. Also called a symlink or soft link. |
 | **systemd** | The init system and service manager on RHEL. It manages units, targets, timers, mounts, and more. |
 | **systemd timer** | A systemd unit that triggers another unit on a schedule, an alternative to cron. `Persistent=true` lets it catch up after downtime. A current RHCSA objective. Covered in R8. |
-| **target** | A systemd grouping of units that represents a boot state, roughly equivalent to an old runlevel. |
+| **target** | A systemd grouping of units that represents a boot state, roughly equivalent to an old runlevel. `systemctl get-default` reads the persistent default; `isolate` changes the running system only. Covered in R5 and R11. |
 | **timezone** | The named region that decides how a UTC instant is displayed, set with `timedatectl set-timezone`. It changes presentation, not the clock. Covered in R8. |
 | **tuned** | A service that applies performance profiles. Covered in R5. |
 | **udev** | The device manager that creates device nodes in `/dev` and applies rules. |

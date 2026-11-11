@@ -39,6 +39,7 @@ sudo su - labuser
 | `./bin/lab up` | Create or start both VMs |
 | `./bin/lab status` | Show VM status |
 | `./bin/lab ssh [server\|node2]` | Log in (default `server`) |
+| `./bin/lab console [server\|node2]` | Attach to the serial console (Ctrl+] to leave) |
 | `./bin/lab snapshot [name]` | Snapshot both VMs (default `clean`) |
 | `./bin/lab restore [name]` | Restore both VMs (default `clean`) |
 | `./bin/lab check r01 lab1` | Run a lab checker |
@@ -111,6 +112,10 @@ Checkers live in `checks/<module>/check.sh` and run inside `server` as root. The
 ./bin/lab check r10 lab2
 ./bin/lab check r10 challenge
 ./bin/lab check r10 all
+./bin/lab check r11 lab1
+./bin/lab check r11 lab2
+./bin/lab check r11 challenge
+./bin/lab check r11 all
 ```
 
 `all` assumes the end states of every lab in that module are present at the same time. If you restored the clean snapshot between labs, check them individually.

@@ -33,6 +33,11 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.ssh.keep_alive = true
 
+  # A cold first boot on a loaded host can spend a couple of minutes in
+  # NetworkManager-wait-online before sshd answers. Vagrant's 300 s default is
+  # too close to that, and a timeout aborts the run before provisioning.
+  config.vm.boot_timeout = 600
+
   config.vm.provider :libvirt do |lv|
     lv.driver = "kvm"
     lv.video_type = "virtio"
