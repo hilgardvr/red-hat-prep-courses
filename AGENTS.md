@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-11 |
-| **Current milestone** | M3 complete — R1–R11 validated; R12 next |
-| **Next milestone** | R12 |
+| **Current milestone** | M4 — R12 core validated; mock exams next |
+| **Next milestone** | R12 mock exams A–C, then PDF/print export |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -51,7 +51,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R9 — Networking and firewalld | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 10 + 13 = 35). Checker reads the `nmcli` profile, live addresses, `/etc/hosts`, and permanent/runtime firewalld state, then proves each open port by fetching it from `node2` with a listener the checker starts itself; walked end to end on a fresh lab, 35/35 after rebooting both VMs. |
 | R10 — Security: SELinux and SSH | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 10 + 21 = 42). Checker reads live SELinux state (mode, file label, `semanage fcontext`/`port` records, Boolean pair), the effective `sshd` configuration plus two real logins, and firewalld rich-rule state, then fetches `/api/` through Apache and the hardened port from `node2`; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
 | R11 — Boot, rescue, and updates | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 8 + 13 = 31). Checker reads the default target and its symlink, both GRUB layers (`/etc/default/grub` and `grub.cfg`), every BLS entry with `grubby --info=ALL`, `/etc/kernel/cmdline`, the live `/proc/cmdline` and `/proc/sys/kernel/panic_on_warn`, the `dnf` history and `check-update`, root's `passwd -S` status, the recovery marker and both SELinux labels; walked from `clean` through Lab 1, Lab 2 (`rd.break` + relabel), the challenge, a reboot of `server`, and passed 31/31. |
-| R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
+| R12 — Capstone | **Core validated 2026-11-11; exams pending** | Theory, Lab 1 (full-stack rehearsal), Lab 2 (diagnostic loop), quiz, cheat sheet, checker (`lab1\|lab2\|all`). Lab 1 35/35, Lab 2 42/42 after repairs, `all` 77/77 after a reboot of `server`. The three timed mock exams and their checker phases are next. |
 | PDF export | **Planned** | M4 |
 
 **Definition of done for a module:** theory, two guided labs, a challenge lab, a reboot-persistence test, a knowledge check, a cheat sheet, and a passing automated checker from a clean snapshot.
@@ -124,6 +124,11 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   └── r11-boot-rescue-updates/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
+│   │       ├── quiz.md
+│   │       └── cheatsheet.md
+│   │   └── r12-capstone/
+│   │       ├── index.md       # theory
+│   │       ├── labs/          # rehearsal + diagnostic loop
 │   │       ├── quiz.md
 │   │       └── cheatsheet.md
 │   ├── reference/             # objective coverage, glossary, RHEL 9 vs 10
@@ -389,7 +394,16 @@ Boot-state checks (R11) add these rules:
 - Prove recovery without asserting a password: `passwd -S root` must return a `P*` status, the last-change field must not be `never`, the marker file must exist and be root-owned, and `/etc/shadow` plus the marker must carry `shadow_t` and `admin_home_t`. `/.autorelabel` must be gone.
 - Prove an update two ways: an `upgrade`/`update` transaction in `dnf history` whose `Return-Code` is `Success`, and `dnf check-update` exiting 0. Require `uname -r` to equal the newest installed `kernel-core`, which forces the reboot.
 - Guard the stack: Lab 1 must leave the production default target that the challenge also expects, or `all` (which runs lab1, lab2, and challenge against one end state) can never pass. The R11 lab proves `set-default` by visiting `graphical.target` and returning to `multi-user.target`.
-- Never assert a boot *duration*, a GRUB menu screenshot, or a timer's `NEXT` value. Read the setting (`GRUB_TIMEOUT`, `set timeout=`) and the produced state (`/proc/cmdline`), not the numbers a particular boot happened to print.
+- Never assert a boot *duration*, a GRUB menu screenshot, or a timer's `NEXT` value. Read the setting (`GRUB_TIMEOUT`, `set timeout=`) and the produced state (`/proc/cmdline`), not the numbers a particular boot printed.
+
+Capstone checks (R12) add these rules:
+
+- **One host, every layer.** R12 is not a new topic, so its checker is a union of the modules it closes: storage (`sfdisk -d`, `lvs`, `blkid`, `findmnt`), accounts (`id -gn`, `passwd -S`, `chage -l`), SELinux (`ls -Z`, `semanage fcontext -l -C`, `semanage port -l -C`), the service (`systemctl`, `ss`), the firewall in both layers, a timer's produced artefact, and the boot target.
+- **The proof is a request from the other machine.** The web check runs `curl` on `node2` as `labuser`, because a local request proves the service and nothing about the zone. This is the same rule as R9 and R10.
+- **A repair is only a repair if the rest of the host still works.** `lab2` asserts the three repaired layers first, then runs the entire `lab1`/`service_host` block. The lab is designed so that fixing the symptom in the wrong layer leaves a regression the second half catches.
+- **A timer check is a check for an artefact, and a restored snapshot clock can lie.** `stamp_fresh` accepts a stamp newer than `/proc/stat`'s `btime` **or** within three minutes of now, and polls for up to 90 s. Right after a reboot the previous boot's stamp can look hours old; a fixed window reports a false failure. This is the same reasoning as R8's `check_n2_sync`.
+- **`all` is the normal workflow here.** Unlike R1–R11, Lab 2 **ends** where Lab 1 does (the three breakages are repaired), so `check r12 all` is valid on one continuous walk and is the documented persistence test. The labs say to restore `clean` only before a mock exam.
+- **Use `chcon -t var_t` as the deterministic SELinux break.** `semanage fcontext -d` followed by `restorecon` can still apply the old record once; `chcon -t var_t` always produces the `403` and the `getattr` AVC that the lab teaches. The repair is the record plus `restorecon`, which is what the checker asserts.
 
 ---
 
@@ -425,7 +439,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | **Validated 2026-11-11** |
 | R10 | SELinux, SSH keys, firewall hardening | 10 | **Validated 2026-11-11** |
 | R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | **Validated 2026-11-11** |
-| R12 | Capstone: timed mock exams and full review | All | Planned |
+| R12 | Capstone: full-stack rehearsal, diagnostic loop, timed mock exams | All | **Core validated; exams pending** |
 
 Status values: **Validated** means the checker has passed from a clean snapshot on a real lab. **Complete; walked** (foundations) means every command in the page was run on the 2026-11-10 lab; foundations have no automated checkers. **Content complete; validation pending** means the full anatomy is written and syntax-checked but has not been walked end to end on a VM. **Planned** means not started. A module moves to **Validated** only after its checkers are re-run on `server`, not because the files exist.
 
@@ -628,12 +642,21 @@ When adding or revising a foundation, repeat the same five steps:
   - **`grep -q` in a pipeline is a trap under `pipefail`.** `cmdline_has`, `label_is`, and `upgrade_ok` all closed the pipe early and turned SIGPIPE into a false failure. They now use `grep ... >/dev/null` and read the whole input.
   - The walk started from `clean`, ran Lab 1 (including the graphical round-trip and the GRUB-editor override), Lab 2 (lock, `rd.break`, relabel, root console login, second reboot), and the challenge (`dnf -y upgrade`, `panic_on_warn=1`, reboot), then ran `./bin/lab check r11 all`: 31/31.
 
-R12 (capstone and mock exams) remains.
+- **R12 core — done and validated 2026-11-11 (`lab1` 35/35, `lab2` 42/42, `all` 77/77 after a reboot).** The capstone is a full-stack rehearsal, a diagnostic lab, a quiz, a cheat sheet, and a checker. It teaches no new command; it makes the learner do several objective groups on one machine in the order a task list would give them. Design decisions worth keeping:
+  - **The module deviates from the two-labs-plus-challenge anatomy on purpose.** A capstone's third phase is the mock exams, not another task sheet, so the anatomy is Lab 1 (build), Lab 2 (diagnose and repair), and Exams A–C (timed, under exam conditions). The deviation is documented here and in the theory page.
+  - **Lab 2 repairs what it breaks, so `all` is valid.** The three breakages are storage (a stale UUID in fstab), SELinux (the record plus a `chcon -t var_t`), and firewall (`--permanent --remove-port` then `--reload`). Each is repaired in the layer that owns it, which leaves the host exactly where Lab 1 left it. That is why `check r12 all` is the normal persistence test rather than a special case.
+  - **The three breakages produce three different symptoms on purpose.** Storage is invisible now and fatal at boot (`findmnt --verify`); SELinux is a local `403` with an AVC; the firewall is a local `200` and a `curl: (7)` from `node2`. The diagnostic table in Lab 2 is the exam skill: group the red lines by layer before touching anything.
+  - **`chcon -t var_t` is the deterministic SELinux break.** The first attempt used `semanage fcontext -d` plus `restorecon`, but `restorecon` still applied the deleted record once, so the page kept working. `chcon -t var_t` always produces the label the AVC needs, and the repair is the record plus `restorecon`, which is what the checker asserts.
+  - **`stamp_fresh` polls and accepts a stamp newer than `btime`.** After a reboot the restored snapshot clock steps forward, so the previous boot's stamp can look hours old even though the timer is healthy. The predicate accepts a stamp from this boot or from the last three minutes, and waits up to 90 s for the next tick, exactly like R8's `check_n2_sync`.
+  - **The checker re-runs the whole rehearsal after the repairs.** A repair that fixes three lines and breaks the account or the timer is not a repair, so `lab2` asserts the repaired layers and then runs `service_host` in full.
+  - **The walk started from `clean`.** Lab 1 built the volume, account, label, service, firewall, and timer; `lab1` passed 35/35. The three breakages produced 12 failures; the repairs restored `lab2` to 42/42. A reboot of `server` then held the mount, the label, the service, the port, and the timer, and `all` passed 77/77.
+  - **The mock exams are next.** They will reuse the same checker style: Phases `exama`, `examb`, and `examc`, each a task sheet plus a grading run, with `./bin/lab` accepting module-defined phase names.
 
-### M4 — R12 and polish
+### M4 — R12 mock exams and polish
 
-- Three timed mock exams with grading scripts.
-- A two-node scenario that combines storage, NFS, firewall, SELinux, and services.
+- Write Mock Exams A, B, and C as task-sheet pages and add `exama|examb|examc` to the R12 checker.
+- Make `labs/bin/lab` accept module-defined phase names (lowercase alphanumeric) instead of the fixed `lab1|lab2|challenge|all`.
+- A two-node exam scenario that combines storage, NFS, firewall, SELinux, and services.
 - PDF/print export (consider `mkdocs-print-site-plugin` or browser print).
 - Review the objective matrix for gaps.
 - Update README status and this file.
@@ -703,6 +726,13 @@ R12 (capstone and mock exams) remains.
 - **R11's `all` check runs against the challenge end state.** `lab1`'s `/proc/cmdline` line and the challenge's live sysctl only pass after the reboot, and `all` expects Lab 1's arguments, Lab 2's recovered account, and the challenge's update at the same time. Run the phases in order; restore `clean` and use the individual checks otherwise.
 - **R11 leaves `panic_on_warn=1` in the running kernel.** A kernel warning during the rest of the lab will panic the machine after ten seconds and reboot it. That is the configured policy working, not a broken VM, but it makes the machine unsuitable for unrelated long-running work until the argument is removed with `grubby --remove-args=panic_on_warn`.
 - **R11's snapshot clock is stale.** A restored `clean` snapshot carries the clock it was saved with. R11 does not schedule anything, so it only affects timestamps a learner compares by eye; R8's `chronyc waitsync 30 0.1` is the fix.
+- **R12's Lab 1 needs a working repository and both VMs.** It installs `lvm2`, `httpd`, and `policycoreutils-python-utils` and ends with a request from `node2`. A learner who left R3's distro repositories disabled, or halted `node2`, fails before the first storage step or at the last proof.
+- **R12's `/srv` volume can show `unlabeled_t` after formatting.** A fresh XFS mounted under `/srv` has no stored label at its root until `restorecon` runs, so the lab shows it and turns it into the SELinux lesson. It is not a broken filesystem and not a reason to run `setenforce 0`.
+- **R12's Lab 2 breakages are repaired by the learner, not by the lab.** If the learner stops halfway, `lab2` fails the layers they did not fix; that is the intended report. `./bin/lab restore clean` is the reset, not a partial repair.
+- **R12's `all` check assumes Lab 2 was repaired.** It is a single continuous walk (Lab 1, then Lab 2, then the repairs). A learner who restored `clean` between the labs should run `lab1` and `lab2` individually.
+- **R12's timer check waits up to 90 s.** On a busy host the first tick after `enable --now` can be missed, and the restored-clock problem makes a fixed window wrong. The wait is deliberate; a timeout is not a false failure.
+- **R12's SELinux break depends on `/srv` being `var_t`.** `chcon -t var_t` produces the web denial because `/srv` is not a content type. A different image could ship a different default; if so, the lab's expected `ls -Z` and AVC differ, but the repair (record plus `restorecon`) is unchanged.
+- **R12's mock exams do not exist yet.** The theory page lists them and describes the format; the pages and the `exama|examb|examc` checker phases are the next milestone. Do not claim the capstone is finished until they are validated.
 - **The audit log needs `auditd`.** `ausearch -m AVC -ts recent` returned `<no matches>` on this host even with denials present, while `ausearch -if /var/log/audit/audit.log -m AVC` and `grep ': avc:' /var/log/audit/audit.log` both worked. The module teaches the `grep` as the reliable fallback, and the checker never parses the log at all — it asks SELinux for the current state instead.
 - **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 
@@ -765,6 +795,9 @@ cd labs
 ./bin/lab check r11 lab2
 ./bin/lab check r11 challenge
 ./bin/lab check r11 all
+./bin/lab check r12 lab1
+./bin/lab check r12 lab2
+./bin/lab check r12 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

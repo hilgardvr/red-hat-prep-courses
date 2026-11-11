@@ -17,7 +17,7 @@ The course is organized around the ten objective groups Red Hat publishes for EX
 | **R9** | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 — Manage basic networking | <span class="badge badge-ready">Available</span> |
 | **R10** | SELinux, SSH key authentication, firewall hardening | 10 — Manage security | <span class="badge badge-ready">Available</span> |
 | **R11** | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | <span class="badge badge-ready">Available</span> |
-| **R12** | Capstone: timed mock exams and full review | All | <span class="badge badge-planned">Planned</span> |
+| **R12** | Capstone: timed mock exams and full review | All | <span class="badge badge-ready">Available</span> |
 
 ## How the modules fit together
 

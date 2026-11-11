@@ -141,9 +141,9 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## Capstone
 
-**Module R12** — <span class="badge badge-planned">Planned</span>
+**Module R12** — <span class="badge badge-ready">Covered</span>
 
-Timed mock exams covering all groups, with grading scripts and a persistence checklist.
+One full-stack rehearsal (storage, account, SELinux, web service, firewall, timer, boot), a diagnostic lab that breaks the host in three layers and repairs it, and three timed mock exams with grading scripts. The capstone adds no new objective; it re-tests every group under exam conditions.
 
 ## Coverage rule
 
@@ -154,4 +154,4 @@ The course is considered complete for a module when every objective bullet in th
 3. an automated check that verifies the result, and
 4. a persistence test where the objective changes system state.
 
-R1–R11 meet this rule; each has passed its checker from a clean snapshot after a reboot. R12 is being written to the same standard.
+R1–R12 meet this rule; each has passed its checker from a clean snapshot after a reboot.
