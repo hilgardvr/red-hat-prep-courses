@@ -104,14 +104,14 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 8. Manage basic networking
 
-**Module R9** — <span class="badge badge-planned">Planned</span>
+**Module R9** — <span class="badge badge-ready">Available</span>
 
 | Objective | Where |
 |---|---|
-| Configure IPv4 and IPv6 addresses | R9 |
-| Configure hostname resolution | R9 |
-| Configure network services to start automatically at boot | R9 |
-| Restrict network access using `firewalld` and `firewall-cmd` | R9 / R10 |
+| Configure IPv4 and IPv6 addresses | [R9 — IPv4 and IPv6](../rhcsa/r09-networking-and-firewall/index.md#ipv4-and-ipv6-in-one-breath), [Lab 1](../rhcsa/r09-networking-and-firewall/labs/lab-1-static-connection.md) |
+| Configure hostname resolution | [R9 — Name resolution](../rhcsa/r09-networking-and-firewall/index.md#name-resolution) and the challenge's [named service host](../rhcsa/r09-networking-and-firewall/labs/challenge-service-host.md) |
+| Configure network services to start automatically at boot | [R9 — The NetworkManager model](../rhcsa/r09-networking-and-firewall/index.md#the-networkmanager-model) (`connection.autoconnect`) and [Lab 2](../rhcsa/r09-networking-and-firewall/labs/lab-2-firewalld.md) (a permanent zone bound to the interface) |
+| Restrict network access using `firewalld` and `firewall-cmd` | [R9 — firewalld](../rhcsa/r09-networking-and-firewall/index.md#firewalld); R10 adds SELinux port labels and hardening |
 
 ## 9. Manage users and groups
 

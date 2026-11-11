@@ -150,6 +150,13 @@ nav:
           - "Challenge — An unattended maintenance routine": rhcsa/r08-scheduling-and-time/labs/challenge-maintenance.md
           - Knowledge check: rhcsa/r08-scheduling-and-time/quiz.md
           - Cheat sheet: rhcsa/r08-scheduling-and-time/cheatsheet.md
+      - "R9 — Networking and firewalld":
+          - Theory: rhcsa/r09-networking-and-firewall/index.md
+          - "Lab 1 — A static connection": rhcsa/r09-networking-and-firewall/labs/lab-1-static-connection.md
+          - "Lab 2 — Zones, ports, and a client": rhcsa/r09-networking-and-firewall/labs/lab-2-firewalld.md
+          - "Challenge — A named service host": rhcsa/r09-networking-and-firewall/labs/challenge-service-host.md
+          - Knowledge check: rhcsa/r09-networking-and-firewall/quiz.md
+          - Cheat sheet: rhcsa/r09-networking-and-firewall/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

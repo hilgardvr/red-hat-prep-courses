@@ -6,9 +6,9 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1–R8 validated; R9 next |
-| **Next milestone** | R9 |
+| **Last updated** | 2026-11-11 |
+| **Current milestone** | M2 complete — R1–R9 validated; R10 next |
+| **Next milestone** | R10 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -48,7 +48,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R6 — Local storage | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 12 + 12 = 36). Checker reads the live partition table, LVM metadata, mounts, and fstab; walked end to end on a fresh lab, 36/36 after a reboot. |
 | R7 — File systems and sharing | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 15 + 16 = 42). Checker reads live partition, superblock, mount, export, and firewalld state on `server`, and reaches `node2` over SSH for the autofs half; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
 | R8 — Scheduling and time | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (13 + 12 + 18 = 43). Checker reads live systemd timer properties, cron files, produced artefacts, and chrony state on `server`, and reaches `node2` over SSH for the client half; walked end to end on a fresh lab, 43/43 after rebooting both VMs. |
-| R9–R11 | **Planned** | See the curriculum map below |
+| R9 — Networking and firewalld | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 10 + 13 = 35). Checker reads the `nmcli` profile, live addresses, `/etc/hosts`, and permanent/runtime firewalld state, then proves each open port by fetching it from `node2` with a listener the checker starts itself; walked end to end on a fresh lab, 35/35 after rebooting both VMs. |
+| R10–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -104,7 +105,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r08-scheduling-and-time/
+│   │   ├── r08-scheduling-and-time/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r09-networking-and-firewall/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -123,6 +129,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r06/check.sh    # R6 automated checker
 │   ├── checks/r07/check.sh    # R7 automated checker (server + node2)
 │   ├── checks/r08/check.sh    # R8 automated checker (server + node2)
+│   ├── checks/r09/check.sh    # R9 automated checker (server + node2)
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -186,6 +193,8 @@ R7 is the first checker that is deliberately **not** confined to one machine. It
 
 R8 is the second two-machine checker and adds a different problem: **a schedule is a promise about the future**, so most of it cannot be checked by reading configuration. Each phase asserts something the scheduler produced — a log line from a cron job, a stamp from a timer, a report the service wrote — and the challenge runs the report service four times to prove the pruning works. `lab2` and `challenge` reach `node2` as `labuser` to read `chronyc sources` and `NTPSynchronized` there, so both VMs must be up. The client half polls for up to 60 s (`check_n2_sync`), because a freshly booted `node2` needs a few seconds before chrony reports a synchronised clock. Validate it from `clean` by walking Lab 1, Lab 2 (both machines), and the challenge, rebooting both, and running `./bin/lab check r08 all`.
 
+R9 is a networking checker and takes the next step: **configuration is not behaviour**. Half of it reads the `nmcli` profile, the live addresses, `/etc/hosts`, and both firewalld layers; the other half starts an HTTP listener on `server` and fetches it **from `node2` as `labuser`**, using the shared lab key and `~/.ssh/config`. That request is the only honest proof that a port is open in the right zone, and it is why `lab2` and `challenge` need both VMs running. The checker also asserts that `ssh` to `node2` still works after every change, because the module's whole risk is a firewall edit that ends the session. Validate it from `clean` by walking Lab 1, Lab 2 (both machines), and the challenge, rebooting both, and running `./bin/lab check r09 all`.
+
 ### Real lab validation
 
 ```bash
@@ -219,6 +228,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R6 lab 1 (12), lab 2 (12), and the challenge (12) passed; `./bin/lab check r06 all` passed 36/36 after rebooting `server`. The walk started from `clean`, installed `lvm2`, created the 5 GiB GPT partition on `/dev/vdb`, built `r6vg` with a 2 GiB XFS `r6data` mounted by UUID, added a 512 MiB swap LV and a 512 MiB ext4 `r6label` mounted by `LABEL=r6label`, then added `/dev/vdb2`, extended the VG, grew `r6data` to 4 GiB, and ran `xfs_growfs`. A marker file written before the resize was readable after the reboot. `findmnt --verify` reported no errors at the end of each phase.
 - R7 lab 1 (11), lab 2 (15), and the challenge (16) passed; `./bin/lab check r07 all` passed 42/42 after rebooting **both** machines. The walk started from `clean`, created a 512 MiB VFAT partition on `/dev/vdb` with `uid=`/`gid=`/`umask=` mount options, exported `/srv/r7/export` to `10.10.10.0/24` from `server` and opened `nfs`, `mountd`, and `rpc-bind`, mounted it by hand and then through autofs on `node2`, and built `r7vg` on a 1.5 GiB second partition with a 512 MiB ext4 `r7data`. A 100 MB `blob.bin` was written before `lvextend -L +512M` and `resize2fs`, and its checksum was unchanged after an offline `e2fsck -fy` and a reboot. Writing to the export as root failed with `Permission denied` (`root_squash`), and writing as `labuser` produced a file owned by `labuser` on both machines. `findmnt --verify` reported no errors at the end of each phase.
 - R8 lab 1 (13), lab 2 (12), and the challenge (18) passed; `./bin/lab check r08 all` passed 43/43 after rebooting **both** machines. The walk started from `clean`, corrected the snapshot's stale clock in Lab 1 Step 0 with `systemctl restart chronyd` and `chronyc waitsync 30 0.1`, then installed `at`, created `/etc/cron.d/r8-heartbeat` and a `labuser` crontab, and queued one `at` job. Lab 2 replaced the cron work with an `OnCalendar=*:0/2` timer, added `allow 10.10.10.0/24`, opened `ntp`, set `Europe/Berlin`, and pointed `node2` at `10.10.10.10`. The challenge added `/usr/local/sbin/r8-report` under an `hourly` `Persistent=true` timer and `/usr/local/sbin/r8-archive` under a Sunday 03:30 cron line, then proved pruning by running the report service four times. On the first clean walk the user cron job failed because `/srv/r8/home` was root-owned; the lab now creates it with `install -d -o labuser -g labuser`.
+- R9 lab 1 (12), lab 2 (10), and the challenge (13) passed; `./bin/lab check r09 all` passed 35/35 after rebooting **both** machines. The walk started from `clean`, created a dummy connection `lab0` with `192.0.2.10/24` and `2001:db8::10/64`, DNS `192.0.2.53`, search domain `r9.lab`, and `never-default` on both families, then added the `r9peer` hosts line. Lab 2 created the `r9web` zone with `http`, `8080/tcp`, and `lab0`, proved that `node2` could not reach `8080` through `public`, opened `9090` at runtime and watched it vanish on `--reload`, made `8080` permanent, and fetched the page from `node2`. The challenge set the static hostname `server.r9.lab`, added the `r9api` hosts line, opened `8443/tcp` permanently, and fetched both pages from `node2`. Two checker bugs were found and fixed during the walk: `nmcli -g ipv6.addresses` escapes the colons (`2001\:db8\:\:10/64`), so `conn_v6` strips backslashes before comparing; and the first `/etc/hosts` helper mis-parsed the file, so `hosts_has_ip` now matches the address in field 1 and the name in a later field. The docs also explain why `getent hosts <own-fqdn>` returns IPv6 and link-local answers through `myhostname`, while `getent ahostsv4` gives the address a service actually uses.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -379,7 +389,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | **Validated 2026-11-10** |
 | R7 | VFAT, NFS, autofs, filesystem repair and online ext4 growth | 6 | **Validated 2026-11-10** |
 | R8 | cron, at, systemd timers, chrony, timezones | 7 | **Validated 2026-11-10** |
-| R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | Planned |
+| R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | **Validated 2026-11-11** |
 | R10 | SELinux, SSH keys, firewall hardening | 10 | Planned |
 | R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | Planned |
 | R12 | Capstone: timed mock exams and full review | All | Planned |
@@ -448,6 +458,15 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R8's challenge report name includes `$$` (2026-11-10) | The checker starts the service four times in a couple of seconds. A name built only from `date +%Y%m%d-%H%M%S` would collide and leave one file, so the pruning check could pass without pruning anything. Adding the PID makes four distinct files, so "keeps the three newest" is a real assertion. |
 | R8's checker polls `node2` for synchronisation instead of sleeping once (2026-11-10) | `NTPSynchronized` is `no` for a few seconds after boot while chrony selects a source. A fixed `sleep 5` would be flaky on a loaded host; `check_n2_sync` polls for up to 60 s and fails with the last value it saw. The check is about the end state, not the delay. |
 | R8 uses `line_is` for cron lines (2026-11-10) | `val_is` strips all whitespace so it can compare one-word values such as `enabled`. A cron line's spaces are load-bearing, and stripping them turned `* * * * * root /path` into `*****root/path`, which failed a correct job on the first run. `line_is` compares one line verbatim and is now the helper for any multi-field comparison. |
+| R9 teaches firewalld on a dummy interface (2026-11-11) | A mistake with `nmcli` or a zone change on `eth1` ends the learner's SSH session, which turns a firewall lesson into a connectivity lesson and needs a console to recover. `lab0` is a real kernel interface with no physical backing, so every command is the one used on a real NIC, and nothing outside the machine can depend on it. |
+| R9's static addresses come from the documentation ranges (2026-11-11) | `192.0.2.0/24` (TEST-NET-1) and `2001:db8::/32` cannot collide with anything real. The addresses are fixed by the lab, so the checker can assert them exactly; only the UUID and the link-local IPv6 address are generated. |
+| R9 configures a DNS server that never answers (2026-11-11) | The objective is "configure hostname resolution", and the honest subset without a second resolver VM is: the DNS settings reach the profile and NetworkManager writes them to `/etc/resolv.conf`, while names themselves resolve through `/etc/hosts` — a legitimate part of the `nsswitch` chain. Running a real DNS daemon would add machinery without teaching a new command, and the module says plainly that `192.0.2.53` is a documentation address. |
+| R9 proves the firewall with a request from `node2` (2026-11-11) | A rule can exist, be permanent, and still be in the wrong zone. Only a client whose traffic traverses the interface rules can tell the difference, so every phase ends with a real HTTP fetch from the other machine. The checker starts its own listener, so a stopped web server is not a failure, and a learner cannot pass by leaving a process behind. |
+| R9 opens 8080 in `public` as well as in `r9web` on purpose (2026-11-11) | `node2` arrives on `eth1`, which is in `public`; the rule in `r9web` is invisible to it. The lab makes the learner meet that failure (`curl: (7) Failed to connect`) before fixing it, because zone selection by incoming interface is the concept most often missed. The checker verifies both zones, so neither half can be skipped. |
+| R9 checks the runtime and permanent layers separately (2026-11-11) | `9090/tcp` is opened at runtime only and must be absent after `--reload`; `8080` and `8443` must be present in both layers. A checker that only asks the runtime question passes a configuration that dies at reboot, and one that only asks the permanent question passes a rule that is not active now. |
+| R9 matches hosts mappings by address, not by name (`hosts_has_ip`) (2026-11-11) | Grepping `/etc/hosts` for `r9peer` passes on a stale line under a different address, which is exactly the mistake the lab is about. The helper requires the documented address in field 1 and the name in a later field, so a partial edit fails. |
+| `conn_v6` strips `nmcli`'s backslash escapes (2026-11-11) | Terse `nmcli -g ipv6.addresses` prints `2001\:db8\:\:10/64`. Comparing that raw string fails a perfectly correct profile; stripping the backslashes keeps the profile as the subject of the check rather than the output format. |
+| R9 records why the `lab0` zone survives a reboot (2026-11-11) | firewalld asks NetworkManager to remember the zone, and the assignment lands in the profile as `connection.zone=r9web`. Without that note a learner would expect `--add-interface` to be undone when the firewall starts before the dummy device exists; the lab explains the race and the two files involved. |
 
 ---
 
@@ -526,7 +545,17 @@ When adding or revising a foundation, repeat the same five steps:
 
 ### M3 — R9–R11
 
-Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R10 (SELinux) and R11 (boot recovery).
+- **R9 — done and validated 2026-11-11 (35/35 from a clean snapshot).** NetworkManager connections, static IPv4 and IPv6, name resolution, and firewalld. Design decisions worth keeping:
+  - The lab network is a **dummy interface** (`lab0`), not `eth1`. The commands are identical to a real NIC, and a mistake cannot end the SSH session the learner is working through.
+  - Addresses come from the documentation ranges (`192.0.2.0/24`, `2001:db8::/32`), so the checker can assert them exactly and nothing real can collide.
+  - Lab 1 builds the profile with `connection add`, then proves `modify` alone changes nothing until `connection up`. It sets `never-default` on both families so the dummy never competes for the default route, and adds the `r9peer` line to `/etc/hosts` so resolution is proved through `files`, the first source in `nsswitch.conf`.
+  - Lab 2 makes zone selection the lesson: `8080` is opened in `r9web`, and `node2` still fails, because it arrives on `eth1` in `public`. The fix is a rule in the zone the traffic actually enters, and the failure output is recorded in the lab.
+  - The runtime/permanent split is taught by opening `9090` at runtime, watching the permanent list stay empty, and watching `9090` disappear on `--reload` while `8080` appears.
+  - Every phase ends with a behavioural check: the checker starts its own HTTP listener and fetches it from `node2` as `labuser`. It also asserts the `ssh` path still works, because a firewall edit that removes `ssh` is the module's main failure mode.
+  - The challenge adds a fully qualified hostname, a second hosts-file name (`r9api`), and a second permanent port (`8443`), without undoing either lab. `getent hosts <own-fqdn>` answers through `myhostname` with IPv6 and link-local addresses; the docs and the checker use `getent ahostsv4` where a service address is what matters.
+  - The walk started from `clean`, ran the three phases in order, rebooted **both** machines, and ran `./bin/lab check r09 all`: 35/35. Two checker bugs surfaced and were fixed: `conn_v6` strips `nmcli`'s escaped colons, and `hosts_has_ip` matches the address field rather than searching for the name anywhere in the line.
+
+R10 (SELinux) and R11 (boot recovery) remain, and they are the domains hardest to learn from prose. Add each with the full anatomy above.
 
 ### M4 — R12 and polish
 
@@ -578,6 +607,13 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **R8's `at` package needs a working repository.** `at` is not in the base image and not in `PACKAGES`, so Lab 1 installs it. A learner who left R3's distro repositories disabled must re-enable them first, exactly as with R6's `lvm2` and R7's `autofs`.
 - **R8's snapshot clock is stale by design.** The clean snapshot restores the clock it was saved with, which on this host was about 14 hours behind. `chronyc waitsync` corrects it in seconds, but a learner who skips Step 0 will see timestamps that look wrong and a `at` job that appears not to have run.
 - **R8 output is clock- and host-sensitive.** Timestamps, timer `NEXT`/`LEFT` columns, stratum numbers, and NTP addresses all differ on every walk and every network. The docs say this once in Lab 1 and Lab 2; the checker reads *which* source is selected and *whether* the clock is synchronised, not the numbers.
+- **R9's `lab2` and `challenge` checks need `node2` running and reachable.** Every port proof is an HTTP fetch from `node2` as `labuser`, so a halted `node2`, or a missing shared key, fails a correct firewall. `./bin/lab check r09 lab1` is the single-machine subset.
+- **R9 cannot exercise the `r9web` zone with a client.** `lab0` is a dummy interface on `192.0.2.0/24`; no peer exists on that subnet, so nothing can connect through it. The checker verifies the `r9web` rules by querying the permanent configuration, and proves the `public` rules behaviourally from `node2`. That split is honest — the zone is still real and still applies — but the docs say it once so a learner does not read the configuration checks as fake.
+- **R9's web listener is temporary.** `python3 -m http.server` is started by hand in the labs and dies at reboot, so after the persistence test the ports are open but nothing is listening. The checker starts its own listener, so this is not a failure; the labs state the distinction.
+- **R9's `192.0.2.53` nameserver never answers.** It is a documentation address. `getent` and `curl` by name will stall if a name is not in `/etc/hosts`, because the resolver waits for a reply that never comes. Every name in the module is static for that reason, and the theory says why.
+- **R9's `firewall-cmd --get-active-zones` formatting is version-sensitive.** firewalld 2.4.3 prints a zone with an interface but no `(active)` marker, while `--list-all` prints `(active)` for the same zone. The checker asks `--query-*` and `--list-interfaces` rather than parsing that prose, but a learner on another firewalld release may see slightly different text.
+- **R9's firewalld output includes `ingress-priority` and `egress-priority`.** Those fields come from firewalld 2.4.3 — older releases omit them, and a learner comparing their output line by line will see a difference that is not a mistake.
+- **R9's dummy interface reports `UNKNOWN` operational state.** It has no carrier to report. `ip addr`, routing, and traffic all work; the lab notes it once.
 - **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 
 ---
@@ -627,6 +663,10 @@ cd labs
 ./bin/lab check r08 lab2
 ./bin/lab check r08 challenge
 ./bin/lab check r08 all
+./bin/lab check r09 lab1
+./bin/lab check r09 lab2
+./bin/lab check r09 challenge
+./bin/lab check r09 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

@@ -10,6 +10,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **bootloader** | The program that loads the kernel. On RHEL, GRUB 2. Covered in R11. |
 | **at** | A scheduler for one-off jobs that run once, later. The daemon is `atd`. Covered in R8. |
 | **chrony** | The NTP implementation on RHEL 10 (`chronyd`), which keeps the system clock accurate and can serve time to a network. Covered in R8. |
+| **CIDR** | Classless Inter-Domain Routing notation: an address followed by the number of network bits, such as `192.0.2.10/24`. The prefix decides which addresses are local. |
 | **cron** | A scheduler for recurring jobs defined in crontabs. Covered in R8. |
 | **DNF** | The package manager on RHEL 10 (`dnf`). It resolves dependencies and installs RPM packages from repositories. Covered in R3. |
 | **exit status** | The number a command returns to the shell: `0` for success, non-zero for failure. Read with `$?`. |
@@ -38,6 +39,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **RPM** | The Red Hat package format and the low-level tool (`rpm`) that manages it. |
 | **SELinux** | Security-Enhanced Linux. A mandatory access control system that labels files and processes and enforces policy. Covered in R10. |
 | **service** | A long-running background process managed by systemd, usually described by a unit file. |
+| **zone (firewalld)** | A named set of firewall rules. Traffic is assigned to a zone by incoming interface or source address, and the default zone catches the rest. Covered in R9. |
 | **snapshot** | A saved state of a virtual machine. The lab uses snapshots to reset between exercises. |
 | **stdin / stdout / stderr** | File descriptors 0, 1, and 2: input, normal output, and error output. |
 | **sudo** | A program that runs a command as another user according to `/etc/sudoers` policy. |

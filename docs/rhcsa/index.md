@@ -14,7 +14,7 @@ The course is organized around the ten objective groups Red Hat publishes for EX
 | **R6** | GPT partitions, LVM, swap, fstab by UUID/label | 5 — Configure local storage | <span class="badge badge-ready">Available</span> |
 | **R7** | VFAT, NFS, autofs, filesystem repair and resize | 6 — Create and configure file systems | <span class="badge badge-ready">Available</span> |
 | **R8** | cron, at, systemd timers, chrony | 7 — Deploy, configure, and maintain systems | <span class="badge badge-ready">Available</span> |
-| **R9** | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 — Manage basic networking | <span class="badge badge-planned">Planned</span> |
+| **R9** | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 — Manage basic networking | <span class="badge badge-ready">Available</span> |
 | **R10** | SELinux, SSH key authentication, firewall hardening | 10 — Manage security | <span class="badge badge-planned">Planned</span> |
 | **R11** | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | <span class="badge badge-planned">Planned</span> |
 | **R12** | Capstone: timed mock exams and full review | All | <span class="badge badge-planned">Planned</span> |
@@ -48,7 +48,7 @@ The order is pedagogical, not mandatory. Storage depends on users and permission
 - **An automated checker** that verifies the end state.
 - **A knowledge check** and a **cheat sheet**.
 
-## Start with R1, then work through R2–R8
+## Start with R1, then work through R2–R9
 
 [R1 — Essential tools](r01-essential-tools/index.md) is the best place to begin. It covers the largest objective group and establishes the lab workflow that every later module uses. Once it passes its checker, continue with [R2 — Users and groups](r02-users-and-groups/index.md), which turns the permission model from R1 into real accounts, policy, and privileged access, then with [R3 — Software and repositories](r03-software-and-repositories/index.md), which is where the exam's no-internet condition first matters.
 
@@ -61,6 +61,8 @@ The order is pedagogical, not mandatory. Storage depends on users and permission
 [R7 — File systems and sharing](r07-file-systems/index.md) turns that storage outward: a VFAT volume whose ownership comes from mount options, an NFS export opened through the firewall, autofs on the client, and an ext4 volume grown and checked while the data on it stays intact. It is the first module that needs both VMs at once.
 
 [R8 — Scheduling and time](r08-scheduling-and-time/index.md) makes the machine act without you: cron, one-off `at` jobs, systemd timers that catch up after downtime, and a two-machine NTP hierarchy with the lab's timezone set explicitly. Its checker proves each schedule by the output it produced, not by the file that describes it.
+
+[R9 — Networking and firewalld](r09-networking-and-firewall/index.md) connects the machine to everything else: NetworkManager connection profiles, static IPv4 and IPv6 on the same interface, name resolution through `/etc/hosts` and DNS, and firewalld zones. It teaches the firewall on a dummy interface, so a mistake cannot end your SSH session, and then proves every rule with a real request from `node2`.
 
 Before R1, make sure the lab is running:
 
