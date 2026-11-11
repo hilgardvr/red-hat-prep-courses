@@ -143,6 +143,13 @@ nav:
           - "Challenge — Grow ext4": rhcsa/r07-file-systems/labs/challenge-grow-ext4.md
           - Knowledge check: rhcsa/r07-file-systems/quiz.md
           - Cheat sheet: rhcsa/r07-file-systems/cheatsheet.md
+      - "R8 — Scheduling and time":
+          - Theory: rhcsa/r08-scheduling-and-time/index.md
+          - "Lab 1 — cron and at": rhcsa/r08-scheduling-and-time/labs/lab-1-cron-and-at.md
+          - "Lab 2 — Timers, NTP, and timezones": rhcsa/r08-scheduling-and-time/labs/lab-2-timers-and-chrony.md
+          - "Challenge — An unattended maintenance routine": rhcsa/r08-scheduling-and-time/labs/challenge-maintenance.md
+          - Knowledge check: rhcsa/r08-scheduling-and-time/quiz.md
+          - Cheat sheet: rhcsa/r08-scheduling-and-time/cheatsheet.md
   - Reference:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md

@@ -8,6 +8,8 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **autofs** | A service that mounts filesystems on demand when a path is accessed. Covered in R7. |
 | **block device** | A device that reads and writes fixed-size blocks, such as a disk or partition (`/dev/vda`, `/dev/vdb1`). |
 | **bootloader** | The program that loads the kernel. On RHEL, GRUB 2. Covered in R11. |
+| **at** | A scheduler for one-off jobs that run once, later. The daemon is `atd`. Covered in R8. |
+| **chrony** | The NTP implementation on RHEL 10 (`chronyd`), which keeps the system clock accurate and can serve time to a network. Covered in R8. |
 | **cron** | A scheduler for recurring jobs defined in crontabs. Covered in R8. |
 | **DNF** | The package manager on RHEL 10 (`dnf`). It resolves dependencies and installs RPM packages from repositories. Covered in R3. |
 | **exit status** | The number a command returns to the shell: `0` for success, non-zero for failure. Read with `$?`. |
@@ -20,6 +22,7 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **hard link** | A directory entry that shares an inode with another entry. See [R1 — Hard and symbolic links](../rhcsa/r01-essential-tools/index.md#hard-and-symbolic-links). |
 | **inode** | The metadata structure for a file: mode, owner, size, timestamps, and data block pointers. A filename points to an inode. |
 | **journald** | The systemd logging service. Read logs with `journalctl`. Covered in R5. |
+| **NTP** | Network Time Protocol. The protocol chrony uses to synchronise clocks over the network. Covered in R8. |
 | **LVM** | Logical Volume Manager. A layer that pools physical volumes into volume groups and carves out logical volumes. Covered in R6. |
 | **mount point** | A directory where a filesystem is attached to the tree. |
 | **NetworkManager** | The network configuration service on RHEL, controlled with `nmcli` or `nmtui`. Covered in R9. |
@@ -40,8 +43,9 @@ Terms used throughout the course. Links point to the module where the term is ex
 | **sudo** | A program that runs a command as another user according to `/etc/sudoers` policy. |
 | **symbolic link** | A file whose content is a path to another file or directory. Also called a symlink or soft link. |
 | **systemd** | The init system and service manager on RHEL. It manages units, targets, timers, mounts, and more. |
-| **systemd timer** | A systemd unit that triggers another unit on a schedule, an alternative to cron. A current RHCSA objective. Covered in R8. |
+| **systemd timer** | A systemd unit that triggers another unit on a schedule, an alternative to cron. `Persistent=true` lets it catch up after downtime. A current RHCSA objective. Covered in R8. |
 | **target** | A systemd grouping of units that represents a boot state, roughly equivalent to an old runlevel. |
+| **timezone** | The named region that decides how a UTC instant is displayed, set with `timedatectl set-timezone`. It changes presentation, not the clock. Covered in R8. |
 | **tuned** | A service that applies performance profiles. Covered in R5. |
 | **udev** | The device manager that creates device nodes in `/dev` and applies rules. |
 | **umask** | A shell setting that removes permission bits from newly created files and directories. See [R1 — Permissions](../rhcsa/r01-essential-tools/index.md#permissions). |

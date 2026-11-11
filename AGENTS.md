@@ -7,8 +7,8 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 | | |
 |---|---|
 | **Last updated** | 2026-11-10 |
-| **Current milestone** | M2 — R1–R7 validated; R8 next |
-| **Next milestone** | R8 |
+| **Current milestone** | M2 — R1–R8 validated; R9 next |
+| **Next milestone** | R9 |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -47,7 +47,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R5 — Processes and services | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 7 + 10 = 27). Checker reads live systemd/journald/tuned state; walked end to end on a fresh lab, 27/27 after a reboot. |
 | R6 — Local storage | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (12 + 12 + 12 = 36). Checker reads the live partition table, LVM metadata, mounts, and fstab; walked end to end on a fresh lab, 36/36 after a reboot. |
 | R7 — File systems and sharing | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (11 + 15 + 16 = 42). Checker reads live partition, superblock, mount, export, and firewalld state on `server`, and reaches `node2` over SSH for the autofs half; walked end to end on a fresh lab, 42/42 after rebooting both VMs. |
-| R8–R11 | **Planned** | See the curriculum map below |
+| R8 — Scheduling and time | **Validated 2026-11-10** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (13 + 12 + 18 = 43). Checker reads live systemd timer properties, cron files, produced artefacts, and chrony state on `server`, and reaches `node2` over SSH for the client half; walked end to end on a fresh lab, 43/43 after rebooting both VMs. |
+| R9–R11 | **Planned** | See the curriculum map below |
 | R12 — Capstone | **Planned** | Mock exams, PDF/print polish |
 | PDF export | **Planned** | M4 |
 
@@ -98,7 +99,12 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │   │   ├── labs/          # 2 guided labs + challenge
 │   │   │   ├── quiz.md
 │   │   │   └── cheatsheet.md
-│   │   └── r07-file-systems/
+│   │   ├── r07-file-systems/
+│   │   │   ├── index.md       # theory
+│   │   │   ├── labs/          # 2 guided labs + challenge
+│   │   │   ├── quiz.md
+│   │   │   └── cheatsheet.md
+│   │   └── r08-scheduling-and-time/
 │   │       ├── index.md       # theory
 │   │       ├── labs/          # 2 guided labs + challenge
 │   │       ├── quiz.md
@@ -116,6 +122,7 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   ├── checks/r05/check.sh    # R5 automated checker
 │   ├── checks/r06/check.sh    # R6 automated checker
 │   ├── checks/r07/check.sh    # R7 automated checker (server + node2)
+│   ├── checks/r08/check.sh    # R8 automated checker (server + node2)
 │   └── README.md              # lab quick reference
 └── .github/workflows/pages.yml
 ```
@@ -177,6 +184,8 @@ R6 has the same limitation for the same reason: `parted`, `sfdisk`, `pvs`, `vgs`
 
 R7 is the first checker that is deliberately **not** confined to one machine. Its `lab2` and `challenge` phases run on `server` and reach `node2` as `labuser` over SSH, using the key and `~/.ssh/config` entries that provisioning installs. That means both blocks of the checker depend on the lab kit being provisioned normally: if `ssh labuser@node2` does not work from `server`, the autofs checks fail no matter how correct the client configuration is. `runuser -u labuser -- ssh ...` is used on purpose: it exercises the same path a learner uses and proves the shared key works. Validate it with both VMs running, from `clean`, by walking Lab 1, Lab 2, and the challenge, rebooting both machines, and running `./bin/lab check r07 all`.
 
+R8 is the second two-machine checker and adds a different problem: **a schedule is a promise about the future**, so most of it cannot be checked by reading configuration. Each phase asserts something the scheduler produced — a log line from a cron job, a stamp from a timer, a report the service wrote — and the challenge runs the report service four times to prove the pruning works. `lab2` and `challenge` reach `node2` as `labuser` to read `chronyc sources` and `NTPSynchronized` there, so both VMs must be up. The client half polls for up to 60 s (`check_n2_sync`), because a freshly booted `node2` needs a few seconds before chrony reports a synchronised clock. Validate it from `clean` by walking Lab 1, Lab 2 (both machines), and the challenge, rebooting both, and running `./bin/lab check r08 all`.
+
 ### Real lab validation
 
 ```bash
@@ -209,6 +218,7 @@ Then walk a module's labs and run its checker. On a clean snapshot almost every 
 - R5 lab 1 (10), lab 2 (7), and the challenge (10) passed; `./bin/lab check r05 all` passed 27/27 after rebooting `server`. The walk started from `clean`, ran Lab 1, Lab 2, and the challenge on one machine, rebooted, and only then ran the checker, because two Lab 2 checks require a journal entry from an earlier boot. Lab 1 deliberately produces a `203/EXEC` failure first: a program under `/srv` is labelled `var_t`, and systemd (`init_t`) may not execute it. The walk confirmed that `SIGTERM` leaves the unit `inactive (dead)` with `Deactivated successfully`, while `SIGKILL` leaves it `failed` with `Result: signal`; the docs and quiz say exactly that.
 - R6 lab 1 (12), lab 2 (12), and the challenge (12) passed; `./bin/lab check r06 all` passed 36/36 after rebooting `server`. The walk started from `clean`, installed `lvm2`, created the 5 GiB GPT partition on `/dev/vdb`, built `r6vg` with a 2 GiB XFS `r6data` mounted by UUID, added a 512 MiB swap LV and a 512 MiB ext4 `r6label` mounted by `LABEL=r6label`, then added `/dev/vdb2`, extended the VG, grew `r6data` to 4 GiB, and ran `xfs_growfs`. A marker file written before the resize was readable after the reboot. `findmnt --verify` reported no errors at the end of each phase.
 - R7 lab 1 (11), lab 2 (15), and the challenge (16) passed; `./bin/lab check r07 all` passed 42/42 after rebooting **both** machines. The walk started from `clean`, created a 512 MiB VFAT partition on `/dev/vdb` with `uid=`/`gid=`/`umask=` mount options, exported `/srv/r7/export` to `10.10.10.0/24` from `server` and opened `nfs`, `mountd`, and `rpc-bind`, mounted it by hand and then through autofs on `node2`, and built `r7vg` on a 1.5 GiB second partition with a 512 MiB ext4 `r7data`. A 100 MB `blob.bin` was written before `lvextend -L +512M` and `resize2fs`, and its checksum was unchanged after an offline `e2fsck -fy` and a reboot. Writing to the export as root failed with `Permission denied` (`root_squash`), and writing as `labuser` produced a file owned by `labuser` on both machines. `findmnt --verify` reported no errors at the end of each phase.
+- R8 lab 1 (13), lab 2 (12), and the challenge (18) passed; `./bin/lab check r08 all` passed 43/43 after rebooting **both** machines. The walk started from `clean`, corrected the snapshot's stale clock in Lab 1 Step 0 with `systemctl restart chronyd` and `chronyc waitsync 30 0.1`, then installed `at`, created `/etc/cron.d/r8-heartbeat` and a `labuser` crontab, and queued one `at` job. Lab 2 replaced the cron work with an `OnCalendar=*:0/2` timer, added `allow 10.10.10.0/24`, opened `ntp`, set `Europe/Berlin`, and pointed `node2` at `10.10.10.10`. The challenge added `/usr/local/sbin/r8-report` under an `hourly` `Persistent=true` timer and `/usr/local/sbin/r8-archive` under a Sunday 03:30 cron line, then proved pruning by running the report service four times. On the first clean walk the user cron job failed because `/srv/r8/home` was root-owned; the lab now creates it with `install -d -o labuser -g labuser`.
 
 The 2026-11-07 run produced the same R1 numbers on the previous box image; the 2026-11-08 box pin, the removal of `LAB_BOX`/`LAB_ISO`, and the `firewalld` install are covered by the 2026-11-10 run.
 
@@ -368,7 +378,7 @@ Foundations modules are lighter than RHCSA modules: explanation, diagram/table, 
 | R5 | Processes, systemd services, journald, tuned | 4 | **Validated 2026-11-10** |
 | R6 | GPT partitions, LVM, swap, fstab by UUID/label | 5 | **Validated 2026-11-10** |
 | R7 | VFAT, NFS, autofs, filesystem repair and online ext4 growth | 6 | **Validated 2026-11-10** |
-| R8 | cron, at, systemd timers, chrony | 7 | Planned |
+| R8 | cron, at, systemd timers, chrony, timezones | 7 | **Validated 2026-11-10** |
 | R9 | nmcli, IPv4/IPv6, hostname resolution, firewalld | 8 | Planned |
 | R10 | SELinux, SSH keys, firewall hardening | 10 | Planned |
 | R11 | Boot targets, GRUB, rescue, rd.break, updates | 4 + 7 | Planned |
@@ -430,6 +440,14 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R7 splits ext4 and XFS grow tools by argument (2026-11-10) | R6 grows XFS with `xfs_growfs <mount point>`; R7 grows ext4 with `resize2fs <device>`. The two are one line apart in the exam objective and are the most common tool/argument mix-up, so the challenge uses ext4 deliberately and the cheat sheet puts the two side by side. |
 | R7 documents `e2fsck`'s "need terminal" behaviour (2026-11-10) | A non-interactive `e2fsck -f` exits 8 with `need terminal for interactive repairs` even on a clean filesystem, because it cannot ask questions. The lab says so once and gives `-y` for scripts, so a learner whose terminal is a pipe does not conclude the filesystem is damaged. |
 | Vagrantfile pins `lv.cpu_mode = "host-passthrough"` (2026-11-10) | Newer libvirt/QEMU rejected the `host-model` CPU XML vagrant-libvirt generated (`CPU vendor specified without CPU model`), which made an existing domain un-updatable and `vagrant up` fail on `node2`. `host-passthrough` exposes the host CPU without the vendor/model pair. It was needed to get `node2` Vagrant-managed again and does not change the guest's view of the CPU. |
+| R8 verifies schedules by their output, not their configuration (2026-11-10) | A crontab line or a unit file is a promise, and a promise is not a result. Every R8 phase asserts an artefact the scheduler produced: a line in `/var/log/r8-heartbeat.log`, a stamp in `/srv/r8/timer/last-run`, a report file, a tarball. That is why `lab1` fails until the learner has actually waited a minute, and why the challenge runs the report service four times rather than grepping the script. |
+| R8 Lab 1 starts with a clock check (2026-11-10) | A restored snapshot carries the clock it was saved with; the clean snapshot came back about 14 hours behind the host. Scheduling anything before chrony steps the clock means waiting on the wrong minute and then debugging a correct configuration. Step 0 restarts `chronyd`, runs `chronyc waitsync 30 0.1`, and shows `timedatectl` before and after. This is also why `chronyc waitsync` is taught: it is the script-friendly way to say "block until the clock is trustworthy". |
+| R8's user cron job needs `/srv/r8/home` owned by `labuser` (2026-11-10) | The first clean walk failed `the personal cron job has written its log` because `mkdir -p` created `/srv/r8/home` as root, so `labuser`'s job could not write there and the error went to mail. The lab now runs `install -d -o labuser -g labuser -m 0755 /srv/r8/home` and explains why. The failure is the most common real cron bug, so the fix is taught rather than hidden in provisioning. |
+| R8 programs live in `/usr/local/bin` and `/usr/local/sbin`, not `/srv` (2026-11-10) | Same SELinux reason as R5: systemd runs as `init_t` and may execute `bin_t`, not `var_t`. R8's timer worker and both challenge scripts are launched by systemd or cron, so a `/srv` path would produce `203/EXEC` on the timer. Data (`/srv/r8/*`) still lives under `/srv` so `restore clean` removes it. |
+| R8 makes the timer-housekeeping job a timer and the weekly archive a cron job (2026-11-10) | The split is deliberate teaching, not nostalgia. The hourly report must catch up after downtime, which only `Persistent=true` provides, so it is a timer. The weekly archive wants one fixed slot and no dependencies, which is exactly cron's strength. Showing both in one challenge makes the choice in the theory's comparison table concrete. |
+| R8's challenge report name includes `$$` (2026-11-10) | The checker starts the service four times in a couple of seconds. A name built only from `date +%Y%m%d-%H%M%S` would collide and leave one file, so the pruning check could pass without pruning anything. Adding the PID makes four distinct files, so "keeps the three newest" is a real assertion. |
+| R8's checker polls `node2` for synchronisation instead of sleeping once (2026-11-10) | `NTPSynchronized` is `no` for a few seconds after boot while chrony selects a source. A fixed `sleep 5` would be flaky on a loaded host; `check_n2_sync` polls for up to 60 s and fails with the last value it saw. The check is about the end state, not the delay. |
+| R8 uses `line_is` for cron lines (2026-11-10) | `val_is` strips all whitespace so it can compare one-word values such as `enabled`. A cron line's spaces are load-bearing, and stripping them turned `* * * * * root /path` into `*****root/path`, which failed a correct job on the first run. `line_is` compares one line verbatim and is now the helper for any multi-field comparison. |
 
 ---
 
@@ -447,7 +465,7 @@ When adding or revising a foundation, repeat the same five steps:
 4. Link it from `docs/foundations/index.md`, and update the previous module's `## Next` link.
 5. Run `mkdocs build --strict`.
 
-### M2 — R2, R3, R4, R5, R6, R7
+### M2 — R2, R3, R4, R5, R6, R7, R8
 
 - **R2 — done and validated 2026-11-10 (88/88 from a clean snapshot).** Users, groups, password aging, sudoers, default permissions. Checker verifies users/groups/password aging/sudo with `getent`, `id`, `chage`, `passwd -S`, `visudo -c`, and `sudo -l -U`. Design decisions worth keeping:
   - The module creates its own sudo drop-in (`/etc/sudoers.d/10-r2-operators`) and never touches `90-rhcsa-labuser`, so a learner editing sudoers cannot lock out the lab account by accident.
@@ -495,8 +513,18 @@ When adding or revising a foundation, repeat the same five steps:
   - The challenge grows ext4 online with `lvextend` + `resize2fs`, because `parted resizepart` refuses a mounted partition. `resize2fs` takes the device and `xfs_growfs` takes the mount point; the cheat sheet puts them side by side and the quiz asks which is which.
   - `e2fsck -f` on a non-terminal exits 8 with `need terminal for interactive repairs` even on a clean filesystem. The docs explain it and give `-fy` for scripts so a learner does not read a healthy filesystem as broken.
   - The walk started from `clean`, ran Lab 1 and the challenge on `server` and Lab 2 across both machines, rebooted **both**, and then ran `./bin/lab check r07 all`: 42/42. The 100 MB `blob.bin` checksum was unchanged after the online grow and the offline check.
+- **R8 — done and validated 2026-11-10 (43/43 from a clean snapshot).** cron, `at`, systemd timers, chrony server/client, and the timezone. Design decisions worth keeping:
+  - The checker is behavioural throughout. It reads the log a cron job wrote, the stamp a timer appended, the report a service produced, and the tarball the archive script made. A learner who writes perfect configuration and never lets it run fails, which is the correct outcome for a scheduling module.
+  - Lab 1 begins with the clock. A restored snapshot came back about 14 hours behind, so Step 0 restarts `chronyd` and runs `chronyc waitsync 30 0.1` before anything is scheduled. The theory says why: a wrong clock makes every later diagnosis misleading.
+  - The user cron job writes into `/srv/r8/home`, which the lab creates with `install -d -o labuser -g labuser`. The first clean walk failed exactly there, and that failure — a root-owned output directory with the error going to mail — is the most common cron bug in production. It is now the documented lesson rather than a hidden setup step.
+  - Lab 2 teaches `Persistent=true`, `OnCalendar` syntax, and `systemd-analyze calendar`. It also shows the two ways to get persistence wrong: enabling the service instead of the timer, and omitting `Type=oneshot`.
+  - The chrony half is a two-machine hierarchy: `server` follows the internet, `allow 10.10.10.0/24`, firewalld `ntp`, and `node2` replaces its pool with `server 10.10.10.10 iburst`. That is the shape of every internal time service, and it makes `^*` and `Reference ID` mean something.
+  - The challenge splits the work on purpose: hourly report on a timer because it must catch up after downtime, weekly archive on a cron line because the slot is fixed. The comparison table in the theory is then not abstract.
+  - Report filenames carry `$$`, so four runs in two seconds produce four files and pruning can be tested. Without the PID the check would pass vacuously.
+  - `check_n2_sync` polls for up to 60 s instead of sleeping a fixed time, because a freshly booted `node2` takes a few seconds to report `NTPSynchronized=yes`.
+  - The walk started from `clean`, ran Lab 1, Lab 2 on both machines, and the challenge, rebooted **both**, and ran `./bin/lab check r08 all`: 43/43. A cron line that was correct failed the first checker run because `val_is` strips whitespace; `line_is` now compares multi-field lines verbatim.
 
-### M3 — R8–R11
+### M3 — R9–R11
 
 Add each module with the full anatomy. Prioritize the domains that are hardest to learn from prose: R10 (SELinux) and R11 (boot recovery).
 
@@ -545,6 +573,11 @@ Add each module with the full anatomy. Prioritize the domains that are hardest t
 - **R7 Lab 2 needs `autofs` from a repository.** It is not in the base image and not in `PACKAGES`, so the lab installs it. A learner who left R3's distro repositories disabled must re-enable them first, exactly as with R6's `lvm2`.
 - **R7 output is protocol- and UUID-sensitive.** `exportfs -v` prints defaults (`root_squash`, `secure`, `wdelay`) that the learner did not type, `findmnt` prints `uid=` as a number, and the VFAT UUID is short (`FBF7-223A`). The docs say this once; the checker reads identifiers from the machine, so a different walk does not produce false failures.
 - **R7's VFAT UUID format is not interchangeable with XFS/ext4 UUIDs.** A `UUID=` line copied from an ext4 lab will never match a VFAT volume, and `LABEL=` is capped at 11 characters.
+- **R8's `lab2` and `challenge` checks need `node2` running and reachable.** Four checks read `chronyc sources` and `NTPSynchronized` over SSH as `labuser`. If `node2` is halted, or the shared key was never installed, they fail even when `server` is perfect. `./bin/lab check r08 lab1` is the single-machine subset.
+- **R8 Lab 1 makes the learner wait a full minute.** Cron has one-minute granularity and the lab proves the job by its log, so the walk cannot be finished faster than the minute boundary. That is the lesson, not a defect; the docs say so in Step 5.
+- **R8's `at` package needs a working repository.** `at` is not in the base image and not in `PACKAGES`, so Lab 1 installs it. A learner who left R3's distro repositories disabled must re-enable them first, exactly as with R6's `lvm2` and R7's `autofs`.
+- **R8's snapshot clock is stale by design.** The clean snapshot restores the clock it was saved with, which on this host was about 14 hours behind. `chronyc waitsync` corrects it in seconds, but a learner who skips Step 0 will see timestamps that look wrong and a `at` job that appears not to have run.
+- **R8 output is clock- and host-sensitive.** Timestamps, timer `NEXT`/`LEFT` columns, stratum numbers, and NTP addresses all differ on every walk and every network. The docs say this once in Lab 1 and Lab 2; the checker reads *which* source is selected and *whether* the clock is synchronised, not the numbers.
 - **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 
 ---
@@ -590,6 +623,10 @@ cd labs
 ./bin/lab check r07 lab2
 ./bin/lab check r07 challenge
 ./bin/lab check r07 all
+./bin/lab check r08 lab1
+./bin/lab check r08 lab2
+./bin/lab check r08 challenge
+./bin/lab check r08 all
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

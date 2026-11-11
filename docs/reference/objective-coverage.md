@@ -91,14 +91,14 @@ This page maps the current EX200 v10 objectives to the course. Use it to find th
 
 ## 7. Deploy, configure, and maintain systems
 
-**Modules R8, R11, and R3** — R3 is <span class="badge badge-ready">Covered</span>; R8 and R11 are <span class="badge badge-planned">Planned</span>.
+**Modules R8, R11, and R3** — R3 and R8 are <span class="badge badge-ready">Covered</span>; R11 is <span class="badge badge-planned">Planned</span>.
 
 | Objective | Where |
 |---|---|
-| Schedule tasks using `at`, `cron`, and systemd timer units | R8 |
-| Start and stop services and configure services to start automatically at boot | R8 |
-| Configure systems to boot into a specific target automatically | R8 / R11 |
-| Configure time service clients | R8 |
+| Schedule tasks using `at`, `cron`, and systemd timer units | [R8 — Choosing a scheduler](../rhcsa/r08-scheduling-and-time/index.md#choosing-a-scheduler), [cron](../rhcsa/r08-scheduling-and-time/index.md#cron), [at](../rhcsa/r08-scheduling-and-time/index.md#at), and [systemd timers](../rhcsa/r08-scheduling-and-time/index.md#systemd-timers) |
+| Start and stop services and configure services to start automatically at boot | [R5 — systemd: units, services, and targets](../rhcsa/r05-processes-and-services/index.md#systemd-units-services-and-state); R8 adds timer units on top |
+| Configure systems to boot into a specific target automatically | R11 |
+| Configure time service clients | [R8 — chrony](../rhcsa/r08-scheduling-and-time/index.md#chrony) and [Lab 2](../rhcsa/r08-scheduling-and-time/labs/lab-2-timers-and-chrony.md); the timezone is in [Timezones](../rhcsa/r08-scheduling-and-time/index.md#timezones) |
 | Install and update software packages from the Red Hat CDN, a remote repository, or the local filesystem | [R3 — `dnf`: transactions](../rhcsa/r03-software-and-repositories/index.md#dnf-transactions) and [Building a local repository](../rhcsa/r03-software-and-repositories/index.md#building-a-local-repository); R11 will cover updates |
 | Modify the system bootloader | R11 |
 
