@@ -1,0 +1,285 @@
+#!/usr/bin/env python3
+"""Build a PDF from the print-site page.
+
+    bin/pdf              # the free sample: objective checklist + mock exam A
+    bin/pdf full         # the complete field guide
+
+The website is not affected: this runs a separate MkDocs build from a print
+profile (mkdocs.print-sample.yml / mkdocs.print-full.yml), takes the
+single-page HTML that mkdocs-print-site-plugin generates, adds a cover and a
+contents page with real page numbers, and hands it to WeasyPrint.
+
+Deliberately not part of CI. The published site has no PDF step, so the
+GitHub Actions runner needs neither WeasyPrint nor Pango. Rebuild locally and
+attach the result to a GitHub Release.
+
+Requires: the packages in requirements.txt, plus WeasyPrint:
+    pip install -r requirements-pdf.txt
+"""
+
+from __future__ import annotations
+
+import argparse
+import html
+import os
+import re
+import subprocess
+import sys
+from datetime import date
+from pathlib import Path
+
+import yaml
+from weasyprint import CSS, HTML
+
+ROOT = Path(__file__).resolve().parent.parent
+DIST = ROOT / "dist"
+
+# Where the printed text points readers for the online version. Set SITE_URL
+# when the site moves to its own domain; the fallback is the Pages URL.
+BOOK_URL = os.environ.get(
+    "SITE_URL", "https://hilgardvr.github.io/red-hat-prep-courses/"
+).rstrip("/") + "/"
+DISCLAIMER = (
+    "Unofficial study material. Not affiliated with, endorsed by, or sponsored "
+    "by Red Hat, Inc. Red Hat, RHCSA, RHCE, and Red Hat Enterprise Linux are "
+    "trademarks of Red Hat, Inc. Course text is licensed CC BY-NC-SA 4.0; "
+    "lab code is MIT."
+)
+
+
+# --------------------------------------------------------------------- yaml
+
+class _ProfileLoader(yaml.SafeLoader):
+    """Reads a print profile without resolving MkDocs' custom tags.
+
+    mkdocs.yml uses `!ENV` and `!!python/name:`; the print profiles `INHERIT`
+    it. Only the `extra.pdf` block is needed here, so every unknown tag is
+    loaded as None instead of raising.
+    """
+
+
+_ProfileLoader.add_multi_constructor("!", lambda loader, suffix, node: None)
+_ProfileLoader.add_multi_constructor(
+    "tag:yaml.org,2002:python/name:", lambda loader, suffix, node: None
+)
+
+
+def load_profile(name: str) -> dict:
+    path = ROOT / f"mkdocs.print-{name}.yml"
+    if not path.exists():
+        sys.exit(f"bin/pdf: no profile at {path.relative_to(ROOT)}")
+    data = yaml.load(path.read_text(), Loader=_ProfileLoader) or {}
+    meta = (data.get("extra") or {}).get("pdf") or {}
+    for key in ("title", "subtitle", "output"):
+        if not meta.get(key):
+            sys.exit(f"bin/pdf: {path.name} is missing extra.pdf.{key}")
+    meta.setdefault("kicker", "")
+    return meta
+
+
+# -------------------------------------------------------------------- build
+
+def build_site(profile: str) -> Path:
+    config = ROOT / f"mkdocs.print-{profile}.yml"
+    site_dir = ROOT / ".print-build" / profile
+
+    print(f"  building {config.name} ...")
+    result = subprocess.run(
+        [sys.executable, "-m", "mkdocs", "build", "-f", str(config), "--strict"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        env={**os.environ, "NO_MKDOCS_2_WARNING": "1"},
+    )
+    if result.returncode != 0:
+        sys.stderr.write(result.stdout)
+        sys.stderr.write(result.stderr)
+        sys.exit("bin/pdf: mkdocs build failed")
+
+    page = site_dir / "print_page" / "index.html"
+    if not page.exists():
+        sys.exit(f"bin/pdf: no print page at {page.relative_to(ROOT)}")
+    return page
+
+
+# ---------------------------------------------------------------- transform
+
+SECTION_RE = re.compile(
+    r'<section class="print-page" id="([^"]+)"[^>]*>(.*?)(?=<section class="print-page"|</div>\s*</article>|\Z)',
+    re.S,
+)
+H1_RE = re.compile(r'<h1[^>]*id="([^"]*)"[^>]*>(.*?)</h1>', re.S)
+H2_RE = re.compile(r'<h2[^>]*id="([^"]*)"[^>]*>(.*?)</h2>', re.S)
+HEADERLINK_RE = re.compile(r'<a class="headerlink".*?</a>', re.S)
+TAG_RE = re.compile(r"<[^>]+>")
+
+
+def plain(markup: str) -> str:
+    """Heading markup -> the text a reader sees."""
+    text = HEADERLINK_RE.sub("", markup)
+    text = TAG_RE.sub("", text)
+    text = html.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def collect_toc(page_html: str) -> list[dict]:
+    entries = []
+    for match in SECTION_RE.finditer(page_html):
+        anchor, body = match.group(1), match.group(2)
+        h1 = H1_RE.search(body)
+        if not h1:
+            continue
+        entry = {"anchor": anchor, "title": plain(h1.group(2)), "children": []}
+        for h2 in H2_RE.finditer(body):
+            title = plain(h2.group(2))
+            if title:
+                entry["children"].append({"anchor": h2.group(1) or anchor, "title": title})
+        entries.append(entry)
+    return entries
+
+
+def render_cover(meta: dict, stamp: str, edition: str) -> str:
+    kicker = f'<p class="pdf-cover__kicker">{html.escape(meta["kicker"])}</p>' if meta.get("kicker") else ""
+    return f"""
+<section class="pdf-cover">
+  <div class="pdf-cover__inner">
+    {kicker}
+    <h1 class="pdf-cover__title">{html.escape(meta["title"])}</h1>
+    <p class="pdf-cover__subtitle">{html.escape(meta["subtitle"])}</p>
+    <p class="pdf-cover__meta">
+      EX200 v10 &middot; Red Hat Enterprise Linux 10<br>
+      {html.escape(stamp)}<br>
+      {html.escape(edition)}
+    </p>
+  </div>
+  <div class="pdf-cover__foot">{html.escape(DISCLAIMER)}</div>
+</section>
+"""
+
+
+def render_toc(entries: list[dict], with_subsections: bool) -> str:
+    if not entries:
+        return ""
+    items = []
+    for entry in entries:
+        items.append(
+            f'<li><a href="#{entry["anchor"]}">{html.escape(entry["title"])}</a></li>'
+        )
+        if with_subsections:
+            for child in entry["children"]:
+                items.append(
+                    f'<li class="pdf-toc__sub"><a href="#{child["anchor"]}">'
+                    f'{html.escape(child["title"])}</a></li>'
+                )
+    return (
+        '<section class="pdf-toc">\n<h1>Contents</h1>\n<ol>\n'
+        + "\n".join(items)
+        + "\n</ol>\n</section>\n"
+    )
+
+
+def inject(page_html: str, meta: dict, stamp: str, edition: str) -> tuple[str, list[dict]]:
+    """Drop the plugin's banner and empty JS-built TOC, add cover and contents.
+
+    The plugin writes an empty `#print-page-toc` nav that its own JavaScript
+    fills in the browser. WeasyPrint does not run scripts, so that nav would
+    be blank on paper; it is replaced with a server-rendered one that carries
+    real page numbers via `target-counter()`.
+    """
+    entries = collect_toc(page_html)
+
+    # The plugin ships its own print stylesheet with an @page block of its own,
+    # including a literal "Page N" footer. It is written for a browser print
+    # dialog, and its @page rules win the cascade over ours, so the folio and
+    # margins would come from two competing sources. print/pdf.css owns the
+    # paged layout for the PDF builds; drop the link.
+    page_html = re.sub(
+        r'<link[^>]+href="[^"]*print-site-material\.css"[^>]*>\s*', "", page_html
+    )
+
+    # Mermaid diagrams are drawn by JavaScript in the browser. WeasyPrint would
+    # print the diagram's source text as a code block, which is worse than no
+    # diagram at all, so each one becomes a short pointer to the web edition.
+    page_html = re.sub(
+        r'<pre class="mermaid">.*?</pre>',
+        '<div class="pdf-figure-note">A diagram appears here in the web edition.</div>',
+        page_html,
+        flags=re.S,
+    )
+
+    # The subscribe page's form cannot be filled in on paper. Point at the web
+    # version instead of printing empty inputs.
+    page_html = re.sub(
+        r'<form class="signup-form".*?</form>',
+        f'<div class="pdf-figure-note">The signup form lives at '
+        f'{BOOK_URL}subscribe/ — or read the course without it; every lesson '
+        f"is free.</div>",
+        page_html,
+        flags=re.S,
+    )
+
+    # The plugin's TOC section: an empty nav its own JavaScript fills at runtime.
+    toc = page_html.find('<div id="print-page-toc"')
+    if toc != -1:
+        start = page_html.rfind("<section", 0, toc)
+        end = page_html.find("</section>", toc)
+        if start != -1 and end != -1:
+            page_html = page_html[:start] + page_html[end + len("</section>"):]
+
+    # The plugin's banner, when the profile asks for one.
+    banner = page_html.find('<div id="print-site-banner">')
+    if banner != -1:
+        end = page_html.find("</div>", banner)
+        if end != -1:
+            page_html = page_html[:banner] + page_html[end + len("</div>"):]
+
+    anchor = 'class="print-site-add-full-url'
+    at = page_html.find(anchor)
+    if at == -1:
+        anchor = 'id="print-site-page"'
+        at = page_html.find(anchor)
+    if at == -1:
+        sys.exit("bin/pdf: cannot find the print-site container to inject into")
+    insert_at = page_html.find(">", at) + 1
+
+    front = render_cover(meta, stamp, edition) + render_toc(entries, with_subsections=len(entries) <= 12)
+    return page_html[:insert_at] + front + page_html[insert_at:], entries
+
+
+# ------------------------------------------------------------------- render
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Build a PDF from the print page.")
+    parser.add_argument("profile", nargs="?", default="sample", choices=["sample", "full"])
+    parser.add_argument("--out", help="output path (default: dist/<output>-<YYYY-MM>.pdf)")
+    args = parser.parse_args()
+
+    meta = load_profile(args.profile)
+    today = date.today()
+    stamp = today.strftime("%B %Y")
+    edition = f"Revision {today.isoformat()}"
+
+    print(f"bin/pdf: {args.profile} profile")
+    page_path = build_site(args.profile)
+
+    source = page_path.read_text()
+    print(f"  print page: {len(source) / 1e6:.1f} MB of HTML")
+    transformed, entries = inject(source, meta, stamp, edition)
+    print(f"  sections: {len(entries)}")
+
+    DIST.mkdir(exist_ok=True)
+    out = Path(args.out) if args.out else DIST / f'{meta["output"]}-{today:%Y-%m}.pdf'
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    print("  rendering with WeasyPrint ...")
+    document = HTML(string=transformed, base_url=str(page_path.parent)).render(
+        stylesheets=[CSS(filename=str(ROOT / "print" / "pdf.css"))]
+    )
+    document.write_pdf(str(out))
+
+    size = out.stat().st_size / 1e6
+    print(f"\n  {out.relative_to(ROOT)}  ({len(document.pages)} pages, {size:.1f} MB)")
+
+
+if __name__ == "__main__":
+    main()

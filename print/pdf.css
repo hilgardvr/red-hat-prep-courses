@@ -1,0 +1,459 @@
+/* Paged-media stylesheet for the PDF builds.
+ *
+ * The input is the print-site plugin's single-page HTML, which is styled for a
+ * screen: it carries the Material header, both sidebars, copy buttons and
+ * permalinks. WeasyPrint does not run JavaScript and does not lay out flexible
+ * navigation, so this file hides the chrome, resets the grid, and turns the
+ * article into a paged document with running headers and page numbers.
+ *
+ * Only used by bin/pdf. It is not referenced by mkdocs.yml, so the website is
+ * unaffected.
+ */
+
+/* ------------------------------------------------------------------ pages */
+
+@page {
+    size: A4;
+    margin: 20mm 17mm 20mm 17mm;
+
+    @top-left {
+        content: string(chapter);
+        font: 8pt "Liberation Sans", sans-serif;
+        color: #8a8a8a;
+        vertical-align: bottom;
+        padding-bottom: 5mm;
+    }
+    @top-right {
+        content: "RHCSA Field Guide";
+        font: 8pt "Liberation Sans", sans-serif;
+        color: #b0b0b0;
+        vertical-align: bottom;
+        padding-bottom: 5mm;
+    }
+    @bottom-left {
+        content: "Unofficial study material \2014  not affiliated with Red Hat, Inc.";
+        font: 7pt "Liberation Sans", sans-serif;
+        color: #a8a8a8;
+        vertical-align: top;
+        padding-top: 5mm;
+    }
+    @bottom-right {
+        content: counter(page);
+        font: 9pt "Liberation Sans", sans-serif;
+        color: #555;
+        vertical-align: top;
+        padding-top: 5mm;
+    }
+}
+
+/* The cover is the first page: full-bleed colour, no header or folio.
+ *
+ * A named page would be tidier, but switching named pages for the very first
+ * element forces a break, which leaves an empty sheet in front of the cover.
+ * The cover is always first by construction, so :first is both simpler and
+ * correct. */
+@page :first {
+    margin: 0;
+    background: #8e1b1b;
+    @top-left { content: ""; }
+    @top-right { content: ""; }
+    @bottom-left { content: ""; }
+    @bottom-right { content: ""; }
+}
+
+@page frontmatter {
+    @top-left { content: ""; }
+    @top-right { content: ""; }
+}
+
+/* ------------------------------------------------------------- base reset */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 10pt;
+}
+
+/* Screen chrome: navigation, theme toggle, search, edit links, permalinks. */
+.md-header,
+.md-footer,
+.md-sidebar,
+.md-nav,
+.md-top,
+.md-source,
+.md-search,
+.md-content__button,
+.md-skip,
+.headerlink,
+.md-button,
+.print-page-toc,
+#print-site-banner,
+#print-page-toc {
+    display: none !important;
+}
+
+.md-main,
+.md-main__inner,
+.md-content,
+.md-content__inner {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+}
+
+article,
+.md-typeset {
+    box-shadow: none !important;
+}
+
+/* Material paints the canvas white. The cover's colour comes from the @page
+ * background, so every wrapper has to stay transparent or the first sheet
+ * prints as a white box inside a red frame. */
+html,
+body,
+.md-container,
+.md-main,
+.md-main__inner,
+.md-content,
+.md-content__inner,
+article,
+.md-typeset,
+#print-site-page {
+    background: transparent !important;
+}
+
+/* -------------------------------------------------------------- structure */
+
+.print-page {
+    break-before: page;
+}
+
+.print-page:first-of-type {
+    break-before: auto;
+}
+
+/* ------------------------------------------------------------ typography */
+
+.md-typeset {
+    font-family: "Liberation Sans", "Noto Sans", sans-serif;
+    font-size: 10pt;
+    line-height: 1.5;
+    color: #1c1c1c;
+}
+
+.md-typeset h1 {
+    string-set: chapter content(text);
+    font-size: 21pt;
+    line-height: 1.15;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 8pt;
+    padding-bottom: 5pt;
+    border-bottom: 1.2pt solid #c62828;
+    break-after: avoid;
+}
+
+.md-typeset h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #111;
+    margin: 16pt 0 6pt;
+    break-after: avoid;
+}
+
+.md-typeset h3 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #222;
+    margin: 12pt 0 4pt;
+    break-after: avoid;
+}
+
+.md-typeset h4 {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #333;
+    margin: 10pt 0 3pt;
+    break-after: avoid;
+}
+
+.md-typeset p,
+.md-typeset li {
+    orphans: 2;
+    widows: 2;
+}
+
+.md-typeset a {
+    color: #0b5cad;
+    text-decoration: none;
+}
+
+/* A PDF is read offline and on paper, so an external link is only useful if
+ * its address is visible. Internal links stay as plain text: the contents page
+ * already gives their page numbers. */
+.md-typeset a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 7.5pt;
+    color: #7a7a7a;
+    word-break: break-all;
+}
+
+/* ------------------------------------------------------------------- code */
+
+.md-typeset code {
+    font-family: "Liberation Mono", monospace;
+    font-size: 0.88em;
+    background: #f3f4f6;
+    padding: 0.1em 0.3em;
+    border-radius: 2pt;
+}
+
+.md-typeset pre {
+    font-size: 8pt;
+    line-height: 1.4;
+    background: #f7f8fa;
+    border: 0.5pt solid #dfe3e8;
+    border-left: 2.5pt solid #c62828;
+    border-radius: 2pt;
+    padding: 7pt 9pt;
+    margin: 8pt 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    break-inside: avoid;
+}
+
+.md-typeset pre > code {
+    background: transparent;
+    padding: 0;
+    font-size: 8pt;
+}
+
+/* Output blocks are marked .no-copy on the site; in print the muted left edge
+ * is the only cue that a block is not meant to be typed. */
+.md-typeset pre:has(code.no-copy) {
+    border-left-color: #bdbdbd;
+}
+
+/* --------------------------------------------------------------- elements */
+
+.md-typeset table:not([class]) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin: 8pt 0;
+}
+
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+    border: 0.5pt solid #d5d9de;
+    padding: 3.5pt 5pt;
+    text-align: left;
+    vertical-align: top;
+}
+
+.md-typeset table:not([class]) thead {
+    display: table-header-group;
+}
+
+.md-typeset table:not([class]) tr {
+    break-inside: avoid;
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+    break-inside: avoid;
+    border: 0.5pt solid #e0e0e0;
+    border-left: 2.5pt solid #c62828;
+    background: #fcf9f9;
+    padding: 6pt 9pt;
+    margin: 9pt 0;
+    font-size: 9.5pt;
+}
+
+.md-typeset .admonition-title {
+    font-weight: 700;
+    margin: 0 0 3pt;
+    color: #8e1b1b;
+}
+
+/* Material draws the disclosure marker and the chevron with an icon font
+ * that WeasyPrint cannot load, so both come out as solid squares. The answer
+ * is open in the PDF anyway (nothing to click), so the markers go. */
+/* Same for admonition titles: their icon is a masked element, so it prints as
+ * a solid block of the title colour. */
+.md-typeset .admonition > .admonition-title::before,
+.md-typeset .admonition > .admonition-title::after,
+.md-typeset details > summary::before,
+.md-typeset details > summary::after {
+    display: none !important;
+    content: none !important;
+}
+
+.md-typeset .admonition > .admonition-title,
+.md-typeset details > summary {
+    padding-left: 0 !important;
+}
+
+.md-typeset details > summary {
+    font-weight: 700;
+    cursor: default;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* Knowledge-check answers keep Material's green "question" colour, which on
+ * paper looks like a warning that was not meant. Print them like any other
+ * aside. */
+.md-typeset details,
+.md-typeset details.question {
+    background: #fbfbfb !important;
+    border-color: #e2e2e2 !important;
+    border-left: 2.5pt solid #9e9e9e !important;
+    box-shadow: none !important;
+}
+
+.md-typeset details.question > summary {
+    color: #333 !important;
+    /* Material tints the summary row green; on paper that reads as a warning
+     * colour applied to a study answer. */
+    background-color: transparent !important;
+}
+
+/* Mermaid diagrams are drawn by JavaScript; bin/pdf replaces each block with a
+ * one-line note, so this only styles what it leaves behind. */
+.pdf-figure-note {
+    border: 0.5pt dashed #c9c9c9;
+    background: #fafafa;
+    color: #6b6b6b;
+    font-size: 8.5pt;
+    font-style: italic;
+    padding: 5pt 8pt;
+    margin: 8pt 0;
+}
+
+.md-typeset ul,
+.md-typeset ol {
+    margin: 6pt 0 6pt 0;
+    padding-left: 16pt;
+}
+
+.md-typeset li {
+    margin: 2pt 0;
+}
+
+.md-typeset hr {
+    border: 0;
+    border-top: 0.5pt solid #dcdcdc;
+    margin: 12pt 0;
+}
+
+.md-typeset img {
+    max-width: 100%;
+}
+
+/* ------------------------------------------------------------- cover page */
+
+/* No fixed height here on purpose. WeasyPrint 70 silently drops the rest of
+ * the document when a block is as tall as the page box, so the colour comes
+ * from the @page background and the content is positioned with padding. */
+
+.md-typeset .pdf-cover {
+    color: #fff !important;
+    padding: 62mm 22mm 0;
+    margin: 0;
+}
+
+.md-typeset .pdf-cover__kicker {
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 9.5pt;
+    letter-spacing: 2.2pt;
+    text-transform: uppercase;
+    color: #f3c9c9 !important;
+    margin: 0 0 9mm;
+}
+
+.md-typeset .pdf-cover__title {
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 33pt;
+    line-height: 1.08;
+    font-weight: 700;
+    margin: 0 0 6mm;
+    color: #fff !important;
+    border: 0;
+    padding: 0;
+    string-set: none;
+}
+
+.md-typeset .pdf-cover__subtitle {
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 13pt;
+    line-height: 1.42;
+    color: #f6dede !important;
+    margin: 0 0 13mm;
+    max-width: 140mm;
+}
+
+.md-typeset .pdf-cover__meta {
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.75;
+    color: #f0cfcf !important;
+    margin: 0;
+}
+
+.md-typeset .pdf-cover__foot {
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.55;
+    color: #e8bcbc !important;
+    border-top: 0.5pt solid #b25a5a;
+    padding-top: 4mm;
+    margin: 78mm 0 0;
+}
+
+/* --------------------------------------------------------- contents page */
+
+.md-typeset .pdf-toc {
+    page: frontmatter;
+    break-before: page;
+    break-after: page;
+}
+
+.md-typeset .pdf-toc h1 {
+    string-set: chapter "Contents";
+    color: #111 !important;
+    font-size: 18pt;
+    border-bottom: 1.2pt solid #c62828;
+}
+
+.md-typeset .pdf-toc ol {
+    list-style: none;
+    margin: 10pt 0 0;
+    padding: 0;
+    font-size: 10pt;
+}
+
+.md-typeset .pdf-toc li {
+    margin: 0;
+    padding: 3.2pt 0;
+    border-bottom: 0.4pt dotted #d8d8d8;
+}
+
+.md-typeset .pdf-toc li.pdf-toc__sub {
+    padding-left: 14pt;
+    font-size: 9pt;
+    color: #444;
+}
+
+.md-typeset .pdf-toc a {
+    color: #1c1c1c !important;
+    text-decoration: none;
+}
+
+.md-typeset .pdf-toc a::after {
+    content: leader('.') target-counter(attr(href), page);
+    color: #666 !important;
+}

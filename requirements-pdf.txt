@@ -1,0 +1,4 @@
+# PDF builds only (bin/pdf). Not installed by CI: the published site needs
+# neither WeasyPrint nor Pango, and the PDFs are attached to a release.
+-r requirements.txt
+weasyprint>=70,<71

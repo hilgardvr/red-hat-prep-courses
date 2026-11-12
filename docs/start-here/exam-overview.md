@@ -116,3 +116,11 @@ It does test whether you can read a requirement, choose the right tool, configur
 - [EX200 exam page](https://www.redhat.com/en/services/training/ex200-red-hat-certified-system-administrator-rhcsa-exam)
 - [Red Hat certification program](https://www.redhat.com/en/services/certification)
 - [Red Hat Enterprise Linux documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/)
+
+---
+
+## A printable version
+
+The [objective coverage matrix](../reference/objective-coverage.md) is the page to keep beside you while you study: every objective in the official grouping, with the lesson that teaches it. It is also available as a printable PDF together with [mock exam A](../rhcsa/r12-capstone/exams/exam-a-web-host.md), so you can audit yourself away from the screen.
+
+[Get the free exam pack](../subscribe.md){ .md-button }

@@ -114,3 +114,11 @@ The capstone includes timed mock exams. Treat them as real:
 - Grade with the provided checker, then review every failed task.
 
 A mock exam is a diagnostic, not a score. The value is in the list of things you could not do.
+
+---
+
+## A checklist for the wall
+
+The plan above works better with something to tick. The [objective coverage matrix](../reference/objective-coverage.md) lists every EX200 objective and the module that covers it, and it is available as a printable PDF with a full timed mock exam attached.
+
+[Get the free exam pack](../subscribe.md){ .md-button }

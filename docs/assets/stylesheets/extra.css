@@ -104,3 +104,88 @@
   background: #2a2d31;
   color: #b0b4b8;
 }
+
+/* ---------------------------------------------------------------- signup */
+
+.md-typeset .signup-form {
+  display: grid;
+  gap: 0.55rem;
+  max-width: 32rem;
+  margin: 1.2rem 0 0.7rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  background: var(--md-code-bg-color);
+}
+
+.md-typeset .signup-form label {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.md-typeset .signup-form__optional {
+  font-weight: 400;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .signup-form input[type="email"],
+.md-typeset .signup-form input[type="text"] {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--md-default-fg-color--light);
+  border-radius: 4px;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  font: inherit;
+}
+
+.md-typeset .signup-form input[type="email"]:focus,
+.md-typeset .signup-form input[type="text"]:focus {
+  outline: 2px solid var(--rh-red);
+  outline-offset: 1px;
+}
+
+.md-typeset .signup-form .signup-form__consent {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.md-typeset .signup-form .signup-form__consent input {
+  margin-top: 0.15rem;
+  flex: none;
+}
+
+.md-typeset .signup-form button {
+  justify-self: start;
+  margin-top: 0.2rem;
+  padding: 0.55rem 1.2rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--rh-red);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.md-typeset .signup-form button:hover {
+  background: var(--rh-red-dark);
+}
+
+.md-typeset .signup-form__small {
+  max-width: 32rem;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .signup-form__pending {
+  max-width: 32rem;
+  margin: 1.2rem 0;
+  padding: 0.8rem 1rem;
+  border-left: 4px solid var(--rh-red);
+  background: var(--md-code-bg-color);
+}

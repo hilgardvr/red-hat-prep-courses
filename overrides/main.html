@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{#
+  Analytics and form wiring.
+
+  Both are off until configured: an unconfigured site should ship nothing that
+  phones home, and a signup form whose endpoint is still a placeholder should
+  never look like a working form. The switches live in mkdocs.yml:
+
+    extra.analytics.goatcounter   site code, e.g. "rhcsafieldguide"
+    (the form endpoint lives in docs/subscribe.md, next to the fields)
+#}
+
+{% block extrahead %}
+  {{ super() }}
+  {% set goatcounter = config.extra.analytics.goatcounter | default('', true) %}
+  {% if goatcounter %}
+    <!-- GoatCounter: cookieless, aggregate page views. No personal data. -->
+    <script data-goatcounter="https://{{ goatcounter }}.goatcounter.com/count"
+            async src="https://gc.zgo.at/count.js"></script>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {{ super() }}
+  <script>
+    /* The subscribe form is written with action="REPLACE_ME" until the email
+       provider exists. Rather than show a form that quietly fails, replace it
+       with an honest note. Remove this block once the form is live. */
+    (function () {
+      document.querySelectorAll('form[data-signup]').forEach(function (form) {
+        var action = form.getAttribute('action') || '';
+        if (action && action.indexOf('REPLACE_ME') === -1) {
+          return;
+        }
+        var note = document.createElement('p');
+        note.className = 'signup-form__pending';
+        note.innerHTML =
+          '<strong>The email list is being connected.</strong> ' +
+          'Until it is live, the sample PDF is not being mailed out — ' +
+          'check back shortly, or start with the free course instead.';
+        form.replaceWith(note);
+      });
+    })();
+  </script>
+{% endblock %}

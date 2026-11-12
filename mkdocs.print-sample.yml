@@ -1,0 +1,41 @@
+# Build profile for the free sample PDF.
+#
+# Inherits the site configuration and narrows the navigation to the two pages
+# that make up the lead magnet: the objective checklist and one full mock exam.
+# The print-site plugin builds its single page from the navigation, so the
+# subset is the whole mechanism -- no content is duplicated.
+#
+# Used by bin/pdf. Not read by CI and not part of the published site.
+
+INHERIT: mkdocs.yml
+
+site_dir: .print-build/sample
+
+# Says "sample" rather than "field guide" on the PDF's running header.
+site_name: RHCSA Field Guide
+
+extra:
+  generator: false
+  pdf:
+    title: "The EX200 objective checklist"
+    subtitle: "Plus a complete timed mock exam you can grade yourself"
+    kicker: "Free sample"
+    output: rhcsa-sample
+
+plugins:
+  - search
+  - print-site:
+      add_to_navigation: false
+      # The plugin's heading numbers (1, 1.1.1) read as errors next to
+      # section titles in a book. Page numbers live in the contents.
+      enumerate_headings: false
+      enumerate_figures: false
+      print_page_title: "Sample"
+      add_print_site_banner: false
+      # Internal links become in-document anchors, which stay clickable
+      # inside the PDF. Only external links print their URL (see print/pdf.css).
+      add_full_urls: false
+
+nav:
+  - "Your syllabus: the EX200 objectives": reference/objective-coverage.md
+  - "Mock exam A — The web host": rhcsa/r12-capstone/exams/exam-a-web-host.md

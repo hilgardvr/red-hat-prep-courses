@@ -183,6 +183,12 @@ Lab 2 walks this loop three times, once per layer.
 | Debugging one task for twenty minutes | Three easier tasks are worth more |
 | Skipping the final reboot | The persistence pass is where most marks are lost |
 
+## Take the exam with you
+
+The [objective matrix](../../reference/objective-coverage.md) and [mock exam A](exams/exam-a-web-host.md) are also available as one printable PDF — about a dozen pages, A4, with the checklist and a full timed exam you can grade yourself. It lands in your inbox, and it is free like the rest of the site.
+
+[Get the free exam pack](../../subscribe.md){ .md-button .md-button--primary }
+
 ## Next
 
 Start with [Lab 1 — The full-stack rehearsal](labs/lab-1-rehearsal.md). It builds the machine that both the diagnostic lab and every mock exam assume you understand.

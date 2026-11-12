@@ -18,3 +18,7 @@ labs/*.log
 .DS_Store
 .idea/
 .vscode/
+
+# PDF build output and intermediate MkDocs builds
+dist/
+.print-build/

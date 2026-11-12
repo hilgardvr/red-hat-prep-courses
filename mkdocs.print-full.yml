@@ -1,0 +1,37 @@
+# Build profile for the complete course PDF.
+#
+# Same idea as mkdocs.print-sample.yml, but with the full navigation, so the
+# PDF is the whole field guide in course order.
+#
+# Used by bin/pdf. Not read by CI and not part of the published site.
+
+INHERIT: mkdocs.yml
+
+site_dir: .print-build/full
+
+extra:
+  generator: false
+  pdf:
+    title: "RHCSA Field Guide"
+    subtitle: "A free, lab-first course for the Red Hat Certified System Administrator exam"
+    kicker: "Complete edition"
+    output: rhcsa-field-guide
+
+plugins:
+  - search
+  - print-site:
+      add_to_navigation: false
+      # The plugin's heading numbers (1, 1.1.1) read as errors next to
+      # section titles in a book. Page numbers live in the contents.
+      enumerate_headings: false
+      enumerate_figures: false
+      # Website furniture, not book content: the subscribe page carries a form
+      # a PDF cannot use, and the privacy notice is about the site's own list.
+      exclude:
+        - subscribe.md
+        - privacy.md
+      print_page_title: "Complete"
+      add_print_site_banner: false
+      # Internal links become in-document anchors, which stay clickable
+      # inside the PDF. Only external links print their URL (see print/pdf.css).
+      add_full_urls: false

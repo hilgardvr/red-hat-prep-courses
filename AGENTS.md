@@ -6,9 +6,9 @@ Update this file whenever a milestone lands, a decision changes, or a module is 
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-11 |
-| **Current milestone** | M4 complete — R1–R12 validated, objective matrix audited, print/PDF page shipped |
-| **Next milestone** | Maintenance: re-validate the lab kit on other hosts, watch Material EOL |
+| **Last updated** | 2026-11-12 |
+| **Current milestone** | M5 — opt-in funnel shipped: `/subscribe/`, `/privacy/`, three CTAs, the GoatCounter hook, and the WeasyPrint PDF pipeline |
+| **Next milestone** | Connect the email provider and analytics, choose the domain, then build the paid exam pack |
 | **Active branch** | `main` |
 | **Remote** | `git@github.com:hilgardvr/red-hat-prep-courses.git` (SSH) |
 
@@ -53,6 +53,8 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 | R11 — Boot, rescue, and updates | **Validated 2026-11-11** | Theory, 2 guided labs, challenge, quiz, cheat sheet, checker (10 + 8 + 13 = 31). Checker reads the default target and its symlink, both GRUB layers (`/etc/default/grub` and `grub.cfg`), every BLS entry with `grubby --info=ALL`, `/etc/kernel/cmdline`, the live `/proc/cmdline` and `/proc/sys/kernel/panic_on_warn`, the `dnf` history and `check-update`, root's `passwd -S` status, the recovery marker and both SELinux labels; walked from `clean` through Lab 1, Lab 2 (`rd.break` + relabel), the challenge, a reboot of `server`, and passed 31/31. |
 | R12 — Capstone | **Validated 2026-11-11** | Theory, 2 guided labs, 3 timed mock exams, quiz, cheat sheet, checker (35 + 42, plus `exama` 37, `examb` 38, `examc` 25). Lab 1 builds the full-stack host; Lab 2 breaks it in three layers and repairs it; the exams are self-contained task sheets graded from `clean`. `lab1` 35/35, `lab2` 42/42 after repairs, `all` 77/77 after a reboot, and each exam passed after its own reboot: A 37/37, B 38/38 (both VMs), C 25/25. |
 | PDF export | **Complete 2026-11-11** | `mkdocs-print-site-plugin` generates `/print_page/`, a single page of the whole course for browser **File → Print → Save as PDF**. Linked as **Print / PDF** in the navigation. No headless renderer, so no extra system dependency. |
+| PDF pipeline (`bin/pdf`) | **Working 2026-11-12** | WeasyPrint renders the print page with `print/pdf.css`, a Python step injects a cover and a contents page with real page numbers, and the output lands in `dist/`. `sample` is 14 pages / 0.7 MB (objective checklist + Exam A); `full` is 774 pages / 7.4 MB. Local only — CI never installs WeasyPrint. |
+| Opt-in funnel | **Shipped 2026-11-12; not connected** | `docs/subscribe.md` and `docs/privacy.md`, CTAs on the exam overview, study plans, and R12 pages, `overrides/main.html` with the analytics hook and the subscribe-form guard. The form still posts to `REPLACE_ME`, so the guard replaces it with a "being connected" notice on the live site. |
 
 **Definition of done for a module:** theory, two guided labs, a challenge lab, a reboot-persistence test, a knowledge check, a cheat sheet, and a passing automated checker from a clean snapshot.
 
@@ -65,8 +67,14 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 ├── AGENTS.md                  # this file
 ├── README.md                  # public project overview
 ├── mkdocs.yml                 # site config and navigation
+├── mkdocs.print-sample.yml    # PDF profile: objective checklist + Exam A
+├── mkdocs.print-full.yml      # PDF profile: the whole course
 ├── requirements.txt           # mkdocs-material + print-site plugin
+├── requirements-pdf.txt       # adds WeasyPrint for bin/pdf (local only)
+├── bin/pdf                    # PDF build: cover, contents, WeasyPrint render
+├── overrides/main.html        # GoatCounter hook + subscribe-form guard
 ├── print/banner.tpl           # banner shown on the generated print page
+├── print/pdf.css              # paged-media stylesheet for the PDF builds
 ├── docs/
 │   ├── index.md               # landing page
 │   ├── start-here/            # how to use, exam overview, study plans, lab setup
@@ -133,8 +141,10 @@ The product is a website built with MkDocs Material and hosted on GitHub Pages. 
 │   │       ├── exams/         # 3 timed mock exams
 │   │       ├── quiz.md
 │   │       └── cheatsheet.md
+│   ├── subscribe.md           # lead magnet: the free exam pack
+│   ├── privacy.md             # POPIA + GDPR notice for the email list
 │   ├── reference/             # objective coverage, glossary, RHEL 9 vs 10
-│   └── assets/stylesheets/    # extra.css
+│   └── assets/stylesheets/    # extra.css, signup form styling
 ├── labs/
 │   ├── Vagrantfile            # server + node2
 │   ├── bin/lab                # lifecycle CLI
@@ -178,6 +188,28 @@ mkdocs build --strict
 ```
 
 `--strict` turns MkDocs warnings into errors. Do not merge a change that fails it. Every new page must be added to `mkdocs.yml`; broken relative links or missing nav targets will fail the build.
+
+### PDFs
+
+`bin/pdf` builds a PDF from the print page. It is deliberately **not** part of CI: the workflow installs `requirements.txt` only, so the runner needs neither WeasyPrint nor Pango.
+
+```bash
+pip install -r requirements-pdf.txt    # once, into .venv
+.venv/bin/python bin/pdf sample        # dist/rhcsa-sample-YYYY-MM.pdf
+.venv/bin/python bin/pdf full          # dist/rhcsa-field-guide-YYYY-MM.pdf
+```
+
+`sample` uses `mkdocs.print-sample.yml`, whose narrowed `nav` *is* the subset — no content is duplicated between profiles. `full` inherits the site `nav` and excludes `subscribe.md` and `privacy.md`, which are website furniture rather than book content.
+
+The pipeline is: build the profile with `--strict`, read `.print-build/<profile>/print_page/index.html`, strip the plugin's banner, script-built TOC and `print-site-material.css` (its `@page` block would fight `print/pdf.css`), replace Mermaid blocks and the signup form with one-line notes, inject the cover and contents, then render with `print/pdf.css`. WeasyPrint's `target-counter()` supplies real page numbers in the contents.
+
+`print/pdf.css` contains several hard-won workarounds:
+
+- **No fixed-height block may equal the page box.** WeasyPrint 70 silently drops the rest of the document when one does; the cover is painted by the `@page :first` background instead.
+- **A named page on the first element forces a break**, which leaves a blank sheet in front of the cover. `@page :first` is both simpler and correct, because the cover is first by construction.
+- **Every wrapper must stay transparent.** Material paints the canvas white, which would print a white box inside the red cover.
+- **Material's icon-font markers print as solid squares.** Admonition titles and `<details>` summaries hide their `::before`/`::after`, and the green `question` tint is reset.
+- **External links print their address**; internal targets are in-document anchors, which stay clickable.
 
 ### Lab scripts
 
@@ -542,6 +574,13 @@ The objective-to-module mapping lives in `docs/reference/objective-coverage.md`.
 | R10 is the first module that installs its own web server (2026-11-11) | `httpd` and `policycoreutils-python-utils` are module features, not base state, so they stay out of `PACKAGES` and are installed in Lab 1. A learner who left R3's distro repositories disabled must re-enable them, exactly as with R6's `lvm2`, R7's `autofs`, and R8's `at`. |
 | F3 defines its vocabulary before using it (2026-11-11) | The page used `PATH`, variable, glob, alias, builtin, and loop as if a beginner already knew them. It now opens with a short term table that links to the section — or the module — that teaches each one, and defines each term again where it first appears. Loops are the one term with no lesson on the page: `docs/rhcsa/r04-shell-scripting/index.md` owns them, and the `for` loop in the word-splitting example is labelled as an illustration, not a syntax lesson. |
 | F3's `type` transcripts come from a real interactive shell (2026-11-11) | Aliases load from `/etc/profile.d/colorls.sh` and `colorgrep.sh` only in an interactive shell, so `bash -c` and root's non-interactive `sudo` shell report no `grep` alias and a different `PATH`. The documented output (`grep` aliased, then `/usr/bin/grep`) is from a login shell as `labuser`, which is what the learner sees. Use `type -P` when the question is "where is the file" and `command -v` when it is "what will actually run"; `command -v` prints the alias, not a path. |
+| The lead magnet is the checklist plus one mock exam (2026-11-12) | The free site is already the whole course, so a "free chapter" would be a step down. The checklist is the thing a learner keeps beside them while studying, and one complete exam shows the format without giving away the pack. Both are already public pages; the PDF is the convenience, not the content. |
+| Free versus paid is reading versus practising (2026-11-12) | The course text stays free and ungated, in line with the project's own rule that the free course must be enough to pass. What can be sold later is practice: more mock exams, a workbook, and grading guidance. Nothing that exists today moves behind the list. |
+| PDFs are built locally by `bin/pdf`, never in CI (2026-11-12) | WeasyPrint needs Pango, Cairo and a font stack, which the GitHub runner would have to install on every deploy for an artefact that changes monthly. The site build stays dependency-light; the PDF is rebuilt by hand and attached to a GitHub Release. The print profile's narrowed `nav` is the whole subsetting mechanism, so no page is duplicated and the PDF cannot drift from the site text. |
+| The subscribe form ships guarded, not broken (2026-11-12) | Until an email provider exists there is no endpoint, and a form that posts nowhere silently loses the address someone typed. `overrides/main.html` replaces any `form[data-signup]` whose `action` still contains `REPLACE_ME` with a plain "being connected" notice. The page can be linked before the provider is chosen, and the guard disappears by deleting one attribute. |
+| Analytics is cookieless GoatCounter, opt-in by config (2026-11-12) | The question is "which modules do people read", not "who are they". GoatCounter counts page views with no cookie and no cross-site identifier, so there is no consent banner to build and no personal data to disclose. The script is only emitted when `extra.analytics.goatcounter` is non-empty, so a fresh clone sends nothing anywhere. |
+| The privacy notice names processors by role, not by brand (2026-11-12) | The provider is not chosen yet, and a notice that names one brand goes stale the day it changes. "The email service provider that runs the list, as a data processor" is accurate under both POPIA and the GDPR, and the notice commits to telling subscribers by email when a processor changes. |
+| CTAs live on three pages, not every page (2026-11-12) | The exam overview, the study plans, and the capstone are the points where a learner has decided to prepare and wants something to tick. A banner on every module would turn a study site into a funnel and contradict the "free course stays free" promise. The house rule is no CTA inside a lesson body. |
 
 ---
 
@@ -672,7 +711,22 @@ When adding or revising a foundation, repeat the same five steps:
 - **Objective matrix — reviewed.** Every bullet of the official EX200 v10 list maps to a lesson and lab; the R12 capstone re-tests the whole list under exam conditions. The matrix's status badges were normalized to `Covered` now that all twelve modules are validated.
 - **Status pages — updated** (README, `docs/index.md`, `docs/rhcsa/index.md`, this file).
 
-**Next:** maintenance only — re-validate the lab kit on other hosts, watch Material's 2027-05-05 EOL, and re-check the objective list before the next exam revision.
+**Next:** the funnel is built but not connected (see M5 below). Materials maintenance — re-validating the lab kit on other hosts and watching Material's 2027-05-05 EOL — continues in the background.
+
+### M5 — the opt-in funnel — **built 2026-11-12, connection pending**
+
+- **`/subscribe/` and `/privacy/` shipped.** The subscribe page explains what the pack is, what happens after signup, and why an address is asked for at all. The privacy notice is written for POPIA and the GDPR and describes the actual stack: aggregate GoatCounter counts, the email provider as a processor, deletion on unsubscribe.
+- **Three CTAs.** Exam overview (after the official links), study plans (after "Using the mock exams"), and the capstone (before its `## Next`). Each offers the printable checklist plus Exam A; none interrupts a lesson.
+- **Analytics hook.** `overrides/main.html` emits the GoatCounter script only when `extra.analytics.goatcounter` is set. Empty means no script at all.
+- **PDF lead magnet.** `bin/pdf sample` produces the 14-page pack; `bin/pdf full` produces the 775-page complete edition. Both are local builds, excluded from git via `dist/` and `.print-build/`.
+
+Remaining to make it live, in order:
+
+1. Choose the email provider (MailerLite or Kit), create the form, and paste its POST endpoint over `REPLACE_ME` in `docs/subscribe.md`.
+2. Set `extra.analytics.goatcounter` to the GoatCounter site code.
+3. Choose the domain, add `docs/CNAME`, and set the `SITE_URL` fallback in `mkdocs.yml` and the workflow.
+4. Replace the privacy notice's issue-tracker contact route with a real address once one exists.
+5. Attach `dist/rhcsa-sample-YYYY-MM.pdf` to a GitHub Release and link it from the subscribe page as the fallback download.
 
 ### Immediate handoff checklist for a new agent
 
@@ -756,6 +810,16 @@ When adding or revising a foundation, repeat the same five steps:
 - **The Vagrantfile's `cpu_mode` pin is host-specific.** `lv.cpu_mode = "host-passthrough"` was added because this host's libvirt rejected the generated `host-model` XML. On a host or libvirt version where `host-model` works, passthrough is still valid but makes the guest see the exact host CPU, which can matter for snapshot portability between machines. Re-test `./bin/lab reset` after changing it.
 - **F3's examples depend on the image's man pages and packages.** The AlmaLinux 10.2 `passwd(5)` page has no example line, so the lab searches for `colon-separated fields` and then reads `head -1 /etc/passwd`, which is version-proof. The `info` manuals ship on disk (`/usr/share/info`, 29 files) but the `info` reader is a separate package the image does not install, so the lab omits `info coreutils` and gives the install command instead. A different image may restore the example or preinstall the reader; the text stays correct either way.
 
+- **The subscribe form has no endpoint yet.** `docs/subscribe.md` posts to `action="REPLACE_ME"`, and `overrides/main.html` replaces the form with a "being connected" notice on the live site. The page is safe to link, but nobody can actually join the list until a MailerLite or Kit endpoint replaces that value.
+- **No analytics is being collected yet.** `extra.analytics.goatcounter` is empty, so no script is emitted. Setting it is a one-line change in `mkdocs.yml`; nothing else in the site needs to know.
+- **The domain is undecided.** `site_url` still falls back to the placeholder `https://your-username.github.io/red-hat-certs/`, so `site/sitemap.xml` advertises the wrong host whenever `SITE_URL` is not set (CI sets it; local builds do not). There is no `docs/CNAME`. The candidates split on trademark exposure: `linuxfieldguide.org` avoids the Red Hat mark entirely, while `rhcsafieldguide.org` matches `site_name` but reuses the acronym in a domain.
+- **The privacy notice's contact route is the public issue tracker.** That is a real route today, but it asks someone requesting deletion to say so in public. Replace it with an address once one exists, and keep the issue-tracker route as the fallback for people who have no email.
+- **Mermaid diagrams are not in the PDFs.** They are drawn by JavaScript, so `bin/pdf` replaces each block with "A diagram appears here in the web edition". Eight diagrams are affected in the full build; the sample has none. A headless renderer would fix it and would also add Chromium to the build host, which the print pipeline exists to avoid.
+- **The full PDF is 775 pages and 7.5 MB, and takes a few minutes to build.** That is expected for 92 pages of course text with running headers and a 92-entry contents. The sample is the artefact that ships first; the full edition is a bundle item.
+- **The sample PDF ends with a nearly empty page.** The objective matrix's closing paragraph spills onto its own page before Exam A's forced page break. Tightening the tables would pull it back, but content shifts with every edit, so the pagination is not hand-tuned.
+- **WeasyPrint's failure modes are quiet.** A block as tall as the page box silently truncates the document, and a named page on the first element inserts a blank sheet. Both are documented in `print/pdf.css`; do not "tidy" the cover back into a fixed-height block.
+- **A broken link fails the PDF build before WeasyPrint runs.** The profiles inherit `mkdocs.yml`, so `bin/pdf` gets the same `--strict` treatment as the site. That is deliberate: a PDF with a dead cross-reference is worse than no PDF.
+
 ---
 
 ## 11. Useful commands
@@ -821,6 +885,10 @@ cd labs
 ./bin/lab check r12 exama
 ./bin/lab check r12 examb
 ./bin/lab check r12 examc
+
+# PDFs (local only)
+.venv/bin/python bin/pdf sample
+.venv/bin/python bin/pdf full
 
 # Validation
 for f in labs/bin/lab labs/provision/*.sh labs/checks/*/*.sh; do bash -n "$f"; done

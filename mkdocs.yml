@@ -17,6 +17,9 @@ copyright: >
 theme:
   name: material
   language: en
+  # Local overrides: analytics (off until a site code is set) and the guard
+  # that hides the subscribe form until its endpoint is real.
+  custom_dir: overrides
   features:
     - navigation.sections
     - navigation.tracking
@@ -45,6 +48,10 @@ extra_css:
 
 extra:
   generator: false
+  analytics:
+    # GoatCounter site code, the part before .goatcounter.com. Empty means no
+    # analytics script is loaded at all, which is the correct default.
+    goatcounter: ""
 
 plugins:
   - search
@@ -90,6 +97,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - "Free exam sample": subscribe.md
   - Start here:
       - How to use this course: start-here/how-to-use.md
       - Exam overview: start-here/exam-overview.md
@@ -197,3 +205,4 @@ nav:
       - Glossary: reference/glossary.md
       - Objective coverage: reference/objective-coverage.md
       - RHEL 9 vs RHEL 10: reference/rhel9-vs-rhel10.md
+  - Privacy: privacy.md

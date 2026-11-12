@@ -4,7 +4,7 @@ A free, lab-first course for the **Red Hat Certified System Administrator (RHCSA
 
 The course teaches the underlying Linux theory first, then turns every exam objective into hands-on practice on disposable RHEL-compatible virtual machines. It is designed for learners starting with little or no Linux experience.
 
-> **Status:** Complete. Foundations **F1–F8**, modules **R1–R12** (the capstone includes three timed mock exams), the validated lab kit, and the printable **Print / PDF** edition are all available. The course covers every objective in the official EX200 v10 list.
+> **Status:** Complete. Foundations **F1–F8**, modules **R1–R12** (the capstone includes three timed mock exams), the validated lab kit, and the printable **Print / PDF** edition are all available. The course covers every objective in the official EX200 v10 list. A free **exam pack** — the objective checklist plus mock exam A, as a PDF — is described on the [subscribe page](docs/subscribe.md).
 
 ## What is here
 
@@ -13,7 +13,11 @@ The course teaches the underlying Linux theory first, then turns every exam obje
 | `docs/` | Course content, built with MkDocs Material |
 | `labs/` | Vagrant + libvirt lab environment, provisioning, and automated checks |
 | `mkdocs.yml` | Site configuration and navigation |
+| `overrides/` | Theme overrides: analytics hook and subscribe-form guard |
+| `bin/pdf` | Builds the PDF editions from the print page |
+| `print/` | Print-page banner and the paged-media stylesheet |
 | `requirements.txt` | Python dependencies for the site |
+| `requirements-pdf.txt` | Adds WeasyPrint for the PDF builds (not used by CI) |
 
 ## Read the course locally
 
@@ -37,6 +41,18 @@ The output is written to `site/`.
 ### Print or PDF
 
 The site also builds a single **Print / PDF** page that combines every page in course order. Open it from the last item in the site navigation, then use your browser's **File → Print → Save as PDF**. It is generated at build time by `mkdocs-print-site-plugin`, so it always matches the published pages and needs no separate export step.
+
+### Typeset PDF editions
+
+Two PDFs are built from that print page with WeasyPrint: a **free sample** (the objective checklist plus mock exam A) and the **complete field guide**.
+
+```bash
+pip install -r requirements-pdf.txt
+.venv/bin/python bin/pdf sample     # dist/rhcsa-sample-YYYY-MM.pdf
+.venv/bin/python bin/pdf full       # dist/rhcsa-field-guide-YYYY-MM.pdf
+```
+
+The PDF builds are local only. CI installs `requirements.txt`, so the published site needs neither WeasyPrint nor its system libraries; the PDFs are attached to a GitHub Release when they change.
 
 ## Deploy to GitHub Pages
 
